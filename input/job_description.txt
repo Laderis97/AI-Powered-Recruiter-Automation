@@ -1,0 +1,36 @@
+Senior Full Stack Developer - Remote Opportunity
+
+We are seeking a talented Senior Full Stack Developer to join our growing engineering team at TechCorp Solutions. This is a remote position with occasional travel for team meetings.
+
+Position: Senior Full Stack Developer
+Experience Level: 5-8 years of professional software development experience
+Location: Remote (US timezone preferred)
+
+Required Skills:
+- Proficiency in JavaScript/TypeScript and modern frameworks (React, Node.js)
+- Experience with cloud platforms (AWS, Azure, or GCP)
+- Database design and optimization (PostgreSQL, MongoDB)
+- RESTful API development and microservices architecture
+- Version control with Git and CI/CD pipelines
+- Strong problem-solving and communication skills
+
+Preferred Qualifications:
+- Experience with Docker and Kubernetes
+- Knowledge of GraphQL
+- Background in agile development methodologies
+- Previous experience in a senior or lead developer role
+
+Responsibilities:
+- Design and develop scalable web applications
+- Collaborate with cross-functional teams to deliver high-quality software
+- Mentor junior developers and contribute to technical decisions
+- Participate in code reviews and maintain coding standards
+- Help drive technical architecture and system design decisions
+
+Benefits:
+- Competitive salary range: $120,000 - $160,000
+- Full remote work flexibility
+- Health, dental, and vision insurance
+- 401(k) with company matching
+- Professional development budget
+- Flexible PTO policy

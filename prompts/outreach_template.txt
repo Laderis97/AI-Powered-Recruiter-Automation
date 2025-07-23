@@ -1,0 +1,25 @@
+Subject: Exciting {seniorityLevel} {jobTitle} Opportunity at {company}
+
+Hi {name},
+
+I hope this message finds you well! I came across your profile and was impressed by your background as a {title} with expertise in {skills}.
+
+We have an exciting {seniorityLevel} {jobTitle} position at {company} that I believe could be a great fit for your experience and career goals. The role offers:
+
+- Opportunity to work with cutting-edge technologies including {skills}
+- Collaborative team environment with growth opportunities
+- Competitive compensation and comprehensive benefits
+- Flexible work arrangements
+
+Given your experience with the technologies we use, I think you'd be an excellent addition to our team. The position involves working on challenging projects that would leverage your expertise in {skills}.
+
+Would you be interested in learning more about this opportunity? I'd love to schedule a brief call to discuss the role in detail and answer any questions you might have.
+
+Looking forward to hearing from you!
+
+Best regards,
+[Your Name]
+[Your Title]
+{company}
+
+Please personalize this message further and make it more engaging and specific to the candidate's background. Keep it professional but warm, and ensure it doesn't sound too generic or automated.

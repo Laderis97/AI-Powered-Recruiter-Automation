@@ -1,0 +1,21 @@
+You are an expert job description parser. Please analyze the following job description and extract key information in JSON format.
+
+Job Description:
+{job_description}
+
+Please extract and return ONLY a valid JSON object with the following structure:
+{
+  "jobTitle": "extracted job title",
+  "seniorityLevel": "junior/mid/senior/lead/principal",
+  "requiredSkills": ["skill1", "skill2", "skill3"],
+  "yearsOfExperience": "X-Y years or specific requirement",
+  "preferredLocation": "location requirement or remote",
+  "summary": "brief 1-2 sentence summary of the role"
+}
+
+Guidelines:
+- Extract the most important 5-8 technical skills mentioned
+- Determine seniority level based on experience requirements and responsibilities
+- Include location preferences (remote, specific cities, etc.)
+- Keep summary concise and professional
+- Return valid JSON only, no additional text or formatting

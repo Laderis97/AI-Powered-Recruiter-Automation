@@ -1,0 +1,29 @@
+{
+  "name": "cursor-mvp-ai-recruiter",
+  "version": "1.0.0",
+  "description": "AI-powered recruiter MVP using Cursor and OpenAI",
+  "main": "cursor_mvp_ai_recruiter.ts",
+  "scripts": {
+    "start": "ts-node cursor_mvp_ai_recruiter.ts",
+    "build": "tsc",
+    "dev": "ts-node --watch cursor_mvp_ai_recruiter.ts"
+  },
+  "dependencies": {
+    "@cursorai/llm-utils": "^1.0.0",
+    "openai": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "ts-node": "^10.9.0"
+  },
+  "keywords": [
+    "ai",
+    "recruiter",
+    "openai",
+    "typescript",
+    "automation"
+  ],
+  "author": "",
+  "license": "MIT"
+}
