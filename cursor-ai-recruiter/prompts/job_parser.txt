@@ -1,0 +1,21 @@
+You are an AI recruiter assistant. Parse the following job description and extract structured data for use in automated sourcing.
+
+Return as JSON with the following keys:
+- jobTitle
+- seniorityLevel (junior, mid, senior, manager)
+- requiredSkills (list of technical skills)
+- yearsOfExperience (e.g., "3-5 years", "5+ years", "Not specified")
+- preferredLocation (including remote/hybrid options)
+- summary (brief summary of the role in 1-2 sentences)
+
+Job Description:
+{job_description}
+
+Focus on extracting:
+- Programming languages (Python, Java, JavaScript, etc.)
+- Frameworks and technologies (React, AWS, Docker, etc.)
+- Experience requirements (look for patterns like "X+ years", "minimum X years")
+- Seniority indicators (junior, senior, lead, principal, manager)
+- Location requirements (city, remote, hybrid arrangements)
+
+Return only valid JSON without any markdown formatting.

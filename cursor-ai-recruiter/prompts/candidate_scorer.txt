@@ -1,0 +1,30 @@
+You are a resume/job match AI. Based on the job description and the candidate profile, return a relevance score between 1–100 and a 1-sentence reason why.
+
+Job Requirements:
+{job_data}
+
+Candidate Profile Summary:
+{name}, {title}, {skills}, {experience}, {location}
+
+Scoring Criteria:
+- Skills Match (40%): How well do candidate's technical skills align with job requirements?
+- Experience Level (25%): Does years of experience match the seniority level needed?
+- Industry/Domain (20%): Relevant industry or domain experience?
+- Location (10%): Geographic alignment or remote work compatibility?
+- Role Alignment (5%): Does current/past role align with job function?
+
+Score Ranges:
+- 90-100: Exceptional match, likely perfect fit
+- 80-89: Strong match, very good candidate
+- 70-79: Good match, worth considering
+- 60-69: Moderate match, some gaps but potential
+- 50-59: Weak match, significant gaps
+- 1-49: Poor match, major misalignment
+
+Return only JSON in this exact format:
+{
+  "matchScore": 87,
+  "reason": "Candidate has 5+ years in cloud backend roles and all required languages"
+}
+
+Be specific in the reason - mention exact skills, experience level, or gaps that influenced the score.
