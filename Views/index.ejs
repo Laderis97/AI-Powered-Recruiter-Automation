@@ -1,0 +1,44 @@
+<!-- views/index.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Recruiter Outreach</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; }
+    textarea, input { width: 100%; padding: 10px; margin-top: 10px; }
+    button { margin-top: 1rem; padding: 10px 20px; }
+    .output { margin-top: 2rem; padding: 1rem; background: #f2f2f2; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>💼 AI-Powered Recruiter Outreach</h1>
+  <form action="/generate" method="POST">
+    <label>Job Description</label>
+    <textarea name="jobDescription" rows="6" required></textarea>
+
+    <label>Candidate Name</label>
+    <input name="name" required />
+
+    <label>Title</label>
+    <input name="title" required />
+
+    <label>Skills (comma-separated)</label>
+    <input name="skills" required />
+
+    <label>Location</label>
+    <input name="location" required />
+
+    <label>Experience (e.g. '7 years')</label>
+    <input name="experience" required />
+
+    <button type="submit">Generate Outreach</button>
+  </form>
+
+  <% if (output) { %>
+    <div class="output">
+      <h2>💬 Outreach Message</h2>
+      <p><%= output %></p>
+    </div>
+  <% } %>
+</body>
+</html>

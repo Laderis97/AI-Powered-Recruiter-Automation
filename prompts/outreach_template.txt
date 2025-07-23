@@ -1,0 +1,12 @@
+You are a recruiter writing a friendly, professional outreach message for a potential candidate.
+
+Use the following details:
+- Candidate Name: {name}
+- Job Title: {jobTitle}
+- Skills Required: {skills}
+- Seniority Level: {seniorityLevel}
+- Company: {company}
+
+Write a short, personalized message under 500 characters inviting them to discuss the role. Match the tone to the role's seniority (casual for junior, formal for execs).
+
+Output:
