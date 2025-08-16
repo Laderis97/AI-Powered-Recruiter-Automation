@@ -1,44 +1,582 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AI Recruiter</title>
+  <title>AI Recruiter Dashboard</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 2rem; background: #f5f5f5; }
-    form { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    textarea, input { width: 100%; margin: 0.5rem 0 1rem; padding: 0.5rem; font-size: 1rem; }
-    button { padding: 0.7rem 1.2rem; font-size: 1rem; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    .output { margin-top: 2rem; white-space: pre-wrap; background: #fff; padding: 1rem; border-radius: 6px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .header h1 {
+      color: #667eea;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+    
+    .stat-label {
+      color: #666;
+      margin-top: 5px;
+    }
+    
+    .tabs {
+      display: flex;
+      background: white;
+      border-radius: 12px 12px 0 0;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .tab {
+      flex: 1;
+      padding: 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+      border: none;
+      background: #f8f9fa;
+      color: #666;
+    }
+    
+    .tab.active {
+      background: #667eea;
+      color: white;
+    }
+    
+    .tab-content {
+      background: white;
+      padding: 30px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: 600;
+    }
+    
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #5a6fd8;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+    
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+    
+    .file-upload {
+      border: 2px dashed #667eea;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      background: #f8f9ff;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .file-upload:hover {
+      background: #e8ecff;
+      border-color: #5a6fd8;
+    }
+    
+    .file-upload input {
+      display: none;
+    }
+    
+    .upload-icon {
+      font-size: 3rem;
+      color: #667eea;
+      margin-bottom: 15px;
+    }
+    
+    .list-item {
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      border-left: 4px solid #667eea;
+    }
+    
+    .list-item h4 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+    
+    .list-item p {
+      color: #666;
+      font-size: 14px;
+    }
+    
+    .skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    
+    .skill-tag {
+      background: #667eea;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 <body>
-  <h1>AI-Powered Recruiter Outreach Generator</h1>
-  <form action="/generate" method="POST">
-    <label>Job Description</label>
-    <textarea name="jobDescription" rows="6" required></textarea>
-
-    <label>Candidate Name</label>
-    <input type="text" name="name" required />
-
-    <label>Title</label>
-    <input type="text" name="title" required />
-
-    <label>Skills (comma separated)</label>
-    <input type="text" name="skills" required />
-
-    <label>Location</label>
-    <input type="text" name="location" required />
-
-    <label>Experience</label>
-    <input type="text" name="experience" required />
-
-    <button type="submit">Generate Outreach Message</button>
-  </form>
-
-  <% if (output) { %>
-    <div class="output">
-      <h2>Generated Outreach Message:</h2>
-      <p><%= output %></p>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 AI Recruiter Dashboard</h1>
+      <p>Automate your recruitment process with AI-powered resume parsing and outreach</p>
     </div>
-  <% } %>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-number" id="jobsCount"><%= jobsCount %></div>
+        <div class="stat-label">Job Postings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="candidatesCount"><%= candidatesCount %></div>
+        <div class="stat-label">Candidates</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="campaignsCount"><%= campaignsCount %></div>
+        <div class="stat-label">Campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="responseRate">0%</div>
+        <div class="stat-label">Response Rate</div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="showTab('upload')">📄 Upload Resumes</button>
+      <button class="tab" onclick="showTab('jobs')">💼 Job Postings</button>
+      <button class="tab" onclick="showTab('candidates')">👥 Candidates</button>
+      <button class="tab" onclick="showTab('campaigns')">📧 Campaigns</button>
+    </div>
+
+    <!-- Upload Resumes Tab -->
+    <div id="upload" class="tab-content">
+      <h2>Upload Resumes</h2>
+      <p>Upload PDF, DOCX, DOC, or TXT files to automatically extract candidate information</p>
+      
+      <div class="form-group">
+        <label>Single Resume Upload</label>
+        <div class="file-upload" onclick="document.getElementById('singleFile').click()">
+          <div class="upload-icon">📄</div>
+          <p>Click to upload a single resume</p>
+          <p style="font-size: 12px; color: #666;">Supports: PDF, DOCX, DOC, TXT (max 10MB)</p>
+        </div>
+        <input type="file" id="singleFile" accept=".pdf,.docx,.doc,.txt" onchange="uploadSingleResume(this)">
+      </div>
+
+      <div class="form-group">
+        <label>Multiple Resumes Upload</label>
+        <div class="file-upload" onclick="document.getElementById('multipleFiles').click()">
+          <div class="upload-icon">📁</div>
+          <p>Click to upload multiple resumes</p>
+          <p style="font-size: 12px; color: #666;">Up to 10 files at once</p>
+        </div>
+        <input type="file" id="multipleFiles" accept=".pdf,.docx,.doc,.txt" multiple onchange="uploadMultipleResumes(this)">
+      </div>
+
+      <div id="uploadResults"></div>
+    </div>
+
+    <!-- Job Postings Tab -->
+    <div id="jobs" class="tab-content hidden">
+      <h2>Job Postings</h2>
+      
+      <form id="jobForm">
+        <div class="form-group">
+          <label>Job Title</label>
+          <input type="text" class="form-control" id="jobTitle" required>
+        </div>
+        
+        <div class="form-group">
+          <label>Job Description</label>
+          <textarea class="form-control" id="jobDescription" rows="6" required></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Create Job Posting</button>
+      </form>
+
+      <div id="jobsList" style="margin-top: 30px;"></div>
+    </div>
+
+    <!-- Candidates Tab -->
+    <div id="candidates" class="tab-content hidden">
+      <h2>Candidates</h2>
+      <div id="candidatesList"></div>
+    </div>
+
+    <!-- Campaigns Tab -->
+    <div id="campaigns" class="tab-content hidden">
+      <h2>Outreach Campaigns</h2>
+      
+      <form id="campaignForm">
+        <div class="form-group">
+          <label>Select Job</label>
+          <select class="form-control" id="campaignJob" required></select>
+        </div>
+        
+        <div class="form-group">
+          <label>Select Candidate</label>
+          <select class="form-control" id="campaignCandidate" required></select>
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Generate Outreach</button>
+      </form>
+
+      <div id="campaignsList" style="margin-top: 30px;"></div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching
+    function showTab(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      
+      // Remove active class from all tabs
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.remove('active');
+      });
+      
+      // Show selected tab content
+      document.getElementById(tabName).classList.remove('hidden');
+      
+      // Add active class to clicked tab
+      event.target.classList.add('active');
+      
+      // Load data for the tab
+      if (tabName === 'candidates') loadCandidates();
+      if (tabName === 'jobs') loadJobs();
+      if (tabName === 'campaigns') loadCampaigns();
+    }
+
+    // File upload functions
+    async function uploadSingleResume(input) {
+      if (!input.files[0]) return;
+      
+      const formData = new FormData();
+      formData.append('resume', input.files[0]);
+      
+      showLoading('uploadResults', 'Parsing resume...');
+      
+      try {
+        const response = await fetch('/api/upload-resume', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showSuccess('uploadResults', `Resume parsed successfully! Added candidate: ${result.candidate.name}`);
+          updateStats();
+        } else {
+          showError('uploadResults', result.error || 'Failed to parse resume');
+        }
+      } catch (error) {
+        showError('uploadResults', 'Network error occurred');
+      }
+      
+      input.value = '';
+    }
+
+    async function uploadMultipleResumes(input) {
+      if (!input.files.length) return;
+      
+      const formData = new FormData();
+      for (let file of input.files) {
+        formData.append('resumes', file);
+      }
+      
+      showLoading('uploadResults', `Parsing ${input.files.length} resumes...`);
+      
+      try {
+        const response = await fetch('/api/upload-multiple-resumes', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+          showSuccess('uploadResults', `${result.candidates.length} resumes parsed successfully!`);
+          updateStats();
+        } else {
+          showError('uploadResults', result.error || 'Failed to parse resumes');
+        }
+      } catch (error) {
+        showError('uploadResults', 'Network error occurred');
+      }
+      
+      input.value = '';
+    }
+
+    // Job management
+    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const jobData = {
+        title: document.getElementById('jobTitle').value,
+        description: document.getElementById('jobDescription').value
+      };
+      
+      try {
+        const response = await fetch('/api/jobs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(jobData)
+        });
+        
+        if (response.ok) {
+          document.getElementById('jobForm').reset();
+          loadJobs();
+          updateStats();
+        }
+      } catch (error) {
+        console.error('Error creating job:', error);
+      }
+    });
+
+    // Campaign management
+    document.getElementById('campaignForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const campaignData = {
+        jobId: document.getElementById('campaignJob').value,
+        candidateId: document.getElementById('campaignCandidate').value
+      };
+      
+      try {
+        const response = await fetch('/api/campaigns', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(campaignData)
+        });
+        
+        if (response.ok) {
+          document.getElementById('campaignForm').reset();
+          loadCampaigns();
+          updateStats();
+        }
+      } catch (error) {
+        console.error('Error creating campaign:', error);
+      }
+    });
+
+    // Data loading functions
+    async function loadCandidates() {
+      try {
+        const response = await fetch('/api/candidates');
+        const candidates = await response.json();
+        
+        const container = document.getElementById('candidatesList');
+        container.innerHTML = candidates.map(candidate => `
+          <div class="list-item">
+            <h4>${candidate.name}</h4>
+            <p><strong>${candidate.title}</strong> • ${candidate.location} • ${candidate.experience}</p>
+            <div class="skills">
+              ${candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            </div>
+          </div>
+        `).join('');
+      } catch (error) {
+        console.error('Error loading candidates:', error);
+      }
+    }
+
+    async function loadJobs() {
+      try {
+        const response = await fetch('/api/jobs');
+        const jobs = await response.json();
+        
+        const container = document.getElementById('jobsList');
+        container.innerHTML = jobs.map(job => `
+          <div class="list-item">
+            <h4>${job.title}</h4>
+            <p>${job.description.substring(0, 200)}...</p>
+          </div>
+        `).join('');
+        
+        // Update campaign form dropdown
+        const jobSelect = document.getElementById('campaignJob');
+        jobSelect.innerHTML = '<option value="">Select a job...</option>' + 
+          jobs.map(job => `<option value="${job.id}">${job.title}</option>`).join('');
+      } catch (error) {
+        console.error('Error loading jobs:', error);
+      }
+    }
+
+    async function loadCampaigns() {
+      try {
+        const response = await fetch('/api/campaigns');
+        const campaigns = await response.json();
+        
+        const container = document.getElementById('campaignsList');
+        container.innerHTML = campaigns.map(campaign => `
+          <div class="list-item">
+            <h4>Campaign #${campaign.id}</h4>
+            <p><strong>Status:</strong> ${campaign.status}</p>
+            <p>${campaign.message.substring(0, 200)}...</p>
+          </div>
+        `).join('');
+        
+        // Update campaign form dropdown
+        const candidateSelect = document.getElementById('campaignCandidate');
+        const candidatesResponse = await fetch('/api/candidates');
+        const candidates = await candidatesResponse.json();
+        candidateSelect.innerHTML = '<option value="">Select a candidate...</option>' + 
+          candidates.map(candidate => `<option value="${candidate.id}">${candidate.name} - ${candidate.title}</option>`).join('');
+      } catch (error) {
+        console.error('Error loading campaigns:', error);
+      }
+    }
+
+    async function updateStats() {
+      try {
+        const response = await fetch('/api/analytics');
+        const stats = await response.json();
+        
+        document.getElementById('jobsCount').textContent = stats.totalJobs;
+        document.getElementById('candidatesCount').textContent = stats.totalCandidates;
+        document.getElementById('campaignsCount').textContent = stats.totalCampaigns;
+        document.getElementById('responseRate').textContent = stats.responseRate;
+      } catch (error) {
+        console.error('Error updating stats:', error);
+      }
+    }
+
+    // Utility functions
+    function showLoading(containerId, message) {
+      document.getElementById(containerId).innerHTML = `<div class="loading">${message}</div>`;
+    }
+
+    function showSuccess(containerId, message) {
+      document.getElementById(containerId).innerHTML = `<div class="success">${message}</div>`;
+    }
+
+    function showError(containerId, message) {
+      document.getElementById(containerId).innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    // Initialize
+    updateStats();
+  </script>
 </body>
 </html>

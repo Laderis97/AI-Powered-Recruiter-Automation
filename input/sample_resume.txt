@@ -1,0 +1,59 @@
+JOHN DOE
+Software Engineer
+john.doe@email.com | (555) 123-4567 | linkedin.com/in/johndoe
+San Francisco, CA | github.com/johndoe | johndoe.dev
+
+PROFESSIONAL SUMMARY
+Experienced software engineer with 5+ years of expertise in full-stack development, specializing in JavaScript, React, Node.js, and cloud technologies. Proven track record of delivering scalable web applications and leading development teams.
+
+TECHNICAL SKILLS
+• Programming Languages: JavaScript, TypeScript, Python, Java
+• Frontend: React, Vue.js, HTML5, CSS3, Bootstrap
+• Backend: Node.js, Express.js, Python Flask, Java Spring
+• Databases: MongoDB, PostgreSQL, MySQL, Redis
+• Cloud & DevOps: AWS, Docker, Kubernetes, CI/CD
+• Tools: Git, VS Code, Postman, Jira
+
+EXPERIENCE
+
+Senior Software Engineer | TechCorp Inc. | 2021 - Present
+• Led development of microservices architecture serving 100K+ users
+• Implemented CI/CD pipelines reducing deployment time by 60%
+• Mentored 3 junior developers and conducted code reviews
+• Technologies: Node.js, React, AWS, Docker, MongoDB
+
+Software Engineer | StartupXYZ | 2019 - 2021
+• Built RESTful APIs and frontend components for SaaS platform
+• Collaborated with product team to implement new features
+• Participated in agile development process with 2-week sprints
+• Technologies: JavaScript, React, Node.js, PostgreSQL
+
+Junior Developer | WebSolutions | 2018 - 2019
+• Developed responsive web applications using modern frameworks
+• Fixed bugs and implemented minor features
+• Worked with senior developers on large-scale projects
+• Technologies: JavaScript, HTML, CSS, PHP
+
+EDUCATION
+Bachelor of Science in Computer Science
+University of California, Berkeley | 2014 - 2018
+GPA: 3.8/4.0
+
+CERTIFICATIONS
+• AWS Certified Developer Associate
+• MongoDB Certified Developer
+• Google Cloud Platform Fundamentals
+
+PROJECTS
+E-commerce Platform | React, Node.js, MongoDB
+• Built full-stack e-commerce solution with payment integration
+• Implemented user authentication and admin dashboard
+• Deployed on AWS with auto-scaling capabilities
+
+Task Management App | Vue.js, Express.js, PostgreSQL
+• Created collaborative task management tool for teams
+• Real-time updates using WebSocket connections
+• Mobile-responsive design with PWA features
+
+LANGUAGES
+English (Native), Spanish (Conversational)
