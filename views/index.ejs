@@ -275,6 +275,68 @@
       background: #f8d7da;
       color: #721c24;
     }
+    
+    /* Modal styles */
+    .modal {
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 0;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .modal-header {
+      padding: 20px;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .modal-header h3 {
+      margin: 0;
+      color: #333;
+    }
+    
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    
+    .close:hover {
+      color: #000;
+    }
+    
+    .modal-body {
+      padding: 20px;
+    }
+    
+    .form-text {
+      color: #6c757d;
+      font-size: 12px;
+      margin-top: 5px;
+    }
+    
+    .form-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -374,6 +436,67 @@
       <div id="emailStatus" class="email-status">
         <strong>📧 Email Service Status:</strong> <span id="emailStatusText">Checking...</span>
         <div id="emailStatusDetails" style="margin-top: 5px; font-size: 12px;"></div>
+        <br>
+        <button type="button" class="btn btn-secondary" onclick="toggleEmailConfig()">
+          ⚙️ Configure Email Settings
+        </button>
+      </div>
+
+      <!-- Email Configuration Modal -->
+      <div id="emailConfigModal" class="modal hidden">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>📧 Configure Email Settings</h3>
+            <span class="close" onclick="toggleEmailConfig()">&times;</span>
+          </div>
+          <div class="modal-body">
+            <form id="emailConfigForm">
+              <div class="form-group">
+                <label>Email Provider</label>
+                <select class="form-control" id="emailProvider" onchange="updateEmailConfig()">
+                  <option value="">Select Provider</option>
+                  <option value="gmail">Gmail</option>
+                  <option value="outlook">Outlook/Hotmail</option>
+                  <option value="yahoo">Yahoo</option>
+                  <option value="custom">Custom SMTP</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label>SMTP Host</label>
+                <input type="text" class="form-control" id="emailHost" placeholder="smtp.gmail.com" required>
+              </div>
+              
+              <div class="form-group">
+                <label>SMTP Port</label>
+                <input type="number" class="form-control" id="emailPort" placeholder="587" required>
+              </div>
+              
+              <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" class="form-control" id="emailUser" placeholder="your-email@gmail.com" required>
+              </div>
+              
+              <div class="form-group">
+                <label>Password/App Password</label>
+                <input type="password" class="form-control" id="emailPass" placeholder="Your password or app password" required>
+                <small class="form-text">For Gmail, use an App Password. For other providers, use your regular password.</small>
+              </div>
+              
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" id="emailSecure" value="true">
+                  Use SSL/TLS (Port 465)
+                </label>
+              </div>
+              
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Save Configuration</button>
+                <button type="button" class="btn btn-secondary" onclick="toggleEmailConfig()">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
       
       <form id="campaignForm">
@@ -667,8 +790,107 @@
         console.error('Error loading campaigns:', error);
       }
       
-      // Check email status when loading campaigns
-      checkEmailStatus();
+          // Check email status when loading campaigns
+    checkEmailStatus();
+    
+    // Email configuration functions
+    function toggleEmailConfig() {
+      const modal = document.getElementById('emailConfigModal');
+      modal.classList.toggle('hidden');
+      
+      if (!modal.classList.contains('hidden')) {
+        loadCurrentEmailConfig();
+      }
+    }
+    
+    function updateEmailConfig() {
+      const provider = document.getElementById('emailProvider').value;
+      const hostInput = document.getElementById('emailHost');
+      const portInput = document.getElementById('emailPort');
+      const secureCheckbox = document.getElementById('emailSecure');
+      
+      // Pre-fill based on provider selection
+      switch(provider) {
+        case 'gmail':
+          hostInput.value = 'smtp.gmail.com';
+          portInput.value = '587';
+          secureCheckbox.checked = false;
+          break;
+        case 'outlook':
+          hostInput.value = 'smtp-mail.outlook.com';
+          portInput.value = '587';
+          secureCheckbox.checked = false;
+          break;
+        case 'yahoo':
+          hostInput.value = 'smtp.mail.yahoo.com';
+          portInput.value = '587';
+          secureCheckbox.checked = false;
+          break;
+        case 'custom':
+          hostInput.value = '';
+          portInput.value = '';
+          secureCheckbox.checked = false;
+          break;
+      }
+    }
+    
+    async function loadCurrentEmailConfig() {
+      try {
+        const response = await fetch('/api/email-config');
+        const result = await response.json();
+        
+        if (result.success && result.config) {
+          document.getElementById('emailHost').value = result.config.host;
+          document.getElementById('emailPort').value = result.config.port;
+          document.getElementById('emailUser').value = result.config.auth.user;
+          // Don't pre-fill password for security
+          document.getElementById('emailSecure').checked = result.config.secure;
+        }
+      } catch (error) {
+        console.error('Error loading email config:', error);
+      }
+    }
+    
+    // Add email config form handler
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailConfigForm = document.getElementById('emailConfigForm');
+      if (emailConfigForm) {
+        emailConfigForm.addEventListener('submit', handleEmailConfigSubmit);
+      }
+    });
+    
+    async function handleEmailConfigSubmit(e) {
+      e.preventDefault();
+      
+      const formData = {
+        host: document.getElementById('emailHost').value,
+        port: document.getElementById('emailPort').value,
+        user: document.getElementById('emailUser').value,
+        pass: document.getElementById('emailPass').value,
+        secure: document.getElementById('emailSecure').checked.toString()
+      };
+      
+      try {
+        const response = await fetch('/api/email-config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showSuccess('emailStatus', 'Email configuration saved successfully!');
+          toggleEmailConfig();
+          checkEmailStatus(); // Refresh status
+        } else {
+          showError('emailStatus', result.error || 'Failed to save email configuration');
+        }
+      } catch (error) {
+        console.error('Error saving email config:', error);
+        showError('emailStatus', 'Network error occurred');
+      }
+    }
     }
 
     async function updateStats() {

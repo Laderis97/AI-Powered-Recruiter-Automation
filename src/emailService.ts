@@ -22,6 +22,7 @@ export interface EmailMessage {
 export class EmailService {
   private transporter: nodemailer.Transporter | null = null;
   private isConfigured: boolean = false;
+  private currentConfig: EmailConfig | null = null;
 
   constructor() {
     this.initializeTransporter();
@@ -105,6 +106,17 @@ export class EmailService {
       configured: this.isConfigured,
       missingVars
     };
+  }
+
+  updateConfig(config: EmailConfig): void {
+    this.currentConfig = config;
+    this.transporter = nodemailer.createTransport(config);
+    this.isConfigured = true;
+    console.log('✅ Email configuration updated successfully');
+  }
+
+  getConfig(): EmailConfig | null {
+    return this.currentConfig;
   }
 }
 

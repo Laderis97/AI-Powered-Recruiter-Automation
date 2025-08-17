@@ -360,6 +360,55 @@ app.get('/api/analytics', (req, res) => {
         responseRate: `${responseRate}%`
     });
 });
+// Email configuration endpoint
+app.post('/api/email-config', (req, res) => {
+    try {
+        const { host, port, user, pass, secure } = req.body;
+        // Validate required fields
+        if (!host || !port || !user || !pass) {
+            return res.status(400).json({
+                success: false,
+                error: 'All email configuration fields are required'
+            });
+        }
+        // Store configuration in memory (in production, you'd want to persist this)
+        // For now, we'll update the email service directly
+        emailService.updateConfig({
+            host,
+            port: parseInt(port),
+            secure: secure === 'true',
+            auth: { user, pass }
+        });
+        res.json({
+            success: true,
+            message: 'Email configuration updated successfully'
+        });
+    }
+    catch (error) {
+        console.error('Error updating email config:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to update email configuration'
+        });
+    }
+});
+// Get current email configuration
+app.get('/api/email-config', (req, res) => {
+    try {
+        const config = emailService.getConfig();
+        res.json({
+            success: true,
+            config: config || null
+        });
+    }
+    catch (error) {
+        console.error('Error getting email config:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to get email configuration'
+        });
+    }
+});
 app.listen(PORT, () => {
     console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
     console.log(`📊 Dashboard available at http://localhost:${PORT}`);
