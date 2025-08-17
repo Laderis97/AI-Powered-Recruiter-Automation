@@ -483,12 +483,24 @@
                 <small class="form-text">For Gmail, use an App Password. For other providers, use your regular password.</small>
               </div>
               
-              <div class="form-group">
-                <label>
-                  <input type="checkbox" id="emailSecure" value="true">
-                  Use SSL/TLS (Port 465)
-                </label>
-              </div>
+                             <div class="form-group">
+                 <label>
+                   <input type="checkbox" id="emailSecure" value="true">
+                   Use SSL/TLS (Port 465)
+                 </label>
+                 <small class="form-text">Check this for Gmail with App Password, or if your provider requires SSL on port 465.</small>
+               </div>
+               
+               <div class="form-group">
+                 <label>Connection Type</label>
+                 <select class="form-control" id="emailConnectionType">
+                   <option value="auto">Auto-detect (Recommended)</option>
+                   <option value="tls">TLS (Port 587)</option>
+                   <option value="ssl">SSL (Port 465)</option>
+                   <option value="none">No encryption (Port 25)</option>
+                 </select>
+                 <small class="form-text">Most modern providers use TLS on port 587. Gmail with App Password can use SSL on port 465.</small>
+               </div>
               
               <div class="form-actions">
                 <button type="submit" class="btn btn-primary">💾 Save Configuration</button>
@@ -861,16 +873,17 @@
        }
      }
      
-     async function handleEmailConfigSubmit(e) {
-       e.preventDefault();
-       
-       const formData = {
-         host: document.getElementById('emailHost').value,
-         port: document.getElementById('emailPort').value,
-         user: document.getElementById('emailUser').value,
-         pass: document.getElementById('emailPass').value,
-         secure: document.getElementById('emailSecure').checked.toString()
-       };
+           async function handleEmailConfigSubmit(e) {
+        e.preventDefault();
+        
+        const formData = {
+          host: document.getElementById('emailHost').value,
+          port: document.getElementById('emailPort').value,
+          user: document.getElementById('emailUser').value,
+          pass: document.getElementById('emailPass').value,
+          secure: document.getElementById('emailSecure').checked.toString(),
+          connectionType: document.getElementById('emailConnectionType').value
+        };
        
        try {
          const response = await fetch('/api/email-config', {

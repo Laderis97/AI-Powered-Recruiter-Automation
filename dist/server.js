@@ -363,7 +363,7 @@ app.get('/api/analytics', (req, res) => {
 // Email configuration endpoint
 app.post('/api/email-config', (req, res) => {
     try {
-        const { host, port, user, pass, secure } = req.body;
+        const { host, port, user, pass, secure, connectionType } = req.body;
         // Validate required fields
         if (!host || !port || !user || !pass) {
             return res.status(400).json({
@@ -371,12 +371,23 @@ app.post('/api/email-config', (req, res) => {
                 error: 'All email configuration fields are required'
             });
         }
+        // Determine secure setting based on connection type
+        let isSecure = false;
+        if (connectionType === 'ssl' || secure === 'true') {
+            isSecure = true;
+        }
+        else if (connectionType === 'tls') {
+            isSecure = false; // TLS uses STARTTLS, not SSL
+        }
+        else if (connectionType === 'auto') {
+            isSecure = parseInt(port) === 465; // Auto-detect based on port
+        }
         // Store configuration in memory (in production, you'd want to persist this)
         // For now, we'll update the email service directly
         emailService.updateConfig({
             host,
             port: parseInt(port),
-            secure: secure === 'true',
+            secure: isSecure,
             auth: { user, pass }
         });
         res.json({

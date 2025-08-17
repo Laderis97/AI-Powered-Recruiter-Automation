@@ -44,6 +44,15 @@ export class EmailService {
           user: emailUser,
           pass: emailPass,
         },
+        // Add TLS configuration to handle SSL errors
+        tls: {
+          rejectUnauthorized: false, // Allow self-signed certificates
+          ciphers: 'SSLv3'
+        },
+        // Add connection timeout
+        connectionTimeout: 60000, // 60 seconds
+        greetingTimeout: 30000, // 30 seconds
+        socketTimeout: 60000, // 60 seconds
       });
       this.isConfigured = true;
       console.log('✅ Email service configured successfully');
@@ -110,7 +119,22 @@ export class EmailService {
 
   updateConfig(config: EmailConfig): void {
     this.currentConfig = config;
-    this.transporter = nodemailer.createTransport(config);
+    
+    // Create transporter with enhanced TLS configuration
+    const transporterConfig = {
+      ...config,
+      // Add TLS configuration to handle SSL errors
+      tls: {
+        rejectUnauthorized: false, // Allow self-signed certificates
+        ciphers: 'SSLv3'
+      },
+      // Add connection timeout
+      connectionTimeout: 60000, // 60 seconds
+      greetingTimeout: 30000, // 30 seconds
+      socketTimeout: 60000, // 60 seconds
+    };
+    
+    this.transporter = nodemailer.createTransport(transporterConfig);
     this.isConfigured = true;
     console.log('✅ Email configuration updated successfully');
   }
