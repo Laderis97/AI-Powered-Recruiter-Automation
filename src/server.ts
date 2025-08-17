@@ -9,6 +9,7 @@ import * as dotenv from 'dotenv';
 import multer from 'multer';
 import { callOpenAI, parseJobDescription, generateOutreach } from './openai.js';
 import { documentParser, ParsedCandidate } from './documentParser.js';
+import { emailService } from './emailService.js';
 
 dotenv.config();
 
@@ -237,6 +238,95 @@ app.put('/api/campaigns/:id/status', (req, res) => {
   } catch (error) {
     console.error('Error updating campaign:', error);
     res.status(500).json({ error: 'Failed to update campaign' });
+  }
+});
+
+// Send campaign via email
+app.post('/api/campaigns/:id/send-email', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const campaign = campaigns.find(c => c.id === id);
+    if (!campaign) {
+      return res.status(404).json({ error: 'Campaign not found' });
+    }
+
+    const candidate = candidates.find(c => c.id === campaign.candidateId);
+    const job = jobs.find(j => j.id === campaign.jobId);
+    
+    if (!candidate || !job) {
+      return res.status(400).json({ error: 'Candidate or job not found' });
+    }
+
+    if (!candidate.email) {
+      return res.status(400).json({ error: 'Candidate has no email address' });
+    }
+
+    // Send the email
+    const result = await emailService.sendOutreachEmail(
+      candidate.email,
+      candidate.name,
+      campaign.message,
+      job.title
+    );
+
+    if (result.success) {
+      // Update campaign status
+      campaign.status = 'sent';
+      campaign.sentAt = new Date();
+      
+      res.json({
+        success: true,
+        message: `Email sent successfully to ${candidate.email}`,
+        campaign
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        error: result.error || 'Failed to send email'
+      });
+    }
+  } catch (error) {
+    console.error('Error sending campaign email:', error);
+    res.status(500).json({ error: 'Failed to send campaign email' });
+  }
+});
+
+// Get email service status
+app.get('/api/email-status', (req, res) => {
+  const status = emailService.getConfigurationStatus();
+  res.json(status);
+});
+
+// Export campaigns to CSV for manual sending
+app.get('/api/campaigns/export', (req, res) => {
+  try {
+    const csvData = campaigns.map(campaign => {
+      const candidate = candidates.find(c => c.id === campaign.candidateId);
+      const job = jobs.find(j => j.id === campaign.jobId);
+      
+      return {
+        'Campaign ID': campaign.id,
+        'Candidate Name': candidate?.name || 'Unknown',
+        'Candidate Email': candidate?.email || 'No email',
+        'Job Title': job?.title || 'Unknown',
+        'Message': campaign.message.replace(/\n/g, ' '),
+        'Status': campaign.status,
+        'Created': campaign.createdAt.toISOString(),
+        'Sent': campaign.sentAt?.toISOString() || ''
+      };
+    });
+
+    const csvHeaders = Object.keys(csvData[0] || {}).join(',');
+    const csvRows = csvData.map(row => Object.values(row).map(value => `"${value}"`).join(','));
+    const csv = [csvHeaders, ...csvRows].join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename="outreach-campaigns.csv"');
+    res.send(csv);
+  } catch (error) {
+    console.error('Error exporting campaigns:', error);
+    res.status(500).json({ error: 'Failed to export campaigns' });
   }
 });
 

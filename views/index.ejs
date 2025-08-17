@@ -230,6 +230,51 @@
       border-radius: 8px;
       margin-bottom: 20px;
     }
+    
+    .status-draft {
+      color: #856404;
+      background: #fff3cd;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status-sent {
+      color: #155724;
+      background: #d4edda;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .status-replied {
+      color: #0c5460;
+      background: #d1ecf1;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .email-status {
+      background: #e2e3e5;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+    
+    .email-status.configured {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .email-status.not-configured {
+      background: #f8d7da;
+      color: #721c24;
+    }
   </style>
 </head>
 <body>
@@ -326,6 +371,11 @@
     <div id="campaigns" class="tab-content hidden">
       <h2>Outreach Campaigns</h2>
       
+      <div id="emailStatus" class="email-status">
+        <strong>📧 Email Service Status:</strong> <span id="emailStatusText">Checking...</span>
+        <div id="emailStatusDetails" style="margin-top: 5px; font-size: 12px;"></div>
+      </div>
+      
       <form id="campaignForm">
         <div class="form-group">
           <label>Select Job</label>
@@ -339,6 +389,10 @@
         
         <button type="submit" class="btn btn-primary">Generate Outreach</button>
       </form>
+
+      <div style="margin-top: 20px;">
+        <button onclick="exportCampaigns()" class="btn btn-secondary">📊 Export Campaigns to CSV</button>
+      </div>
 
       <div id="campaignsList" style="margin-top: 30px;"></div>
     </div>
@@ -588,8 +642,18 @@
         container.innerHTML = campaigns.map(campaign => `
           <div class="list-item">
             <h4>Campaign #${campaign.id}</h4>
-            <p><strong>Status:</strong> ${campaign.status}</p>
+            <p><strong>Status:</strong> <span class="status-${campaign.status}">${campaign.status.toUpperCase()}</span></p>
             <p>${campaign.message.substring(0, 200)}...</p>
+            <div class="campaign-actions" style="margin-top: 10px;">
+              <button onclick="viewCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-right: 5px;">View</button>
+              ${campaign.status === 'draft' ? `
+                <button onclick="sendCampaignEmail('${campaign.id}')" class="btn btn-primary" style="margin-right: 5px;">📧 Send Email</button>
+                <button onclick="copyToClipboard('${campaign.id}')" class="btn btn-secondary">📋 Copy Message</button>
+              ` : ''}
+              ${campaign.status === 'sent' ? `
+                <span style="color: green;">✅ Sent on ${new Date(campaign.sentAt).toLocaleDateString()}</span>
+              ` : ''}
+            </div>
           </div>
         `).join('');
         
@@ -602,6 +666,9 @@
       } catch (error) {
         console.error('Error loading campaigns:', error);
       }
+      
+      // Check email status when loading campaigns
+      checkEmailStatus();
     }
 
     async function updateStats() {
@@ -629,6 +696,127 @@
 
     function showError(containerId, message) {
       document.getElementById(containerId).innerHTML = `<div class="error">${message}</div>`;
+    }
+
+    // Campaign sending functions
+    async function sendCampaignEmail(campaignId) {
+      if (!confirm('Are you sure you want to send this email? This action cannot be undone.')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/campaigns/${campaignId}/send-email`, {
+          method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+          showSuccess('campaignsList', result.message);
+          loadCampaigns(); // Refresh the list
+          updateStats();
+        } else {
+          showError('campaignsList', result.error || 'Failed to send email');
+        }
+      } catch (error) {
+        console.error('Error sending campaign email:', error);
+        showError('campaignsList', 'Network error occurred');
+      }
+    }
+
+    async function copyToClipboard(campaignId) {
+      try {
+        const response = await fetch('/api/campaigns');
+        const campaigns = await response.json();
+        const campaign = campaigns.find(c => c.id === campaignId);
+        
+        if (campaign) {
+          await navigator.clipboard.writeText(campaign.message);
+          showSuccess('campaignsList', 'Message copied to clipboard!');
+        }
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        showError('campaignsList', 'Failed to copy message');
+      }
+    }
+
+    async function viewCampaign(campaignId) {
+      try {
+        const response = await fetch('/api/campaigns');
+        const campaigns = await response.json();
+        const campaign = campaigns.find(c => c.id === campaignId);
+        
+        if (campaign) {
+          const candidate = await fetch('/api/candidates').then(r => r.json()).then(candidates => 
+            candidates.find(c => c.id === campaign.candidateId)
+          );
+          const job = await fetch('/api/jobs').then(r => r.json()).then(jobs => 
+            jobs.find(j => j.id === campaign.jobId)
+          );
+          
+          const message = `
+Campaign Details:
+- Candidate: ${candidate?.name || 'Unknown'}
+- Job: ${job?.title || 'Unknown'}
+- Status: ${campaign.status}
+- Created: ${new Date(campaign.createdAt).toLocaleString()}
+${campaign.sentAt ? `- Sent: ${new Date(campaign.sentAt).toLocaleString()}` : ''}
+
+Message:
+${campaign.message}
+          `;
+          
+          alert(message);
+        }
+      } catch (error) {
+        console.error('Error viewing campaign:', error);
+        showError('campaignsList', 'Failed to load campaign details');
+      }
+    }
+
+    async function exportCampaigns() {
+      try {
+        const response = await fetch('/api/campaigns/export');
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'outreach-campaigns.csv';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        showSuccess('campaignsList', 'Campaigns exported successfully!');
+      } catch (error) {
+        console.error('Error exporting campaigns:', error);
+        showError('campaignsList', 'Failed to export campaigns');
+      }
+    }
+
+    async function checkEmailStatus() {
+      try {
+        const response = await fetch('/api/email-status');
+        const status = await response.json();
+        
+        const statusElement = document.getElementById('emailStatusText');
+        const detailsElement = document.getElementById('emailStatusDetails');
+        const statusContainer = document.getElementById('emailStatus');
+        
+        if (status.configured) {
+          statusElement.textContent = '✅ Configured and Ready';
+          statusContainer.className = 'email-status configured';
+          detailsElement.textContent = 'You can send emails directly from the dashboard.';
+        } else {
+          statusElement.textContent = '⚠️ Not Configured';
+          statusContainer.className = 'email-status not-configured';
+          detailsElement.textContent = `Missing environment variables: ${status.missingVars.join(', ')}. Use "Copy Message" to manually send.`;
+        }
+      } catch (error) {
+        console.error('Error checking email status:', error);
+        const statusElement = document.getElementById('emailStatusText');
+        statusElement.textContent = '❌ Error checking status';
+      }
     }
 
     // Note: updateStats() is now called in DOMContentLoaded
