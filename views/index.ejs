@@ -345,6 +345,32 @@
   </div>
 
   <script>
+    // Wait for DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM loaded, setting up event listeners...');
+      
+      // Set up form event listeners
+      const jobForm = document.getElementById('jobForm');
+      const campaignForm = document.getElementById('campaignForm');
+      
+      if (jobForm) {
+        console.log('Job form found, adding event listener...');
+        jobForm.addEventListener('submit', handleJobSubmit);
+      } else {
+        console.error('Job form not found!');
+      }
+      
+      if (campaignForm) {
+        console.log('Campaign form found, adding event listener...');
+        campaignForm.addEventListener('submit', handleCampaignSubmit);
+      } else {
+        console.error('Campaign form not found!');
+      }
+      
+      // Initialize stats
+      updateStats();
+    });
+
     // Tab switching
     function showTab(tabName) {
       // Hide all tab contents
@@ -433,13 +459,16 @@
     }
 
     // Job management
-    document.getElementById('jobForm').addEventListener('submit', async (e) => {
+    async function handleJobSubmit(e) {
       e.preventDefault();
+      console.log('Job form submitted!');
       
       const jobData = {
         title: document.getElementById('jobTitle').value,
         description: document.getElementById('jobDescription').value
       };
+      
+      console.log('Job data:', jobData);
       
       try {
         const response = await fetch('/api/jobs', {
@@ -448,24 +477,37 @@
           body: JSON.stringify(jobData)
         });
         
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
+          const result = await response.json();
+          console.log('Job created successfully:', result);
           document.getElementById('jobForm').reset();
           loadJobs();
           updateStats();
+          showSuccess('jobsList', 'Job posting created successfully!');
+        } else {
+          const error = await response.json();
+          console.error('Server error:', error);
+          showError('jobsList', error.error || 'Failed to create job posting');
         }
       } catch (error) {
         console.error('Error creating job:', error);
+        showError('jobsList', 'Network error occurred');
       }
-    });
+    }
 
     // Campaign management
-    document.getElementById('campaignForm').addEventListener('submit', async (e) => {
+    async function handleCampaignSubmit(e) {
       e.preventDefault();
+      console.log('Campaign form submitted!');
       
       const campaignData = {
         jobId: document.getElementById('campaignJob').value,
         candidateId: document.getElementById('campaignCandidate').value
       };
+      
+      console.log('Campaign data:', campaignData);
       
       try {
         const response = await fetch('/api/campaigns', {
@@ -474,15 +516,25 @@
           body: JSON.stringify(campaignData)
         });
         
+        console.log('Response status:', response.status);
+        
         if (response.ok) {
+          const result = await response.json();
+          console.log('Campaign created successfully:', result);
           document.getElementById('campaignForm').reset();
           loadCampaigns();
           updateStats();
+          showSuccess('campaignsList', 'Outreach campaign created successfully!');
+        } else {
+          const error = await response.json();
+          console.error('Server error:', error);
+          showError('campaignsList', error.error || 'Failed to create campaign');
         }
       } catch (error) {
         console.error('Error creating campaign:', error);
+        showError('campaignsList', 'Network error occurred');
       }
-    });
+    }
 
     // Data loading functions
     async function loadCandidates() {
@@ -579,8 +631,7 @@
       document.getElementById(containerId).innerHTML = `<div class="error">${message}</div>`;
     }
 
-    // Initialize
-    updateStats();
+    // Note: updateStats() is now called in DOMContentLoaded
   </script>
 </body>
 </html>
