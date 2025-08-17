@@ -45,8 +45,7 @@ export class DocumentParser {
     try {
       switch (fileExtension) {
         case '.pdf':
-          extractedText = await this.parsePDF(filePath);
-          break;
+          throw new Error(`PDF files are not yet supported. Please convert to TXT, DOCX, or DOC format.`);
         case '.docx':
         case '.doc':
           extractedText = await this.parseWordDocument(filePath);
@@ -55,7 +54,7 @@ export class DocumentParser {
           extractedText = await this.parseTextFile(filePath);
           break;
         default:
-          throw new Error(`Unsupported file type: ${fileExtension}`);
+          throw new Error(`Unsupported file type: ${fileExtension}. Supported formats: TXT, DOCX, DOC`);
       }
 
       // Use AI to extract structured candidate information
@@ -78,9 +77,8 @@ export class DocumentParser {
 
   private async parsePDF(filePath: string): Promise<string> {
     try {
-      // For now, return a placeholder message for PDFs
-      // In production, you would use a proper PDF parsing library
-      return "PDF parsing is currently being implemented. Please convert to text format for now.";
+      // For now, throw an error for PDFs to trigger fallback or better error handling
+      throw new Error("PDF parsing is currently being implemented. Please convert to text format for now.");
     } catch (error) {
       throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

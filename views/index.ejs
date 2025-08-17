@@ -272,22 +272,24 @@
       
       <div class="form-group">
         <label>Single Resume Upload</label>
-        <div class="file-upload" onclick="document.getElementById('singleFile').click()">
-          <div class="upload-icon">📄</div>
-          <p>Click to upload a single resume</p>
-          <p style="font-size: 12px; color: #666;">Supports: PDF, DOCX, DOC, TXT (max 10MB)</p>
-        </div>
-        <input type="file" id="singleFile" accept=".pdf,.docx,.doc,.txt" onchange="uploadSingleResume(this)">
+                 <div class="file-upload" onclick="document.getElementById('singleFile').click()">
+           <div class="upload-icon">📄</div>
+           <p>Click to upload a single resume</p>
+           <p style="font-size: 12px; color: #666;">Supports: TXT, DOCX, DOC (max 10MB)</p>
+           <p style="font-size: 11px; color: #ff6b6b;">⚠️ PDF support coming soon</p>
+         </div>
+         <input type="file" id="singleFile" accept=".txt,.docx,.doc" onchange="uploadSingleResume(this)">
       </div>
 
       <div class="form-group">
         <label>Multiple Resumes Upload</label>
-        <div class="file-upload" onclick="document.getElementById('multipleFiles').click()">
-          <div class="upload-icon">📁</div>
-          <p>Click to upload multiple resumes</p>
-          <p style="font-size: 12px; color: #666;">Up to 10 files at once</p>
-        </div>
-        <input type="file" id="multipleFiles" accept=".pdf,.docx,.doc,.txt" multiple onchange="uploadMultipleResumes(this)">
+                 <div class="file-upload" onclick="document.getElementById('multipleFiles').click()">
+           <div class="upload-icon">📁</div>
+           <p>Click to upload multiple resumes</p>
+           <p style="font-size: 12px; color: #666;">Up to 10 files at once</p>
+           <p style="font-size: 11px; color: #ff6b6b;">⚠️ PDF support coming soon</p>
+         </div>
+         <input type="file" id="multipleFiles" accept=".txt,.docx,.doc" multiple onchange="uploadMultipleResumes(this)">
       </div>
 
       <div id="uploadResults"></div>
@@ -384,12 +386,13 @@
         
         const result = await response.json();
         
-        if (response.ok) {
-          showSuccess('uploadResults', `Resume parsed successfully! Added candidate: ${result.candidate.name}`);
-          updateStats();
-        } else {
-          showError('uploadResults', result.error || 'Failed to parse resume');
-        }
+                 if (response.ok) {
+           showSuccess('uploadResults', `Resume parsed successfully! Added candidate: ${result.candidate.name}`);
+           updateStats();
+         } else {
+           const errorMessage = result.error || result.details || 'Failed to parse resume';
+           showError('uploadResults', errorMessage);
+         }
       } catch (error) {
         showError('uploadResults', 'Network error occurred');
       }
@@ -415,12 +418,13 @@
         
         const result = await response.json();
         
-        if (response.ok) {
-          showSuccess('uploadResults', `${result.candidates.length} resumes parsed successfully!`);
-          updateStats();
-        } else {
-          showError('uploadResults', result.error || 'Failed to parse resumes');
-        }
+                 if (response.ok) {
+           showSuccess('uploadResults', `${result.candidates.length} resumes parsed successfully!`);
+           updateStats();
+         } else {
+           const errorMessage = result.error || result.details || 'Failed to parse resumes';
+           showError('uploadResults', errorMessage);
+         }
       } catch (error) {
         showError('uploadResults', 'Network error occurred');
       }
