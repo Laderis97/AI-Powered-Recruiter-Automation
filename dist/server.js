@@ -71,7 +71,16 @@ app.post('/api/jobs', async (req, res) => {
         if (!title || !description) {
             return res.status(400).json({ error: 'Title and description are required' });
         }
-        const parsedData = await parseJobDescription(description);
+        let parsedData = null;
+        // Try to parse with AI, but don't fail if it doesn't work
+        try {
+            parsedData = await parseJobDescription(description);
+            console.log('✅ Job description parsed with AI successfully');
+        }
+        catch (aiError) {
+            console.log('⚠️ AI parsing failed, creating job without parsed data:', aiError instanceof Error ? aiError.message : 'Unknown error');
+            // Continue without AI parsing - this is not a critical failure
+        }
         const job = {
             id: Date.now().toString(),
             title,
@@ -80,11 +89,15 @@ app.post('/api/jobs', async (req, res) => {
             createdAt: new Date()
         };
         jobs.push(job);
+        console.log(`✅ Job created successfully: ${title}`);
         res.json(job);
     }
     catch (error) {
-        console.error('Error creating job:', error);
-        res.status(500).json({ error: 'Failed to create job posting' });
+        console.error('❌ Error creating job:', error);
+        res.status(500).json({
+            error: 'Failed to create job posting',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        });
     }
 });
 app.post('/api/candidates', (req, res) => {
@@ -119,7 +132,23 @@ app.post('/api/campaigns', async (req, res) => {
         if (!job || !candidate) {
             return res.status(400).json({ error: 'Job and candidate not found' });
         }
-        const message = await generateOutreach(candidate, job.parsedData);
+        let message = 'Default outreach message';
+        // Try to generate AI outreach, but don't fail if it doesn't work
+        try {
+            if (job.parsedData) {
+                message = await generateOutreach(candidate, job.parsedData);
+                console.log('✅ AI outreach generated successfully');
+            }
+            else {
+                // Generate a basic message without AI
+                message = `Hi ${candidate.name},\n\nI hope this message finds you well. I came across your profile and was impressed by your background in ${candidate.title}.\n\nWe have an exciting opportunity that I believe would be a great fit for your skills and experience.\n\nWould you be interested in discussing this further?\n\nBest regards,\nRecruitment Team`;
+                console.log('⚠️ Using fallback outreach message (no AI parsing available)');
+            }
+        }
+        catch (aiError) {
+            console.log('⚠️ AI outreach generation failed, using fallback message:', aiError instanceof Error ? aiError.message : 'Unknown error');
+            message = `Hi ${candidate.name},\n\nI hope this message finds you well. I came across your profile and was impressed by your background in ${candidate.title}.\n\nWe have an exciting opportunity that I believe would be a great fit for your skills and experience.\n\nWould you be interested in discussing this further?\n\nBest regards,\nRecruitment Team`;
+        }
         const campaign = {
             id: Date.now().toString(),
             jobId,
