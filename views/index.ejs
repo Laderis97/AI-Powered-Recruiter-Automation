@@ -537,15 +537,24 @@
         console.error('Job form not found!');
       }
       
-      if (campaignForm) {
-        console.log('Campaign form found, adding event listener...');
-        campaignForm.addEventListener('submit', handleCampaignSubmit);
-      } else {
-        console.error('Campaign form not found!');
-      }
-      
-      // Initialize stats
-      updateStats();
+             if (campaignForm) {
+         console.log('Campaign form found, adding event listener...');
+         campaignForm.addEventListener('submit', handleCampaignSubmit);
+       } else {
+         console.error('Campaign form not found!');
+       }
+       
+       // Set up email config form handler
+       const emailConfigForm = document.getElementById('emailConfigForm');
+       if (emailConfigForm) {
+         console.log('Email config form found, adding event listener...');
+         emailConfigForm.addEventListener('submit', handleEmailConfigSubmit);
+       } else {
+         console.error('Email config form not found!');
+       }
+       
+       // Initialize stats
+       updateStats();
     });
 
     // Tab switching
@@ -786,112 +795,104 @@
         const candidates = await candidatesResponse.json();
         candidateSelect.innerHTML = '<option value="">Select a candidate...</option>' + 
           candidates.map(candidate => `<option value="${candidate.id}">${candidate.name} - ${candidate.title}</option>`).join('');
-      } catch (error) {
-        console.error('Error loading campaigns:', error);
-      }
-      
-          // Check email status when loading campaigns
-    checkEmailStatus();
-    
-    // Email configuration functions
-    function toggleEmailConfig() {
-      const modal = document.getElementById('emailConfigModal');
-      modal.classList.toggle('hidden');
-      
-      if (!modal.classList.contains('hidden')) {
-        loadCurrentEmailConfig();
-      }
-    }
-    
-    function updateEmailConfig() {
-      const provider = document.getElementById('emailProvider').value;
-      const hostInput = document.getElementById('emailHost');
-      const portInput = document.getElementById('emailPort');
-      const secureCheckbox = document.getElementById('emailSecure');
-      
-      // Pre-fill based on provider selection
-      switch(provider) {
-        case 'gmail':
-          hostInput.value = 'smtp.gmail.com';
-          portInput.value = '587';
-          secureCheckbox.checked = false;
-          break;
-        case 'outlook':
-          hostInput.value = 'smtp-mail.outlook.com';
-          portInput.value = '587';
-          secureCheckbox.checked = false;
-          break;
-        case 'yahoo':
-          hostInput.value = 'smtp.mail.yahoo.com';
-          portInput.value = '587';
-          secureCheckbox.checked = false;
-          break;
-        case 'custom':
-          hostInput.value = '';
-          portInput.value = '';
-          secureCheckbox.checked = false;
-          break;
-      }
-    }
-    
-    async function loadCurrentEmailConfig() {
-      try {
-        const response = await fetch('/api/email-config');
-        const result = await response.json();
-        
-        if (result.success && result.config) {
-          document.getElementById('emailHost').value = result.config.host;
-          document.getElementById('emailPort').value = result.config.port;
-          document.getElementById('emailUser').value = result.config.auth.user;
-          // Don't pre-fill password for security
-          document.getElementById('emailSecure').checked = result.config.secure;
-        }
-      } catch (error) {
-        console.error('Error loading email config:', error);
-      }
-    }
-    
-    // Add email config form handler
-    document.addEventListener('DOMContentLoaded', function() {
-      const emailConfigForm = document.getElementById('emailConfigForm');
-      if (emailConfigForm) {
-        emailConfigForm.addEventListener('submit', handleEmailConfigSubmit);
-      }
-    });
-    
-    async function handleEmailConfigSubmit(e) {
-      e.preventDefault();
-      
-      const formData = {
-        host: document.getElementById('emailHost').value,
-        port: document.getElementById('emailPort').value,
-        user: document.getElementById('emailUser').value,
-        pass: document.getElementById('emailPass').value,
-        secure: document.getElementById('emailSecure').checked.toString()
-      };
-      
-      try {
-        const response = await fetch('/api/email-config', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-          showSuccess('emailStatus', 'Email configuration saved successfully!');
-          toggleEmailConfig();
-          checkEmailStatus(); // Refresh status
-        } else {
-          showError('emailStatus', result.error || 'Failed to save email configuration');
-        }
-      } catch (error) {
-        console.error('Error saving email config:', error);
-        showError('emailStatus', 'Network error occurred');
-      }
-    }
-    }
+             } catch (error) {
+         console.error('Error loading campaigns:', error);
+       }
+       
+       // Check email status when loading campaigns
+       checkEmailStatus();
+     }
+     
+     // Email configuration functions
+     function toggleEmailConfig() {
+       const modal = document.getElementById('emailConfigModal');
+       modal.classList.toggle('hidden');
+       
+       if (!modal.classList.contains('hidden')) {
+         loadCurrentEmailConfig();
+       }
+     }
+     
+     function updateEmailConfig() {
+       const provider = document.getElementById('emailProvider').value;
+       const hostInput = document.getElementById('emailHost');
+       const portInput = document.getElementById('emailPort');
+       const secureCheckbox = document.getElementById('emailSecure');
+       
+       // Pre-fill based on provider selection
+       switch(provider) {
+         case 'gmail':
+           hostInput.value = 'smtp.gmail.com';
+           portInput.value = '587';
+           secureCheckbox.checked = false;
+           break;
+         case 'outlook':
+           hostInput.value = 'smtp-mail.outlook.com';
+           portInput.value = '587';
+           secureCheckbox.checked = false;
+           break;
+         case 'yahoo':
+           hostInput.value = 'smtp.mail.yahoo.com';
+           portInput.value = '587';
+           secureCheckbox.checked = false;
+           break;
+         case 'custom':
+           hostInput.value = '';
+           portInput.value = '';
+           secureCheckbox.checked = false;
+           break;
+       }
+     }
+     
+     async function loadCurrentEmailConfig() {
+       try {
+         const response = await fetch('/api/email-config');
+         const result = await response.json();
+         
+         if (result.success && result.config) {
+           document.getElementById('emailHost').value = result.config.host;
+           document.getElementById('emailPort').value = result.config.port;
+           document.getElementById('emailUser').value = result.config.auth.user;
+           // Don't pre-fill password for security
+           document.getElementById('emailSecure').checked = result.config.secure;
+         }
+       } catch (error) {
+         console.error('Error loading email config:', error);
+       }
+     }
+     
+     async function handleEmailConfigSubmit(e) {
+       e.preventDefault();
+       
+       const formData = {
+         host: document.getElementById('emailHost').value,
+         port: document.getElementById('emailPort').value,
+         user: document.getElementById('emailUser').value,
+         pass: document.getElementById('emailPass').value,
+         secure: document.getElementById('emailSecure').checked.toString()
+       };
+       
+       try {
+         const response = await fetch('/api/email-config', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json' },
+           body: JSON.stringify(formData)
+         });
+         
+         const result = await response.json();
+         
+         if (result.success) {
+           showSuccess('emailStatus', 'Email configuration saved successfully!');
+           toggleEmailConfig();
+           checkEmailStatus(); // Refresh status
+         } else {
+           showError('emailStatus', result.error || 'Failed to save email configuration');
+         }
+       } catch (error) {
+         console.error('Error saving email config:', error);
+         showError('emailStatus', 'Network error occurred');
+       }
+     }
 
     async function updateStats() {
       try {
