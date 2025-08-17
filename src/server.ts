@@ -332,4 +332,9 @@ app.get('/api/analytics', (req, res) => {
 app.listen(PORT, () => {
   console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
   console.log(`📊 Dashboard available at http://localhost:${PORT}`);
+  console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
+}).on('error', (error) => {
+  console.error('❌ Server failed to start:', error);
+  process.exit(1);
 });
