@@ -1,6 +1,7 @@
 // src/emailService.ts
 
 import nodemailer from 'nodemailer';
+import { storageService } from './storage.js';
 
 export interface EmailConfig {
   host: string;
@@ -28,37 +29,41 @@ export class EmailService {
     this.initializeTransporter();
   }
 
-  private initializeTransporter(): void {
-    // Check if email configuration is available
-    const emailHost = process.env.EMAIL_HOST;
-    const emailPort = process.env.EMAIL_PORT;
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
+  private async initializeTransporter(): Promise<void> {
+    try {
+      // First try to load from storage
+      const storedConfig = await storageService.getEmailConfig();
+      if (storedConfig) {
+        this.updateConfig(storedConfig);
+        console.log('✅ Email service configured from storage');
+        return;
+      }
 
-    if (emailHost && emailPort && emailUser && emailPass) {
-      this.transporter = nodemailer.createTransport({
-        host: emailHost,
-        port: parseInt(emailPort),
-        secure: parseInt(emailPort) === 465, // true for 465, false for other ports
-        auth: {
-          user: emailUser,
-          pass: emailPass,
-        },
-        // Add TLS configuration to handle SSL errors
-        tls: {
-          rejectUnauthorized: false, // Allow self-signed certificates
-          ciphers: 'SSLv3'
-        },
-        // Add connection timeout
-        connectionTimeout: 60000, // 60 seconds
-        greetingTimeout: 30000, // 30 seconds
-        socketTimeout: 60000, // 60 seconds
-      });
-      this.isConfigured = true;
-      console.log('✅ Email service configured successfully');
-    } else {
-      console.log('⚠️ Email service not configured - missing environment variables');
-      console.log('   Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS to enable email sending');
+      // Fallback to environment variables
+      const emailHost = process.env.EMAIL_HOST;
+      const emailPort = process.env.EMAIL_PORT;
+      const emailUser = process.env.EMAIL_USER;
+      const emailPass = process.env.EMAIL_PASS;
+
+      if (emailHost && emailPort && emailUser && emailPass) {
+        const config: EmailConfig = {
+          host: emailHost,
+          port: parseInt(emailPort),
+          secure: parseInt(emailPort) === 465, // true for 465, false for other ports
+          auth: {
+            user: emailUser,
+            pass: emailPass,
+          }
+        };
+        
+        this.updateConfig(config);
+        console.log('✅ Email service configured from environment variables');
+      } else {
+        console.log('⚠️ Email service not configured - missing environment variables');
+        console.log('   Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS to enable email sending');
+      }
+    } catch (error) {
+      console.error('❌ Error initializing email service:', error);
     }
   }
 
