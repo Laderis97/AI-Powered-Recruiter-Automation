@@ -104,7 +104,9 @@ export class DocumentParser {
   }
 
   private async extractCandidateInfo(text: string, fileName: string): Promise<ParsedCandidate> {
-    const prompt = `
+    // Try AI extraction first
+    try {
+      const prompt = `
 You are an AI recruiter assistant. Extract candidate information from the following resume/document text.
 
 Extract and return as JSON with these fields:
@@ -129,7 +131,6 @@ ${text}
 Return only valid JSON. If a field is not found, use null or empty string as appropriate:
 `;
 
-    try {
       const result = await callOpenAI(prompt);
       const parsed = JSON.parse(result);
       
@@ -151,8 +152,72 @@ Return only valid JSON. If a field is not found, use null or empty string as app
         rawText: text
       };
     } catch (error) {
-      throw new Error(`Failed to extract candidate info: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      if (error instanceof Error && error.message.includes('401')) {
+        console.log('⚠️ OpenAI API authentication failed, using fallback text parsing...');
+        return this.extractBasicInfo(text);
+      } else if (error instanceof Error && error.message.includes('429')) {
+        console.log('⚠️ OpenAI API rate limit exceeded, using fallback text parsing...');
+        return this.extractBasicInfo(text);
+      } else if (error instanceof Error && error.message.includes('JSON')) {
+        console.log('⚠️ Failed to parse AI response, using fallback text parsing...');
+        return this.extractBasicInfo(text);
+      } else {
+        // Fallback to basic text extraction
+        console.log('⚠️ AI extraction failed, using fallback text parsing...');
+        return this.extractBasicInfo(text);
+      }
     }
+  }
+
+  private extractBasicInfo(text: string): ParsedCandidate {
+    // Basic regex-based extraction as fallback
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
+    // Extract name (usually first line)
+    const name = lines[0] || 'Unknown';
+    
+    // Extract email
+    const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const email = emailMatch ? emailMatch[0] : undefined;
+    
+    // Extract phone
+    const phoneMatch = text.match(/\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
+    const phone = phoneMatch ? phoneMatch[0] : undefined;
+    
+    // Extract LinkedIn
+    const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9-]+/);
+    const linkedin = linkedinMatch ? `https://${linkedinMatch[0]}` : undefined;
+    
+    // Extract GitHub
+    const githubMatch = text.match(/github\.com\/[a-zA-Z0-9-]+/);
+    const github = githubMatch ? `https://${githubMatch[0]}` : undefined;
+    
+    // Extract skills (look for common skill keywords)
+    const skillKeywords = [
+      'JavaScript', 'TypeScript', 'Python', 'Java', 'React', 'Vue', 'Node.js', 'Express',
+      'MongoDB', 'PostgreSQL', 'MySQL', 'AWS', 'Docker', 'Kubernetes', 'Git', 'HTML', 'CSS',
+      'Angular', 'Vue.js', 'PHP', 'C#', '.NET', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin'
+    ];
+    const skills = skillKeywords.filter(skill => 
+      text.toLowerCase().includes(skill.toLowerCase())
+    );
+    
+    return {
+      name,
+      email,
+      phone,
+      title: lines[1] || undefined,
+      currentCompany: undefined,
+      location: undefined,
+      experience: 'Unknown',
+      skills,
+      education: [],
+      summary: undefined,
+      linkedin,
+      github,
+      portfolio: undefined,
+      rawText: text
+    };
   }
 
   async parseMultipleDocuments(files: Array<{ path: string; originalname: string }>): Promise<ParsedCandidate[]> {
