@@ -6,7 +6,7 @@ import multer from 'multer';
 import { documentParser, ParsedCandidate } from './documentParser.js';
 import { parseJobDescription, generateOutreach } from './openai.js';
 import { emailService } from './emailService.js';
-import { storageService, JobPosting, Candidate, Campaign } from './storage.js';
+import { databaseService, JobPosting, Candidate, Campaign, EmailConfig } from './databaseService.js';
 
 dotenv.config();
 
@@ -47,7 +47,7 @@ const upload = multer({
 // Routes
 app.get('/', async (req, res) => {
   try {
-    const analytics = await storageService.getAnalytics();
+    const analytics = await databaseService.getAnalytics();
     res.render('index', {
       jobsCount: analytics.totalJobs,
       candidatesCount: analytics.totalCandidates,
@@ -87,7 +87,7 @@ app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
       createdAt: new Date()
     };
 
-    await storageService.addCandidate(newCandidate);
+    await databaseService.addCandidate(newCandidate);
 
     res.json({ 
       success: true, 
@@ -130,7 +130,7 @@ app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req
           createdAt: new Date()
         };
 
-        await storageService.addCandidate(newCandidate);
+        await databaseService.addCandidate(newCandidate);
         candidates.push(newCandidate);
       } catch (error) {
         errors.push(`${file.originalname}: ${error instanceof Error ? error.message : 'Unknown error'}`);
@@ -154,7 +154,7 @@ app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req
 
 app.get('/api/candidates', async (req, res) => {
   try {
-    const candidates = await storageService.getCandidates();
+    const candidates = await databaseService.getCandidates();
     res.json(candidates);
   } catch (error) {
     console.error('Error fetching candidates:', error);
@@ -164,7 +164,7 @@ app.get('/api/candidates', async (req, res) => {
 
 app.get('/api/jobs', async (req, res) => {
   try {
-    const jobs = await storageService.getJobs();
+    const jobs = await databaseService.getJobs();
     res.json(jobs);
   } catch (error) {
     console.error('Error fetching jobs:', error);
@@ -214,7 +214,7 @@ app.post('/api/jobs', async (req, res) => {
       createdAt: new Date()
     };
 
-    await storageService.addJob(job);
+    await databaseService.addJob(job);
     res.json(job);
   } catch (error) {
     console.error('Error creating job:', error);
@@ -224,7 +224,7 @@ app.post('/api/jobs', async (req, res) => {
 
 app.get('/api/campaigns', async (req, res) => {
   try {
-    const campaigns = await storageService.getCampaigns();
+    const campaigns = await databaseService.getCampaigns();
     res.json(campaigns);
   } catch (error) {
     console.error('Error fetching campaigns:', error);
@@ -240,8 +240,8 @@ app.post('/api/campaigns', async (req, res) => {
       return res.status(400).json({ error: 'Job ID and candidate ID are required' });
     }
 
-    const job = await storageService.getJob(jobId);
-    const candidate = await storageService.getCandidate(candidateId);
+    const job = await databaseService.getJob(jobId);
+    const candidate = await databaseService.getCandidate(candidateId);
     
     if (!job || !candidate) {
       return res.status(404).json({ error: 'Job or candidate not found' });
@@ -273,7 +273,7 @@ app.post('/api/campaigns', async (req, res) => {
       createdAt: new Date()
     };
 
-    await storageService.addCampaign(campaign);
+    await databaseService.addCampaign(campaign);
     res.json(campaign);
   } catch (error) {
     console.error('Error creating campaign:', error);
@@ -284,14 +284,14 @@ app.post('/api/campaigns', async (req, res) => {
 app.post('/api/campaigns/:id/send-email', async (req, res) => {
   try {
     const campaignId = req.params.id;
-    const campaign = await storageService.getCampaign(campaignId);
+    const campaign = await databaseService.getCampaign(campaignId);
     
     if (!campaign) {
       return res.status(404).json({ error: 'Campaign not found' });
     }
 
-    const candidate = await storageService.getCandidate(campaign.candidateId);
-    const job = await storageService.getJob(campaign.jobId);
+    const candidate = await databaseService.getCandidate(campaign.candidateId);
+    const job = await databaseService.getJob(campaign.jobId);
     
     if (!candidate || !job) {
       return res.status(404).json({ error: 'Candidate or job not found' });
@@ -306,7 +306,7 @@ app.post('/api/campaigns/:id/send-email', async (req, res) => {
 
     if (result.success) {
       // Update campaign status
-      await storageService.updateCampaign(campaignId, {
+      await databaseService.updateCampaign(campaignId, {
         status: 'sent',
         sentAt: new Date()
       });
@@ -329,7 +329,7 @@ app.post('/api/campaigns/:id/send-email', async (req, res) => {
 
 app.get('/api/analytics', async (req, res) => {
   try {
-    const analytics = await storageService.getAnalytics();
+    const analytics = await databaseService.getAnalytics();
     res.json(analytics);
   } catch (error) {
     console.error('Error fetching analytics:', error);
@@ -339,7 +339,7 @@ app.get('/api/analytics', async (req, res) => {
 
 app.get('/api/campaigns/export', async (req, res) => {
   try {
-    const csvData = await storageService.exportCampaignsCSV();
+    const csvData = await databaseService.exportCampaignsCSV();
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename="outreach-campaigns.csv"');
     res.send(csvData);
@@ -357,7 +357,7 @@ app.get('/api/email-status', (req, res) => {
 
 app.get('/api/email-config', async (req, res) => {
   try {
-    const config = await storageService.getEmailConfig();
+    const config = await databaseService.getEmailConfig();
     res.json({ 
       success: true, 
       config: config || null 
@@ -393,18 +393,19 @@ app.post('/api/email-config', async (req, res) => {
       isSecure = parseInt(port) === 465; // Auto-detect based on port
     }
 
-    const config = {
+    const config: EmailConfig = {
       host,
       port: parseInt(port),
       secure: isSecure,
-      auth: { user, pass }
+      auth: { user, pass },
+      connectionType: connectionType || 'auto'
     };
 
     // Update email service
     emailService.updateConfig(config);
     
     // Store configuration persistently
-    await storageService.setEmailConfig(config);
+    await databaseService.setEmailConfig(config);
 
     res.json({ 
       success: true, 
@@ -425,7 +426,7 @@ app.listen(PORT, () => {
   console.log(`📊 Dashboard available at http://localhost:${PORT}`);
   console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
-  console.log(`💾 Data storage: ${storageService['dataPath']}`);
+  console.log(`💾 Database service: Supabase`);
 }).on('error', (error) => {
   console.error('❌ Server failed to start:', error);
   process.exit(1);
