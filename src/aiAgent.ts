@@ -116,24 +116,41 @@ export class AIAgent {
   async analyzeSkillsGap(candidate: Candidate, job: JobPosting): Promise<SkillsGap> {
     try {
       const prompt = `
-        Analyze the skills gap between a candidate and a job posting.
+        Perform a comprehensive skills gap analysis between a candidate and a job posting.
         
-        CANDIDATE SKILLS: ${candidate.skills.join(', ')}
-        JOB REQUIREMENTS: ${job.description}
+        CANDIDATE:
+        - Name: ${candidate.name}
+        - Current Title: ${candidate.title}
+        - Experience: ${candidate.experience}
+        - Skills: ${candidate.skills.join(', ')}
+        - Location: ${candidate.location}
         
-        Identify:
-        1. Missing critical skills
-        2. Skill level assessments (beginner/intermediate/advanced)
-        3. Critical gaps that must be addressed
-        4. Nice-to-have skills
+        JOB POSTING:
+        - Title: ${job.title}
+        - Description: ${job.description}
         
-        Return as JSON:
+        Please analyze the skills gap and provide:
+        
+        1. MISSING CRITICAL SKILLS: Skills that are essential for the role but the candidate doesn't have
+        2. CRITICAL GAPS: Areas where the candidate's skills are insufficient for the role requirements
+        3. NICE TO HAVE: Skills that would be beneficial but aren't essential
+        
+        For each category, provide specific, actionable insights. Consider:
+        - Technical skills mentioned in the job description
+        - Industry-specific knowledge requirements
+        - Tools and technologies mentioned
+        - Experience level requirements
+        - Soft skills and leadership requirements
+        
+        Return as JSON with these exact keys:
         {
-          "missingSkills": ["skill1", "skill2"],
-          "skillLevels": {"skill": "level"},
-          "criticalGaps": ["critical_skill1"],
-          "niceToHave": ["nice_skill1"]
+          "missingSkills": ["specific_skill_1", "specific_skill_2", "specific_skill_3"],
+          "skillLevels": {"skill_name": "beginner/intermediate/advanced"},
+          "criticalGaps": ["critical_gap_1", "critical_gap_2"],
+          "niceToHave": ["nice_to_have_skill_1", "nice_to_have_skill_2"]
         }
+        
+        Ensure each array contains at least 2-3 specific items. Be detailed and specific about the skills and gaps.
       `;
 
       const response = await callOpenAI(prompt);
@@ -258,17 +275,55 @@ export class AIAgent {
     const candidateSkills = candidate.skills.map(s => s.toLowerCase());
     const jobText = job.description.toLowerCase();
     
-    // Simple keyword matching
-    const commonSkills = ['javascript', 'python', 'react', 'node.js', 'sql', 'aws'];
-    const missingSkills = commonSkills.filter(skill => 
+    // Enhanced keyword matching for common tech skills
+    const techSkills = [
+      'javascript', 'python', 'react', 'node.js', 'sql', 'aws', 'docker', 'kubernetes',
+      'git', 'html', 'css', 'typescript', 'angular', 'vue', 'java', 'c#', 'php',
+      'mongodb', 'postgresql', 'mysql', 'redis', 'elasticsearch', 'kafka',
+      'jenkins', 'gitlab', 'github', 'azure', 'gcp', 'terraform', 'ansible',
+      'machine learning', 'ai', 'data science', 'analytics', 'agile', 'scrum'
+    ];
+    
+    // Find missing skills
+    const missingSkills = techSkills.filter(skill => 
       jobText.includes(skill) && !candidateSkills.some(cs => cs.includes(skill))
     );
+    
+    // Identify critical gaps based on job title and description
+    const criticalGaps = [];
+    if (job.title.toLowerCase().includes('senior') && !candidate.experience?.toLowerCase().includes('senior')) {
+      criticalGaps.push('Senior-level experience required');
+    }
+    if (job.title.toLowerCase().includes('manager') && !candidate.title?.toLowerCase().includes('manager')) {
+      criticalGaps.push('Management experience needed');
+    }
+    if (jobText.includes('leadership') && !candidate.title?.toLowerCase().includes('lead')) {
+      criticalGaps.push('Leadership experience required');
+    }
+    
+    // Add missing technical skills as critical gaps
+    criticalGaps.push(...missingSkills.slice(0, 3));
+    
+    // Nice to have skills
+    const niceToHave = missingSkills.slice(3, 6);
+    
+    // Skill levels assessment
+    const skillLevels: { [skill: string]: "beginner" | "intermediate" | "advanced" } = {};
+    candidateSkills.forEach(skill => {
+      if (skill.includes('senior') || skill.includes('lead')) {
+        skillLevels[skill] = 'advanced';
+      } else if (skill.includes('junior') || skill.includes('entry')) {
+        skillLevels[skill] = 'beginner';
+      } else {
+        skillLevels[skill] = 'intermediate';
+      }
+    });
 
     return {
-      missingSkills,
-      skillLevels: {},
-      criticalGaps: missingSkills.slice(0, 2),
-      niceToHave: missingSkills.slice(2)
+      missingSkills: missingSkills.slice(0, 5),
+      skillLevels,
+      criticalGaps: criticalGaps.length > 0 ? criticalGaps : ['Technical skills gap', 'Experience level mismatch'],
+      niceToHave: niceToHave.length > 0 ? niceToHave : ['Additional certifications', 'Industry-specific knowledge']
     };
   }
 
