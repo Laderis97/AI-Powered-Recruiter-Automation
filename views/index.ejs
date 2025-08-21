@@ -957,6 +957,281 @@
       
       // Initialize stats
       updateStats();
+      
+      // AI Analysis functions - defined here to ensure DOM is ready
+      window.analyzeRoleAlignment = async function() {
+        const candidateId = document.getElementById('analysisCandidate').value;
+        const jobId = document.getElementById('analysisJob').value;
+
+        if (!candidateId || !jobId) {
+          showError('alignmentResults', 'Please select both a Candidate and a Job to analyze.');
+          return;
+        }
+
+        showLoading('alignmentResults', 'Analyzing role alignment...');
+        try {
+          const response = await fetch('/api/role-alignment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ candidateId, jobId })
+          });
+          
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+          
+          const result = await response.json();
+          console.log('Full API response:', result);
+
+          if (response.ok && result.success) {
+            console.log('Role alignment result:', result); // Debug log
+            console.log('Alignment data:', result.alignment);
+            
+            // Debug: Check if DOM elements exist
+            const overallScoreEl = document.getElementById('overallScore');
+            const technicalScoreEl = document.getElementById('technicalScore');
+            const experienceScoreEl = document.getElementById('experienceScore');
+            const skillsScoreEl = document.getElementById('skillsScore');
+            const culturalFitScoreEl = document.getElementById('culturalFitScore');
+            
+            console.log('DOM elements found:', {
+              overallScore: overallScoreEl,
+              technicalScore: technicalScoreEl,
+              experienceScore: experienceScoreEl,
+              skillsScore: skillsScoreEl,
+              culturalFitScore: culturalFitScoreEl
+            });
+            
+            // Update score displays
+            if (overallScoreEl) {
+              overallScoreEl.textContent = `${result.alignment.overallScore}%`;
+              console.log('Updated overall score:', result.alignment.overallScore);
+            }
+            if (technicalScoreEl) {
+              technicalScoreEl.textContent = `${result.alignment.technicalScore}%`;
+              console.log('Updated technical score:', result.alignment.technicalScore);
+            }
+            if (experienceScoreEl) {
+              experienceScoreEl.textContent = `${result.alignment.experienceScore}%`;
+              console.log('Updated experience score:', result.alignment.experienceScore);
+            }
+            if (skillsScoreEl) {
+              skillsScoreEl.textContent = `${result.alignment.skillsScore}%`;
+              console.log('Updated skills score:', result.alignment.skillsScore);
+            }
+            if (culturalFitScoreEl) {
+              culturalFitScoreEl.textContent = `${result.alignment.culturalFitScore}%`;
+              console.log('Updated cultural fit score:', result.alignment.culturalFitScore);
+            }
+            
+            // Update detailed breakdown
+            const detailedBreakdownEl = document.getElementById('detailedBreakdown');
+            if (detailedBreakdownEl) {
+              detailedBreakdownEl.textContent = result.alignment.detailedBreakdown;
+              console.log('Updated detailed breakdown');
+            }
+            
+            // Update lists
+            const recommendationsListEl = document.getElementById('recommendationsList');
+            const riskFactorsListEl = document.getElementById('riskFactorsList');
+            const trainingNeedsListEl = document.getElementById('trainingNeedsList');
+            
+            if (recommendationsListEl) {
+              recommendationsListEl.innerHTML = result.alignment.recommendations.map(r => `<li>${r}</li>`).join('');
+              console.log('Updated recommendations list');
+            }
+            if (riskFactorsListEl) {
+              riskFactorsListEl.innerHTML = result.alignment.riskFactors.map(r => `<li>${r}</li>`).join('');
+              console.log('Updated risk factors list');
+            }
+            if (trainingNeedsListEl) {
+              trainingNeedsListEl.innerHTML = result.alignment.trainingNeeds.map(t => `<li>${t}</li>`).join('');
+              console.log('Updated training needs list');
+            }
+            
+            // Show results
+            const alignmentResultsEl = document.getElementById('alignmentResults');
+            if (alignmentResultsEl) {
+              alignmentResultsEl.style.display = 'block';
+              console.log('Showing alignment results');
+            }
+            
+            document.getElementById('skillsGapResults').style.display = 'none';
+            document.getElementById('interviewQuestionsResults').style.display = 'none';
+            document.getElementById('culturalFitResults').style.display = 'none';
+            
+            console.log('Scores updated:', {
+              overall: result.alignment.overallScore,
+              technical: result.alignment.technicalScore,
+              experience: result.alignment.experienceScore,
+              skills: result.alignment.skillsScore,
+              cultural: result.alignment.culturalFitScore
+            });
+            
+            console.log('✅ Role alignment analysis completed successfully');
+          } else {
+            console.error('API returned error:', result);
+            showError('alignmentResults', result.error || 'Failed to analyze role alignment');
+          }
+        } catch (error) {
+          console.error('Error analyzing role alignment:', error);
+          showError('alignmentResults', 'Network error occurred');
+        }
+      };
+
+      window.analyzeSkillsGap = async function() {
+        const candidateId = document.getElementById('analysisCandidate').value;
+        const jobId = document.getElementById('analysisJob').value;
+
+        if (!candidateId || !jobId) {
+          showError('skillsGapResults', 'Please select both a Candidate and a Job to analyze.');
+          return;
+        }
+
+        showLoading('skillsGapResults', 'Analyzing skills gap...');
+        try {
+          const response = await fetch('/api/skills-gap', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ candidateId, jobId })
+          });
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            console.log('Skills gap result:', result); // Debug log
+            
+            // Update lists
+            const missingSkillsListEl = document.getElementById('missingSkillsList');
+            const criticalGapsListEl = document.getElementById('criticalGapsList');
+            const niceToHaveListEl = document.getElementById('niceToHaveList');
+            
+            if (missingSkillsListEl) {
+              missingSkillsListEl.innerHTML = result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('');
+            }
+            if (criticalGapsListEl) {
+              criticalGapsListEl.innerHTML = result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('');
+            }
+            if (niceToHaveListEl) {
+              niceToHaveListEl.innerHTML = result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('');
+            }
+            
+            // Show results
+            document.getElementById('skillsGapResults').style.display = 'block';
+            document.getElementById('alignmentResults').style.display = 'none';
+            document.getElementById('interviewQuestionsResults').style.display = 'none';
+            document.getElementById('culturalFitResults').style.display = 'none';
+            
+            console.log('✅ Skills gap analysis completed successfully');
+          } else {
+            showError('skillsGapResults', result.error || 'Failed to analyze skills gap');
+          }
+        } catch (error) {
+          console.error('Error analyzing skills gap:', error);
+          showError('skillsGapResults', 'Network error occurred');
+        }
+      };
+
+      window.generateInterviewQuestions = async function() {
+        const candidateId = document.getElementById('analysisCandidate').value;
+        const jobId = document.getElementById('analysisJob').value;
+
+        if (!candidateId || !jobId) {
+          showError('interviewQuestionsResults', 'Please select both a Candidate and a Job to generate questions.');
+          return;
+        }
+
+        showLoading('interviewQuestionsResults', 'Generating interview questions...');
+        try {
+          const response = await fetch('/api/interview-questions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ candidateId, jobId })
+          });
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            console.log('Interview questions result:', result); // Debug log
+            
+            // Update list
+            const interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
+            if (interviewQuestionsListEl) {
+              interviewQuestionsListEl.innerHTML = result.questions.map(q => `<li>${q}</li>`).join('');
+            }
+            
+            // Show results
+            document.getElementById('interviewQuestionsResults').style.display = 'block';
+            document.getElementById('alignmentResults').style.display = 'none';
+            document.getElementById('skillsGapResults').style.display = 'none';
+            document.getElementById('culturalFitResults').style.display = 'none';
+            
+            console.log('✅ Interview questions generated successfully');
+          } else {
+            showError('interviewQuestionsResults', result.error || 'Failed to generate interview questions');
+          }
+        } catch (error) {
+          console.error('Error generating interview questions:', error);
+          showError('interviewQuestionsResults', 'Network error occurred');
+        }
+      };
+
+      window.assessCulturalFit = async function() {
+        const candidateId = document.getElementById('analysisCandidate').value;
+        const jobId = document.getElementById('analysisJob').value;
+
+        if (!candidateId || !jobId) {
+          showError('culturalFitResults', 'Please select both a Candidate and a Job to analyze.');
+          return;
+        }
+
+        showLoading('culturalFitResults', 'Assessing cultural fit...');
+        try {
+          const response = await fetch('/api/cultural-fit', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ candidateId, jobId })
+          });
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            console.log('Cultural fit result:', result); // Debug log
+            
+            // Update lists
+            const strengthsListEl = document.getElementById('strengthsList');
+            const concernsListEl = document.getElementById('concernsList');
+            const recommendationsListEl = document.getElementById('culturalRecommendationsList');
+            
+            if (strengthsListEl) {
+              strengthsListEl.innerHTML = result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('');
+            }
+            if (concernsListEl) {
+              concernsListEl.innerHTML = result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('');
+            }
+            if (recommendationsListEl) {
+              recommendationsListEl.innerHTML = result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('');
+            }
+            
+            // Show results
+            document.getElementById('culturalFitResults').style.display = 'block';
+            document.getElementById('alignmentResults').style.display = 'none';
+            document.getElementById('skillsGapResults').style.display = 'none';
+            document.getElementById('interviewQuestionsResults').style.display = 'none';
+            
+            console.log('✅ Cultural fit assessment completed successfully');
+          } else {
+            showError('culturalFitResults', result.error || 'Failed to assess cultural fit');
+          }
+        } catch (error) {
+          console.error('Error assessing cultural fit:', error);
+          showError('culturalFitResults', 'Network error occurred');
+        }
+      };
     });
 
     // Tab switching
@@ -1482,255 +1757,6 @@ ${campaign.message}
         console.error('Error checking email status:', error);
         const statusElement = document.getElementById('emailStatusText');
         statusElement.textContent = '❌ Error checking status';
-      }
-    }
-
-    // AI Analysis functions
-    async function analyzeRoleAlignment() {
-      const candidateId = document.getElementById('analysisCandidate').value;
-      const jobId = document.getElementById('analysisJob').value;
-
-      if (!candidateId || !jobId) {
-        showError('alignmentResults', 'Please select both a Candidate and a Job to analyze.');
-        return;
-      }
-
-      showLoading('alignmentResults', 'Analyzing role alignment...');
-      try {
-        const response = await fetch('/api/role-alignment', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ candidateId, jobId })
-        });
-        
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-        
-        const result = await response.json();
-        console.log('Full API response:', result);
-
-        if (response.ok && result.success) {
-          console.log('Role alignment result:', result); // Debug log
-          console.log('Alignment data:', result.alignment);
-          
-          // Debug: Check if DOM elements exist
-          const overallScoreEl = document.getElementById('overallScore');
-          const technicalScoreEl = document.getElementById('technicalScore');
-          const experienceScoreEl = document.getElementById('experienceScore');
-          const skillsScoreEl = document.getElementById('skillsScore');
-          const culturalFitScoreEl = document.getElementById('culturalFitScore');
-          
-          console.log('DOM elements found:', {
-            overallScore: overallScoreEl,
-            technicalScore: technicalScoreEl,
-            experienceScore: experienceScoreEl,
-            skillsScore: skillsScoreEl,
-            culturalFitScore: culturalFitScoreEl
-          });
-          
-          // Update score displays
-          if (overallScoreEl) {
-            overallScoreEl.textContent = `${result.alignment.overallScore}%`;
-            console.log('Updated overall score:', result.alignment.overallScore);
-          }
-          if (technicalScoreEl) {
-            technicalScoreEl.textContent = `${result.alignment.technicalScore}%`;
-            console.log('Updated technical score:', result.alignment.technicalScore);
-          }
-          if (experienceScoreEl) {
-            experienceScoreEl.textContent = `${result.alignment.experienceScore}%`;
-            console.log('Updated experience score:', result.alignment.experienceScore);
-          }
-          if (skillsScoreEl) {
-            skillsScoreEl.textContent = `${result.alignment.skillsScore}%`;
-            console.log('Updated skills score:', result.alignment.skillsScore);
-          }
-          if (culturalFitScoreEl) {
-            culturalFitScoreEl.textContent = `${result.alignment.culturalFitScore}%`;
-            console.log('Updated cultural fit score:', result.alignment.culturalFitScore);
-          }
-          
-          // Update detailed breakdown
-          const detailedBreakdownEl = document.getElementById('detailedBreakdown');
-          if (detailedBreakdownEl) {
-            detailedBreakdownEl.textContent = result.alignment.detailedBreakdown;
-            console.log('Updated detailed breakdown');
-          }
-          
-          // Update lists
-          const recommendationsListEl = document.getElementById('recommendationsList');
-          const riskFactorsListEl = document.getElementById('riskFactorsList');
-          const trainingNeedsListEl = document.getElementById('trainingNeedsList');
-          
-          if (recommendationsListEl) {
-            recommendationsListEl.innerHTML = result.alignment.recommendations.map(r => `<li>${r}</li>`).join('');
-            console.log('Updated recommendations list');
-          }
-          if (riskFactorsListEl) {
-            riskFactorsListEl.innerHTML = result.alignment.riskFactors.map(r => `<li>${r}</li>`).join('');
-            console.log('Updated risk factors list');
-          }
-          if (trainingNeedsListEl) {
-            trainingNeedsListEl.innerHTML = result.alignment.trainingNeeds.map(t => `<li>${t}</li>`).join('');
-            console.log('Updated training needs list');
-          }
-          
-          // Show results
-          const alignmentResultsEl = document.getElementById('alignmentResults');
-          if (alignmentResultsEl) {
-            alignmentResultsEl.style.display = 'block';
-            console.log('Showing alignment results');
-          }
-          
-          document.getElementById('skillsGapResults').style.display = 'none';
-          document.getElementById('interviewQuestionsResults').style.display = 'none';
-          document.getElementById('culturalFitResults').style.display = 'none';
-          
-          console.log('Scores updated:', {
-            overall: result.alignment.overallScore,
-            technical: result.alignment.technicalScore,
-            experience: result.alignment.experienceScore,
-            skills: result.alignment.skillsScore,
-            cultural: result.alignment.culturalFitScore
-          });
-          
-          console.log('✅ Role alignment analysis completed successfully');
-        } else {
-          console.error('API returned error:', result);
-          showError('alignmentResults', result.error || 'Failed to analyze role alignment');
-        }
-      } catch (error) {
-        console.error('Error analyzing role alignment:', error);
-        showError('alignmentResults', 'Network error occurred');
-      }
-    }
-
-    async function analyzeSkillsGap() {
-      const candidateId = document.getElementById('analysisCandidate').value;
-      const jobId = document.getElementById('analysisJob').value;
-
-      if (!candidateId || !jobId) {
-        showError('skillsGapResults', 'Please select both a Candidate and a Job to analyze.');
-        return;
-      }
-
-      showLoading('skillsGapResults', 'Analyzing skills gap...');
-      try {
-        const response = await fetch('/api/skills-gap', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ candidateId, jobId })
-        });
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          console.log('Skills gap result:', result); // Debug log
-          
-          // Update lists
-          document.getElementById('missingSkillsList').innerHTML = result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('');
-          document.getElementById('criticalGapsList').innerHTML = result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('');
-          document.getElementById('niceToHaveList').innerHTML = result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('');
-          
-          // Show results
-          document.getElementById('skillsGapResults').style.display = 'block';
-          document.getElementById('alignmentResults').style.display = 'none';
-          document.getElementById('interviewQuestionsResults').style.display = 'none';
-          document.getElementById('culturalFitResults').style.display = 'none';
-        } else {
-          showError('skillsGapResults', result.error || 'Failed to analyze skills gap');
-        }
-      } catch (error) {
-        console.error('Error analyzing skills gap:', error);
-        showError('skillsGapResults', 'Network error occurred');
-      }
-    }
-
-    async function generateInterviewQuestions() {
-      const candidateId = document.getElementById('analysisCandidate').value;
-      const jobId = document.getElementById('analysisJob').value;
-
-      if (!candidateId || !jobId) {
-        showError('interviewQuestionsResults', 'Please select both a Candidate and a Job to generate questions.');
-        return;
-      }
-
-      showLoading('interviewQuestionsResults', 'Generating interview questions...');
-      try {
-        const response = await fetch('/api/interview-questions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ candidateId, jobId })
-        });
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          console.log('Interview questions result:', result); // Debug log
-          
-          // Update questions list
-          document.getElementById('interviewQuestionsList').innerHTML = result.questions.map(q => `<li>${q}</li>`).join('');
-          
-          // Show results
-          document.getElementById('interviewQuestionsResults').style.display = 'block';
-          document.getElementById('alignmentResults').style.display = 'none';
-          document.getElementById('skillsGapResults').style.display = 'none';
-          document.getElementById('culturalFitResults').style.display = 'none';
-        } else {
-          showError('interviewQuestionsResults', result.error || 'Failed to generate interview questions');
-        }
-      } catch (error) {
-        console.error('Error generating interview questions:', error);
-        showError('interviewQuestionsResults', 'Network error occurred');
-      }
-    }
-
-    async function assessCulturalFit() {
-      const candidateId = document.getElementById('analysisCandidate').value;
-      const jobId = document.getElementById('analysisJob').value;
-
-      if (!candidateId || !jobId) {
-        showError('culturalFitResults', 'Please select both a Candidate and a Job to assess cultural fit.');
-        return;
-      }
-
-      showLoading('culturalFitResults', 'Assessing cultural fit...');
-      try {
-        const response = await fetch('/api/cultural-fit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ candidateId, jobId })
-        });
-        const result = await response.json();
-
-        if (response.ok && result.success) {
-          console.log('Cultural fit result:', result); // Debug log
-          
-          // Update cultural fit score
-          document.getElementById('culturalFitScoreDisplay').textContent = `${result.culturalFit.fitScore}%`;
-          
-          // Update lists
-          document.getElementById('strengthsList').innerHTML = result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('');
-          document.getElementById('concernsList').innerHTML = result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('');
-          document.getElementById('culturalRecommendationsList').innerHTML = result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('');
-          
-          // Show results
-          document.getElementById('culturalFitResults').style.display = 'block';
-          document.getElementById('alignmentResults').style.display = 'none';
-          document.getElementById('skillsGapResults').style.display = 'none';
-          document.getElementById('interviewQuestionsResults').style.display = 'none';
-        } else {
-          showError('culturalFitResults', result.error || 'Failed to assess cultural fit');
-        }
-      } catch (error) {
-        console.error('Error assessing cultural fit:', error);
-        showError('culturalFitResults', 'Network error occurred');
       }
     }
   </script>
