@@ -831,6 +831,9 @@
           <button onclick="generateInterviewQuestions()" class="btn btn-secondary">
             ❓ Generate Interview Questions
           </button>
+          <button onclick="generateCategorizedInterviewQuestions()" class="btn btn-secondary">
+            🗂️ Categorized Questions
+          </button>
           <button onclick="assessCulturalFit()" class="btn btn-secondary">
             🤝 Cultural Fit Assessment
           </button>
@@ -898,6 +901,21 @@
         <h4>❓ AI-Generated Interview Questions</h4>
         <div class="questions-list">
           <ol id="interviewQuestionsList"></ol>
+        </div>
+        <div id="categorizedQuestions" style="margin-top: 20px; display: none;">
+          <h5>🗂️ Categorized</h5>
+          <div class="gap-section">
+            <h6>🧩 Technical</h6>
+            <ul id="questionsTechnical"></ul>
+            <h6>📘 Experience</h6>
+            <ul id="questionsExperience"></ul>
+            <h6>🧠 Problem Solving</h6>
+            <ul id="questionsProblem"></ul>
+            <h6>🤝 Leadership & Collaboration</h6>
+            <ul id="questionsLeadership"></ul>
+            <h6>🎯 Cultural Fit & Motivation</h6>
+            <ul id="questionsCultural"></ul>
+          </div>
         </div>
       </div>
 
@@ -1362,6 +1380,67 @@
           }
         } catch (error) {
           console.error('Error generating interview questions:', error);
+          showError('interviewQuestionsResults', 'Network error occurred');
+        }
+      };
+
+      window.generateCategorizedInterviewQuestions = async function() {
+        const candidateId = document.getElementById('analysisCandidate').value;
+        const jobId = document.getElementById('analysisJob').value;
+
+        if (!candidateId || !jobId) {
+          showError('interviewQuestionsResults', 'Please select both a Candidate and a Job to generate questions.');
+          return;
+        }
+
+        showLoading('interviewQuestionsResults', 'Generating categorized interview questions...');
+        try {
+          const response = await fetch('/api/interview-questions/categorized', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ candidateId, jobId })
+          });
+          const result = await response.json();
+
+          if (response.ok && result.success) {
+            console.log('Categorized interview questions result:', result); // Debug log
+
+            // Fill master list too
+            const interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
+            if (interviewQuestionsListEl) {
+              interviewQuestionsListEl.innerHTML = result.categorizedQuestions.all.map((q) => `<li>${q}</li>`).join('');
+            }
+
+            // Update categorized lists
+            const techEl = document.getElementById('questionsTechnical');
+            const expEl = document.getElementById('questionsExperience');
+            const probEl = document.getElementById('questionsProblem');
+            const leadEl = document.getElementById('questionsLeadership');
+            const cultEl = document.getElementById('questionsCultural');
+
+            if (techEl) techEl.innerHTML = result.categorizedQuestions.technical.map((q) => `<li>${q}</li>`).join('');
+            if (expEl) expEl.innerHTML = result.categorizedQuestions.experience.map((q) => `<li>${q}</li>`).join('');
+            if (probEl) probEl.innerHTML = result.categorizedQuestions.problemSolving.map((q) => `<li>${q}</li>`).join('');
+            if (leadEl) leadEl.innerHTML = result.categorizedQuestions.leadership.map((q) => `<li>${q}</li>`).join('');
+            if (cultEl) cultEl.innerHTML = result.categorizedQuestions.cultural.map((q) => `<li>${q}</li>`).join('');
+
+            const categorizedContainer = document.getElementById('categorizedQuestions');
+            if (categorizedContainer) categorizedContainer.style.display = 'block';
+
+            // Show results and hide others
+            document.getElementById('interviewQuestionsResults').style.display = 'block';
+            document.getElementById('alignmentResults').style.display = 'none';
+            document.getElementById('skillsGapResults').style.display = 'none';
+            document.getElementById('culturalFitResults').style.display = 'none';
+
+            console.log('✅ Categorized interview questions generated successfully');
+          } else {
+            showError('interviewQuestionsResults', result.error || 'Failed to generate categorized interview questions');
+          }
+        } catch (error) {
+          console.error('Error generating categorized interview questions:', error);
           showError('interviewQuestionsResults', 'Network error occurred');
         }
       };
