@@ -107,6 +107,51 @@ export class AIAgent {
   }
 
   /**
+   * Generate categorized interview questions based on candidate-job alignment
+   */
+  async generateCategorizedInterviewQuestions(candidate: Candidate, job: JobPosting): Promise<Result<{
+    technical: string[];
+    experience: string[];
+    problemSolving: string[];
+    leadership: string[];
+    cultural: string[];
+    all: string[];
+  }>> {
+    try {
+      const result = await this.generateInterviewQuestions(candidate, job);
+      
+      if (result.ok) {
+        const questions = result.data;
+        
+        // Categorize questions based on keywords and content
+        const categorized = this.categorizeQuestions(questions);
+        
+        return { 
+          ok: true, 
+          data: {
+            ...categorized,
+            all: questions
+          }
+        };
+      } else {
+        return result;
+      }
+    } catch (error) {
+      this.log.error('Unexpected error in categorized interview questions:', error);
+      const fallbackQuestions = this.generateFallbackInterviewQuestions(candidate, job);
+      const categorized = this.categorizeQuestions(fallbackQuestions);
+      
+      return { 
+        ok: true, 
+        data: {
+          ...categorized,
+          all: fallbackQuestions
+        }
+      };
+    }
+  }
+
+  /**
    * Assess cultural fit and soft skills
    */
   async assessCulturalFit(candidate: Candidate, job: JobPosting): Promise<Result<CulturalFit>> {
@@ -217,20 +262,34 @@ Ensure each array contains at least 2-3 specific items. Be detailed and specific
   private buildInterviewQuestionsPrompt(candidate: Candidate, job: JobPosting): string {
     return `You are a strict JSON API. Output only valid JSON matching the provided schema. No prose.
 
-Generate 5-7 relevant interview questions for a candidate applying to this job.
+Generate 7-10 highly relevant interview questions for a candidate applying to this specific job. The questions should be tailored to the candidate's background and the job requirements.
 
-CANDIDATE: ${this.redactPII(candidate.name)} - ${candidate.title} with skills: ${candidate.skills.join(', ')}
-JOB: ${job.title} - ${this.truncateDescription(job.description)}
+CANDIDATE BACKGROUND:
+- Name: ${this.redactPII(candidate.name)}
+- Current Title: ${candidate.title}
+- Experience: ${candidate.experience}
+- Skills: ${candidate.skills.join(', ')}
+- Location: ${candidate.location}
 
-Focus on:
-- Technical skills assessment
-- Experience validation
-- Problem-solving scenarios
-- Cultural fit questions
+JOB REQUIREMENTS:
+- Title: ${job.title}
+- Description: ${this.truncateDescription(job.description)}
+
+Generate questions in these categories (2-3 questions per category):
+
+1. TECHNICAL SKILLS ASSESSMENT: Questions to evaluate specific technical competencies mentioned in the job
+2. EXPERIENCE VALIDATION: Questions to verify relevant experience and project work
+3. PROBLEM-SOLVING SCENARIOS: Real-world scenarios the candidate might face in this role
+4. LEADERSHIP & COLLABORATION: Questions about team dynamics, leadership, and communication
+5. CULTURAL FIT & MOTIVATION: Questions about work style, values, and career goals
+
+Make questions specific to the technologies, tools, and industry mentioned in the job description.
+If the candidate has specific skills that align with the job, create questions that leverage their background.
+If there are gaps between candidate skills and job requirements, create questions that assess learning ability and adaptability.
 
 If unsure, use empty arrays; never invent entities not mentioned.
 
-Return as a JSON array: ["question1", "question2", "question3"]`;
+Return as a JSON array with exactly 7-10 questions: ["question1", "question2", "question3", "question4", "question5", "question6", "question7"]`;
   }
 
   private buildCulturalFitPrompt(candidate: Candidate, job: JobPosting): string {
@@ -362,12 +421,51 @@ Return as JSON:
   }
 
   private generateFallbackInterviewQuestions(candidate: Candidate, job: JobPosting): string[] {
-    return [
+    const jobText = job.description.toLowerCase();
+    const candidateSkills = candidate.skills.map(s => s.toLowerCase());
+    
+    // Technical skills assessment
+    const technicalQuestions = [
       'What experience do you have with the technologies mentioned in this role?',
-      'How do you stay updated with industry trends?',
-      'Describe a time you had to learn a new technology quickly',
-      'What motivates you in your work?',
-      'How do you handle tight deadlines and pressure?'
+      'How do you stay updated with industry trends and new technologies?',
+      'Describe a time you had to learn a new technology quickly for a project'
+    ];
+    
+    // Experience validation
+    const experienceQuestions = [
+      'Tell me about a challenging project you worked on that relates to this role',
+      'What metrics or KPIs did you use to measure success in your previous roles?',
+      'Describe a situation where you had to work with cross-functional teams'
+    ];
+    
+    // Problem-solving scenarios
+    const problemSolvingQuestions = [
+      'How do you approach debugging complex technical issues?',
+      'Walk me through your process for prioritizing multiple competing deadlines',
+      'Describe a time when you had to make a difficult technical decision with limited information'
+    ];
+    
+    // Leadership & collaboration
+    const leadershipQuestions = [
+      'How do you handle disagreements with team members or stakeholders?',
+      'Tell me about a time you had to lead a team through a challenging situation',
+      'How do you ensure effective communication in remote or distributed teams?'
+    ];
+    
+    // Cultural fit & motivation
+    const culturalQuestions = [
+      'What motivates you in your work and what are your career goals?',
+      'How do you handle tight deadlines and pressure?',
+      'What type of work environment and company culture do you thrive in?'
+    ];
+    
+    // Combine all questions
+    return [
+      ...technicalQuestions,
+      ...experienceQuestions,
+      ...problemSolvingQuestions,
+      ...leadershipQuestions,
+      ...culturalQuestions
     ];
   }
 
@@ -389,6 +487,70 @@ Return as JSON:
     ).length;
     
     return clamp((skillMatches / candidateSkills.length) * 100);
+  }
+
+  // Private method to categorize questions
+  private categorizeQuestions(questions: string[]): {
+    technical: string[];
+    experience: string[];
+    problemSolving: string[];
+    leadership: string[];
+    cultural: string[];
+  } {
+    const technical: string[] = [];
+    const experience: string[] = [];
+    const problemSolving: string[] = [];
+    const leadership: string[] = [];
+    const cultural: string[] = [];
+
+    questions.forEach(question => {
+      const lowerQuestion = question.toLowerCase();
+      
+      // Technical skills assessment
+      if (lowerQuestion.includes('technology') || lowerQuestion.includes('technical') || 
+          lowerQuestion.includes('debug') || lowerQuestion.includes('code') ||
+          lowerQuestion.includes('tool') || lowerQuestion.includes('framework') ||
+          lowerQuestion.includes('language') || lowerQuestion.includes('platform')) {
+        technical.push(question);
+      }
+      // Experience validation
+      else if (lowerQuestion.includes('project') || lowerQuestion.includes('experience') ||
+               lowerQuestion.includes('worked on') || lowerQuestion.includes('previous role') ||
+               lowerQuestion.includes('kpi') || lowerQuestion.includes('metric') ||
+               lowerQuestion.includes('cross-functional')) {
+        experience.push(question);
+      }
+      // Problem-solving scenarios
+      else if (lowerQuestion.includes('problem') || lowerQuestion.includes('challenge') ||
+               lowerQuestion.includes('difficult') || lowerQuestion.includes('decision') ||
+               lowerQuestion.includes('approach') || lowerQuestion.includes('process') ||
+               lowerQuestion.includes('scenario')) {
+        problemSolving.push(question);
+      }
+      // Leadership & collaboration
+      else if (lowerQuestion.includes('team') || lowerQuestion.includes('lead') ||
+               lowerQuestion.includes('collaboration') || lowerQuestion.includes('stakeholder') ||
+               lowerQuestion.includes('communication') || lowerQuestion.includes('disagreement') ||
+               lowerQuestion.includes('remote')) {
+        leadership.push(question);
+      }
+      // Cultural fit & motivation
+      else if (lowerQuestion.includes('motivate') || lowerQuestion.includes('culture') ||
+               lowerQuestion.includes('environment') || lowerQuestion.includes('goal') ||
+               lowerQuestion.includes('pressure') || lowerQuestion.includes('deadline') ||
+               lowerQuestion.includes('value')) {
+        cultural.push(question);
+      }
+      // Default categorization for unmatched questions
+      else {
+        // Distribute evenly across categories
+        const categories = [technical, experience, problemSolving, leadership, cultural];
+        const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+        randomCategory.push(question);
+      }
+    });
+
+    return { technical, experience, problemSolving, leadership, cultural };
   }
 }
 

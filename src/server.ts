@@ -529,6 +529,48 @@ app.post('/api/email-config', async (req, res) => {
     }
   });
 
+  // Categorized interview questions generation
+  app.post('/api/interview-questions/categorized', async (req, res) => {
+    try {
+      const { candidateId, jobId } = req.body;
+      
+      if (!candidateId || !jobId) {
+        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+      }
+
+      const candidate = await databaseService.getCandidate(candidateId);
+      const job = await databaseService.getJob(jobId);
+
+      if (!candidate || !job) {
+        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+      }
+
+      const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, job);
+      
+      if (result.ok) {
+        res.json({ 
+          success: true, 
+          categorizedQuestions: result.data,
+          message: `${result.data.all.length} categorized interview questions generated`,
+          summary: {
+            technical: result.data.technical.length,
+            experience: result.data.experience.length,
+            problemSolving: result.data.problemSolving.length,
+            leadership: result.data.leadership.length,
+            cultural: result.data.cultural.length,
+            total: result.data.all.length
+          }
+        });
+      } else {
+        console.error('Categorized interview questions generation failed:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to generate categorized interview questions' });
+      }
+    } catch (error) {
+      console.error('Error in categorized interview questions generation:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+  });
+
   // Cultural fit assessment
   app.post('/api/cultural-fit', async (req, res) => {
     try {
