@@ -960,6 +960,13 @@
       
       // AI Analysis functions - defined here to ensure DOM is ready
       function analyzeRoleAlignment() {
+        // Ensure DOM is ready before proceeding
+        if (document.readyState !== 'complete') {
+          console.log('DOM not ready, waiting...');
+          setTimeout(analyzeRoleAlignment, 100);
+          return;
+        }
+        
         const candidateId = document.getElementById('analysisCandidate').value;
         const jobId = document.getElementById('analysisJob').value;
 
