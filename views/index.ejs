@@ -1176,6 +1176,16 @@
       window.analyzeRoleAlignment = analyzeRoleAlignment;
 
       window.analyzeSkillsGap = async function() {
+        // Ensure DOM is ready before proceeding
+        if (document.readyState !== 'complete') {
+          console.log('DOM not ready, waiting...');
+          setTimeout(analyzeSkillsGap, 100);
+          return;
+        }
+        
+        console.log('🔍 Starting skills gap analysis...');
+        console.log('📋 Document ready state:', document.readyState);
+        
         const candidateId = document.getElementById('analysisCandidate').value;
         const jobId = document.getElementById('analysisJob').value;
 
@@ -1183,6 +1193,9 @@
           showError('skillsGapResults', 'Please select both a Candidate and a Job to analyze.');
           return;
         }
+
+        console.log('🔍 Selected candidate ID:', candidateId);
+        console.log('🔍 Selected job ID:', jobId);
 
         showLoading('skillsGapResults', 'Analyzing skills gap...');
         try {
@@ -1193,34 +1206,113 @@
             },
             body: JSON.stringify({ candidateId, jobId })
           });
+          
+          console.log('Response status:', response.status);
+          console.log('Response ok:', response.ok);
+          
           const result = await response.json();
+          console.log('Full skills gap API response:', result);
 
           if (response.ok && result.success) {
-            console.log('Skills gap result:', result); // Debug log
+            console.log('Skills gap result:', result);
+            console.log('Skills gap data:', result.skillsGap);
             
-            // Update lists
-            const missingSkillsListEl = document.getElementById('missingSkillsList');
-            const criticalGapsListEl = document.getElementById('criticalGapsList');
-            const niceToHaveListEl = document.getElementById('niceToHaveList');
+            // Enhanced debugging: Check tab visibility and element hierarchy
+            const aiAnalysisTab = document.getElementById('ai-analysis');
+            console.log('🔍 AI Analysis tab found:', aiAnalysisTab);
+            console.log('🔍 AI Analysis tab display:', aiAnalysisTab ? aiAnalysisTab.style.display : 'NOT FOUND');
+            console.log('🔍 AI Analysis tab classList:', aiAnalysisTab ? aiAnalysisTab.classList.toString() : 'NOT FOUND');
             
+            // Check if tab is visible
+            if (aiAnalysisTab && aiAnalysisTab.classList.contains('hidden')) {
+              console.log('⚠️ AI Analysis tab is hidden!');
+            }
+            
+            // Comprehensive DOM element finder for skills gap
+            let missingSkillsListEl = document.getElementById('missingSkillsList');
+            let criticalGapsListEl = document.getElementById('criticalGapsList');
+            let niceToHaveListEl = document.getElementById('niceToHaveList');
+            
+            // If elements not found by ID, try searching within the tab
+            if (!missingSkillsListEl && aiAnalysisTab) {
+              console.log('🔍 Searching within AI Analysis tab...');
+              missingSkillsListEl = aiAnalysisTab.querySelector('#missingSkillsList');
+              criticalGapsListEl = aiAnalysisTab.querySelector('#criticalGapsList');
+              niceToHaveListEl = aiAnalysisTab.querySelector('#niceToHaveList');
+            }
+            
+            // Final fallback: create elements if they don't exist
+            if (!missingSkillsListEl) {
+              console.log('⚠️ Creating fallback skills gap elements...');
+              const skillsGapResults = document.getElementById('skillsGapResults');
+              if (skillsGapResults) {
+                // Create a simple skills gap display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.innerHTML = `
+                  <h4>🔍 Skills Gap Analysis Results</h4>
+                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h5>❌ Missing Critical Skills:</h5>
+                    <ul>${result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('')}</ul>
+                    
+                    <h5>🚨 Critical Gaps:</h5>
+                    <ul>${result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('')}</ul>
+                    
+                    <h5>✨ Nice to Have:</h5>
+                    <ul>${result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('')}</ul>
+                  </div>
+                `;
+                skillsGapResults.appendChild(fallbackDiv);
+                console.log('✅ Fallback skills gap display created');
+              }
+            }
+            
+            console.log('DOM elements found:', {
+              missingSkillsList: missingSkillsListEl,
+              criticalGapsList: criticalGapsListEl,
+              niceToHaveList: niceToHaveListEl
+            });
+            
+            // Update lists if elements exist
             if (missingSkillsListEl) {
               missingSkillsListEl.innerHTML = result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('');
+              console.log('Updated missing skills list');
+            } else {
+              console.log('❌ Missing skills list element not found');
             }
+            
             if (criticalGapsListEl) {
               criticalGapsListEl.innerHTML = result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('');
+              console.log('Updated critical gaps list');
+            } else {
+              console.log('❌ Critical gaps list element not found');
             }
+            
             if (niceToHaveListEl) {
               niceToHaveListEl.innerHTML = result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('');
+              console.log('Updated nice to have list');
+            } else {
+              console.log('❌ Nice to have list element not found');
             }
             
             // Show results
-            document.getElementById('skillsGapResults').style.display = 'block';
-            document.getElementById('alignmentResults').style.display = 'none';
-            document.getElementById('interviewQuestionsResults').style.display = 'none';
-            document.getElementById('culturalFitResults').style.display = 'none';
+            const skillsGapResultsEl = document.getElementById('skillsGapResults');
+            if (skillsGapResultsEl) {
+              skillsGapResultsEl.style.display = 'block';
+              console.log('Showing skills gap results');
+            }
+            
+            // Hide other results
+            const alignmentResults = document.getElementById('alignmentResults');
+            const interviewQuestionsResults = document.getElementById('interviewQuestionsResults');
+            const culturalFitResults = document.getElementById('culturalFitResults');
+            
+            if (alignmentResults) alignmentResults.style.display = 'none';
+            if (interviewQuestionsResults) interviewQuestionsResults.style.display = 'none';
+            if (culturalFitResults) culturalFitResults.style.display = 'none';
             
             console.log('✅ Skills gap analysis completed successfully');
           } else {
+            console.error('API returned error:', result);
             showError('skillsGapResults', result.error || 'Failed to analyze skills gap');
           }
         } catch (error) {
