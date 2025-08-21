@@ -959,7 +959,7 @@
       updateStats();
       
       // AI Analysis functions - defined here to ensure DOM is ready
-      window.analyzeRoleAlignment = async function() {
+      function analyzeRoleAlignment() {
         const candidateId = document.getElementById('analysisCandidate').value;
         const jobId = document.getElementById('analysisJob').value;
 
@@ -969,22 +969,23 @@
         }
 
         showLoading('alignmentResults', 'Analyzing role alignment...');
-        try {
-          const response = await fetch('/api/role-alignment', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ candidateId, jobId })
-          });
-          
+        
+        fetch('/api/role-alignment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ candidateId, jobId })
+        })
+        .then(response => {
           console.log('Response status:', response.status);
           console.log('Response ok:', response.ok);
-          
-          const result = await response.json();
+          return response.json();
+        })
+        .then(result => {
           console.log('Full API response:', result);
 
-          if (response.ok && result.success) {
+          if (result.success) {
             console.log('Role alignment result:', result); // Debug log
             console.log('Alignment data:', result.alignment);
             
@@ -1057,9 +1058,13 @@
               console.log('Showing alignment results');
             }
             
-            document.getElementById('skillsGapResults').style.display = 'none';
-            document.getElementById('interviewQuestionsResults').style.display = 'none';
-            document.getElementById('culturalFitResults').style.display = 'none';
+            const skillsGapResults = document.getElementById('skillsGapResults');
+            const interviewQuestionsResults = document.getElementById('interviewQuestionsResults');
+            const culturalFitResults = document.getElementById('culturalFitResults');
+            
+            if (skillsGapResults) skillsGapResults.style.display = 'none';
+            if (interviewQuestionsResults) interviewQuestionsResults.style.display = 'none';
+            if (culturalFitResults) culturalFitResults.style.display = 'none';
             
             console.log('Scores updated:', {
               overall: result.alignment.overallScore,
@@ -1074,11 +1079,15 @@
             console.error('API returned error:', result);
             showError('alignmentResults', result.error || 'Failed to analyze role alignment');
           }
-        } catch (error) {
+        })
+        .catch(error => {
           console.error('Error analyzing role alignment:', error);
           showError('alignmentResults', 'Network error occurred');
-        }
-      };
+        });
+      }
+      
+      // Make functions globally accessible for onclick attributes
+      window.analyzeRoleAlignment = analyzeRoleAlignment;
 
       window.analyzeSkillsGap = async function() {
         const candidateId = document.getElementById('analysisCandidate').value;
