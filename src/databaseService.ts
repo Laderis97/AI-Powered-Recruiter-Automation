@@ -97,7 +97,8 @@ export class DatabaseService {
           title: job.title,
           description: job.description,
           parsed_data: job.parsedData,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          is_archived: false
         });
 
       if (error) throw error;
@@ -246,7 +247,8 @@ export class DatabaseService {
           skills: candidate.skills,
           linkedin: candidate.linkedin,
           github: candidate.github,
-          created_at: new Date().toISOString()
+          created_at: new Date().toISOString(),
+          is_archived: false
         });
 
       if (error) throw error;
@@ -393,7 +395,8 @@ export class DatabaseService {
           message: campaign.message,
           status: campaign.status,
           created_at: new Date().toISOString(),
-          sent_at: campaign.sentAt?.toISOString()
+          sent_at: campaign.sentAt?.toISOString(),
+          is_archived: false
         });
 
       if (error) throw error;
