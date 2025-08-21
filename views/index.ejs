@@ -1504,10 +1504,16 @@ ${campaign.message}
           },
           body: JSON.stringify({ candidateId, jobId })
         });
+        
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+        
         const result = await response.json();
+        console.log('Full API response:', result);
 
         if (response.ok && result.success) {
           console.log('Role alignment result:', result); // Debug log
+          console.log('Alignment data:', result.alignment);
           
           // Debug: Check if DOM elements exist
           const overallScoreEl = document.getElementById('overallScore');
@@ -1525,27 +1531,59 @@ ${campaign.message}
           });
           
           // Update score displays
-          if (overallScoreEl) overallScoreEl.textContent = `${result.alignment.overallScore}%`;
-          if (technicalScoreEl) technicalScoreEl.textContent = `${result.alignment.technicalScore}%`;
-          if (experienceScoreEl) experienceScoreEl.textContent = `${result.alignment.experienceScore}%`;
-          if (skillsScoreEl) skillsScoreEl.textContent = `${result.alignment.skillsScore}%`;
-          if (culturalFitScoreEl) culturalFitScoreEl.textContent = `${result.alignment.culturalFitScore}%`;
+          if (overallScoreEl) {
+            overallScoreEl.textContent = `${result.alignment.overallScore}%`;
+            console.log('Updated overall score:', result.alignment.overallScore);
+          }
+          if (technicalScoreEl) {
+            technicalScoreEl.textContent = `${result.alignment.technicalScore}%`;
+            console.log('Updated technical score:', result.alignment.technicalScore);
+          }
+          if (experienceScoreEl) {
+            experienceScoreEl.textContent = `${result.alignment.experienceScore}%`;
+            console.log('Updated experience score:', result.alignment.experienceScore);
+          }
+          if (skillsScoreEl) {
+            skillsScoreEl.textContent = `${result.alignment.skillsScore}%`;
+            console.log('Updated skills score:', result.alignment.skillsScore);
+          }
+          if (culturalFitScoreEl) {
+            culturalFitScoreEl.textContent = `${result.alignment.culturalFitScore}%`;
+            console.log('Updated cultural fit score:', result.alignment.culturalFitScore);
+          }
           
           // Update detailed breakdown
           const detailedBreakdownEl = document.getElementById('detailedBreakdown');
-          if (detailedBreakdownEl) detailedBreakdownEl.textContent = result.alignment.detailedBreakdown;
+          if (detailedBreakdownEl) {
+            detailedBreakdownEl.textContent = result.alignment.detailedBreakdown;
+            console.log('Updated detailed breakdown');
+          }
           
           // Update lists
           const recommendationsListEl = document.getElementById('recommendationsList');
           const riskFactorsListEl = document.getElementById('riskFactorsList');
           const trainingNeedsListEl = document.getElementById('trainingNeedsList');
           
-          if (recommendationsListEl) recommendationsListEl.innerHTML = result.alignment.recommendations.map(r => `<li>${r}</li>`).join('');
-          if (riskFactorsListEl) riskFactorsListEl.innerHTML = result.alignment.riskFactors.map(r => `<li>${r}</li>`).join('');
-          if (trainingNeedsListEl) trainingNeedsListEl.innerHTML = result.alignment.trainingNeeds.map(t => `<li>${t}</li>`).join('');
+          if (recommendationsListEl) {
+            recommendationsListEl.innerHTML = result.alignment.recommendations.map(r => `<li>${r}</li>`).join('');
+            console.log('Updated recommendations list');
+          }
+          if (riskFactorsListEl) {
+            riskFactorsListEl.innerHTML = result.alignment.riskFactors.map(r => `<li>${r}</li>`).join('');
+            console.log('Updated risk factors list');
+          }
+          if (trainingNeedsListEl) {
+            trainingNeedsListEl.innerHTML = result.alignment.trainingNeeds.map(t => `<li>${t}</li>`).join('');
+            console.log('Updated training needs list');
+          }
           
           // Show results
-          document.getElementById('alignmentResults').style.display = 'block';
+          const alignmentResultsEl = document.getElementById('alignmentResults');
+          if (alignmentResultsEl) {
+            alignmentResultsEl.style.display = 'block';
+            console.log('Showing alignment results');
+          }
+          
           document.getElementById('skillsGapResults').style.display = 'none';
           document.getElementById('interviewQuestionsResults').style.display = 'none';
           document.getElementById('culturalFitResults').style.display = 'none';
@@ -1557,7 +1595,10 @@ ${campaign.message}
             skills: result.alignment.skillsScore,
             cultural: result.alignment.culturalFitScore
           });
+          
+          console.log('✅ Role alignment analysis completed successfully');
         } else {
+          console.error('API returned error:', result);
           showError('alignmentResults', result.error || 'Failed to analyze role alignment');
         }
       } catch (error) {
