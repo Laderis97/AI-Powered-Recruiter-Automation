@@ -301,8 +301,126 @@
       color: white;
       padding: 6px 12px;
       border-radius: 20px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 500;
+    }
+
+    /* AI Analysis Styles */
+    .analysis-controls {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .analysis-controls .form-group {
+      margin-bottom: 20px;
+    }
+
+    .analysis-actions {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 25px;
+    }
+
+    .analysis-results {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      margin-top: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .score-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 20px;
+      margin: 25px 0;
+    }
+
+    .score-card {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      border-radius: 12px;
+      border: 2px solid #e2e8f0;
+    }
+
+    .score-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .score-label {
+      font-size: 0.9rem;
+      color: #4a5568;
+      font-weight: 500;
+    }
+
+    .analysis-details h5 {
+      color: #1a202c;
+      margin: 25px 0 15px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .analysis-details ul {
+      margin-left: 20px;
+      color: #4a5568;
+      line-height: 1.6;
+    }
+
+    .analysis-details li {
+      margin-bottom: 8px;
+    }
+
+    .gap-section h5 {
+      color: #1a202c;
+      margin: 20px 0 12px 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .gap-section ul {
+      margin-left: 20px;
+      color: #4a5568;
+      line-height: 1.6;
+    }
+
+    .questions-list ol {
+      margin-left: 20px;
+      color: #4a5568;
+      line-height: 1.6;
+    }
+
+    .questions-list li {
+      margin-bottom: 15px;
+      padding: 15px;
+      background: #f7fafc;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+
+    .fit-score {
+      text-align: center;
+      margin: 25px 0;
+    }
+
+    .fit-details h5 {
+      color: #1a202c;
+      margin: 20px 0 12px 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .fit-details ul {
+      margin-left: 20px;
+      color: #4a5568;
+      line-height: 1.6;
     }
     
     .hidden {
@@ -515,6 +633,7 @@
       <button class="tab" onclick="showTab('jobs')">💼 Job Postings</button>
       <button class="tab" onclick="showTab('candidates')">👥 Candidates</button>
       <button class="tab" onclick="showTab('campaigns')">📧 Campaigns</button>
+      <button class="tab" onclick="showTab('ai-analysis')">🧠 AI Analysis</button>
     </div>
 
     <!-- Upload Resumes Tab -->
@@ -679,6 +798,129 @@
 
       <div id="campaignsList" style="margin-top: 40px;"></div>
     </div>
+
+    <!-- New AI Analysis Tab -->
+    <div id="ai-analysis" class="tab-content hidden">
+      <div class="section-header">
+        <h3>🧠 AI Role Alignment Analysis</h3>
+        <p>Intelligent candidate-job matching and analysis</p>
+      </div>
+      
+      <div class="analysis-controls">
+        <div class="form-group">
+          <label for="analysisCandidate">Select Candidate:</label>
+          <select id="analysisCandidate" class="form-control">
+            <option value="">Choose a candidate...</option>
+          </select>
+        </div>
+        
+        <div class="form-group">
+          <label for="analysisJob">Select Job:</label>
+          <select id="analysisJob" class="form-control">
+            <option value="">Choose a job...</option>
+          </select>
+        </div>
+        
+        <div class="analysis-actions">
+          <button onclick="analyzeRoleAlignment()" class="btn btn-primary">
+            🎯 Analyze Role Alignment
+          </button>
+          <button onclick="analyzeSkillsGap()" class="btn btn-secondary">
+            🔍 Skills Gap Analysis
+          </button>
+          <button onclick="generateInterviewQuestions()" class="btn btn-secondary">
+            ❓ Generate Interview Questions
+          </button>
+          <button onclick="assessCulturalFit()" class="btn btn-secondary">
+            🤝 Cultural Fit Assessment
+          </button>
+        </div>
+      </div>
+
+      <!-- Role Alignment Results -->
+      <div id="alignmentResults" class="analysis-results" style="display: none;">
+        <h4>🎯 Role Alignment Score</h4>
+        <div class="score-grid">
+          <div class="score-card">
+            <div class="score-value" id="overallScore">-</div>
+            <div class="score-label">Overall Match</div>
+          </div>
+          <div class="score-card">
+            <div class="score-value" id="technicalScore">-</div>
+            <div class="score-label">Technical Skills</div>
+          </div>
+          <div class="score-card">
+            <div class="score-value" id="experienceScore">-</div>
+            <div class="score-label">Experience</div>
+          </div>
+          <div class="score-card">
+            <div class="score-value" id="skillsScore">-</div>
+            <div class="score-label">Skills Match</div>
+          </div>
+          <div class="score-card">
+            <div class="score-value" id="culturalFitScore">-</div>
+            <div class="score-label">Cultural Fit</div>
+          </div>
+        </div>
+        
+        <div class="analysis-details">
+          <h5>📊 Detailed Breakdown</h5>
+          <p id="detailedBreakdown"></p>
+          
+          <h5>💡 Recommendations</h5>
+          <ul id="recommendationsList"></ul>
+          
+          <h5>⚠️ Risk Factors</h5>
+          <ul id="riskFactorsList"></ul>
+          
+          <h5>📚 Training Needs</h5>
+          <ul id="trainingNeedsList"></ul>
+        </div>
+      </div>
+
+      <!-- Skills Gap Results -->
+      <div id="skillsGapResults" class="analysis-results" style="display: none;">
+        <h4>🔍 Skills Gap Analysis</h4>
+        <div class="gap-section">
+          <h5>❌ Missing Critical Skills</h5>
+          <ul id="missingSkillsList"></ul>
+          
+          <h5>🚨 Critical Gaps</h5>
+          <ul id="criticalGapsList"></ul>
+          
+          <h5>✨ Nice to Have</h5>
+          <ul id="niceToHaveList"></ul>
+        </div>
+      </div>
+
+      <!-- Interview Questions Results -->
+      <div id="interviewQuestionsResults" class="analysis-results" style="display: none;">
+        <h4>❓ AI-Generated Interview Questions</h4>
+        <div class="questions-list">
+          <ol id="interviewQuestionsList"></ol>
+        </div>
+      </div>
+
+      <!-- Cultural Fit Results -->
+      <div id="culturalFitResults" class="analysis-results" style="display: none;">
+        <h4>🤝 Cultural Fit Assessment</h4>
+        <div class="fit-score">
+          <div class="score-value" id="culturalFitScoreDisplay">-</div>
+          <div class="score-label">Cultural Fit Score</div>
+        </div>
+        
+        <div class="fit-details">
+          <h5>💪 Strengths</h5>
+          <ul id="strengthsList"></ul>
+          
+          <h5>⚠️ Concerns</h5>
+          <ul id="concernsList"></ul>
+          
+          <h5>💡 Recommendations</h5>
+          <ul id="culturalRecommendationsList"></ul>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -739,6 +981,8 @@
       if (tabName === 'candidates') loadCandidates();
       if (tabName === 'jobs') loadJobs();
       if (tabName === 'campaigns') loadCampaigns();
+      if (tabName === 'ai-analysis') loadCandidatesForAnalysis(); // Load candidates for AI analysis
+      if (tabName === 'ai-analysis') loadJobsForAnalysis(); // Load jobs for AI analysis
     }
 
     // File upload functions
@@ -962,7 +1206,45 @@
       // Check email status when loading campaigns
       checkEmailStatus();
     }
-    
+
+    async function loadCandidatesForAnalysis() {
+      try {
+        const response = await fetch('/api/candidates');
+        const candidates = await response.json();
+        
+        const select = document.getElementById('analysisCandidate');
+        select.innerHTML = '<option value="">Choose a candidate...</option>';
+        
+        candidates.forEach(candidate => {
+          const option = document.createElement('option');
+          option.value = candidate.id;
+          option.textContent = `${candidate.name} - ${candidate.title}`;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading candidates for analysis:', error);
+      }
+    }
+
+    async function loadJobsForAnalysis() {
+      try {
+        const response = await fetch('/api/jobs');
+        const jobs = await response.json();
+        
+        const select = document.getElementById('analysisJob');
+        select.innerHTML = '<option value="">Choose a job...</option>';
+        
+        jobs.forEach(job => {
+          const option = document.createElement('option');
+          option.value = job.id;
+          option.textContent = job.title;
+          select.appendChild(option);
+        });
+      } catch (error) {
+        console.error('Error loading jobs for analysis:', error);
+      }
+    }
+
     // Email configuration functions
     function toggleEmailConfig() {
       const modal = document.getElementById('emailConfigModal');
@@ -1203,7 +1485,194 @@ ${campaign.message}
       }
     }
 
-    // Note: updateStats() is now called in DOMContentLoaded
+    // AI Analysis functions
+    async function analyzeRoleAlignment() {
+      const candidateId = document.getElementById('analysisCandidate').value;
+      const jobId = document.getElementById('analysisJob').value;
+
+      if (!candidateId || !jobId) {
+        showError('alignmentResults', 'Please select both a Candidate and a Job to analyze.');
+        return;
+      }
+
+      showLoading('alignmentResults', 'Analyzing role alignment...');
+      try {
+        const response = await fetch('/api/role-alignment', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ candidateId, jobId })
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Role alignment result:', result); // Debug log
+          
+          // Update score displays
+          document.getElementById('overallScore').textContent = `${result.alignment.overallScore}%`;
+          document.getElementById('technicalScore').textContent = `${result.alignment.technicalScore}%`;
+          document.getElementById('experienceScore').textContent = `${result.alignment.experienceScore}%`;
+          document.getElementById('skillsScore').textContent = `${result.alignment.skillsScore}%`;
+          document.getElementById('culturalFitScore').textContent = `${result.alignment.culturalFitScore}%`;
+          
+          // Update detailed breakdown
+          document.getElementById('detailedBreakdown').textContent = result.alignment.detailedBreakdown;
+          
+          // Update lists
+          document.getElementById('recommendationsList').innerHTML = result.alignment.recommendations.map(r => `<li>${r}</li>`).join('');
+          document.getElementById('riskFactorsList').innerHTML = result.alignment.riskFactors.map(r => `<li>${r}</li>`).join('');
+          document.getElementById('trainingNeedsList').innerHTML = result.alignment.trainingNeeds.map(t => `<li>${t}</li>`).join('');
+          
+          // Show results
+          document.getElementById('alignmentResults').style.display = 'block';
+          document.getElementById('skillsGapResults').style.display = 'none';
+          document.getElementById('interviewQuestionsResults').style.display = 'none';
+          document.getElementById('culturalFitResults').style.display = 'none';
+          
+          console.log('Scores updated:', {
+            overall: result.alignment.overallScore,
+            technical: result.alignment.technicalScore,
+            experience: result.alignment.experienceScore,
+            skills: result.alignment.skillsScore,
+            cultural: result.alignment.culturalFitScore
+          });
+        } else {
+          showError('alignmentResults', result.error || 'Failed to analyze role alignment');
+        }
+      } catch (error) {
+        console.error('Error analyzing role alignment:', error);
+        showError('alignmentResults', 'Network error occurred');
+      }
+    }
+
+    async function analyzeSkillsGap() {
+      const candidateId = document.getElementById('analysisCandidate').value;
+      const jobId = document.getElementById('analysisJob').value;
+
+      if (!candidateId || !jobId) {
+        showError('skillsGapResults', 'Please select both a Candidate and a Job to analyze.');
+        return;
+      }
+
+      showLoading('skillsGapResults', 'Analyzing skills gap...');
+      try {
+        const response = await fetch('/api/skills-gap', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ candidateId, jobId })
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Skills gap result:', result); // Debug log
+          
+          // Update lists
+          document.getElementById('missingSkillsList').innerHTML = result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('');
+          document.getElementById('criticalGapsList').innerHTML = result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('');
+          document.getElementById('niceToHaveList').innerHTML = result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('');
+          
+          // Show results
+          document.getElementById('skillsGapResults').style.display = 'block';
+          document.getElementById('alignmentResults').style.display = 'none';
+          document.getElementById('interviewQuestionsResults').style.display = 'none';
+          document.getElementById('culturalFitResults').style.display = 'none';
+        } else {
+          showError('skillsGapResults', result.error || 'Failed to analyze skills gap');
+        }
+      } catch (error) {
+        console.error('Error analyzing skills gap:', error);
+        showError('skillsGapResults', 'Network error occurred');
+      }
+    }
+
+    async function generateInterviewQuestions() {
+      const candidateId = document.getElementById('analysisCandidate').value;
+      const jobId = document.getElementById('analysisJob').value;
+
+      if (!candidateId || !jobId) {
+        showError('interviewQuestionsResults', 'Please select both a Candidate and a Job to generate questions.');
+        return;
+      }
+
+      showLoading('interviewQuestionsResults', 'Generating interview questions...');
+      try {
+        const response = await fetch('/api/interview-questions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ candidateId, jobId })
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Interview questions result:', result); // Debug log
+          
+          // Update questions list
+          document.getElementById('interviewQuestionsList').innerHTML = result.questions.map(q => `<li>${q}</li>`).join('');
+          
+          // Show results
+          document.getElementById('interviewQuestionsResults').style.display = 'block';
+          document.getElementById('alignmentResults').style.display = 'none';
+          document.getElementById('skillsGapResults').style.display = 'none';
+          document.getElementById('culturalFitResults').style.display = 'none';
+        } else {
+          showError('interviewQuestionsResults', result.error || 'Failed to generate interview questions');
+        }
+      } catch (error) {
+        console.error('Error generating interview questions:', error);
+        showError('interviewQuestionsResults', 'Network error occurred');
+      }
+    }
+
+    async function assessCulturalFit() {
+      const candidateId = document.getElementById('analysisCandidate').value;
+      const jobId = document.getElementById('analysisJob').value;
+
+      if (!candidateId || !jobId) {
+        showError('culturalFitResults', 'Please select both a Candidate and a Job to assess cultural fit.');
+        return;
+      }
+
+      showLoading('culturalFitResults', 'Assessing cultural fit...');
+      try {
+        const response = await fetch('/api/cultural-fit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ candidateId, jobId })
+        });
+        const result = await response.json();
+
+        if (response.ok && result.success) {
+          console.log('Cultural fit result:', result); // Debug log
+          
+          // Update cultural fit score
+          document.getElementById('culturalFitScoreDisplay').textContent = `${result.culturalFit.fitScore}%`;
+          
+          // Update lists
+          document.getElementById('strengthsList').innerHTML = result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('');
+          document.getElementById('concernsList').innerHTML = result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('');
+          document.getElementById('culturalRecommendationsList').innerHTML = result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('');
+          
+          // Show results
+          document.getElementById('culturalFitResults').style.display = 'block';
+          document.getElementById('alignmentResults').style.display = 'none';
+          document.getElementById('skillsGapResults').style.display = 'none';
+          document.getElementById('interviewQuestionsResults').style.display = 'none';
+        } else {
+          showError('culturalFitResults', result.error || 'Failed to assess cultural fit');
+        }
+      } catch (error) {
+        console.error('Error assessing cultural fit:', error);
+        showError('culturalFitResults', 'Network error occurred');
+      }
+    }
   </script>
 </body>
 </html>
+
