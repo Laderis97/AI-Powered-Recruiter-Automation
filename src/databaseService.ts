@@ -117,6 +117,25 @@ export class DatabaseService {
     }
   }
 
+  async deleteJob(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.JOBS)
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleting job from database:', error);
+        throw new Error(`Failed to delete job: ${error.message}`);
+      }
+      
+      console.log(`✅ Job deleted from database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in deleteJob:', error);
+      throw error;
+    }
+  }
+
   // Candidate methods
   async getCandidates(): Promise<Candidate[]> {
     try {
@@ -198,6 +217,25 @@ export class DatabaseService {
     } catch (error) {
       console.error('❌ Error fetching candidate:', error);
       return undefined;
+    }
+  }
+
+  async deleteCandidate(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.CANDIDATES)
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleting candidate from database:', error);
+        throw new Error(`Failed to delete candidate: ${error.message}`);
+      }
+      
+      console.log(`✅ Candidate deleted from database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in deleteCandidate:', error);
+      throw error;
     }
   }
 
@@ -293,6 +331,25 @@ export class DatabaseService {
     } catch (error) {
       console.error('❌ Error fetching campaign:', error);
       return undefined;
+    }
+  }
+
+  async deleteCampaign(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.CAMPAIGNS)
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error deleting campaign from database:', error);
+        throw new Error(`Failed to delete campaign: ${error.message}`);
+      }
+      
+      console.log(`✅ Campaign deleted from database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in deleteCampaign:', error);
+      throw error;
     }
   }
 

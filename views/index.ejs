@@ -1457,6 +1457,31 @@
       }
     }
 
+    async function deleteJob(jobId) {
+      if (!confirm('Are you sure you want to delete this job posting? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('jobsList', 'Job posting deleted successfully!');
+          loadJobs();
+          updateStats();
+        } else {
+          const error = await response.json();
+          console.error('Server error:', error);
+          showError('jobsList', error.error || 'Failed to delete job posting');
+        }
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        showError('jobsList', 'Network error occurred');
+      }
+    }
+
     // Campaign management
     async function handleCampaignSubmit(e) {
       e.preventDefault();
@@ -1496,6 +1521,31 @@
       }
     }
 
+    async function deleteCampaign(campaignId) {
+      if (!confirm('Are you sure you want to delete this campaign? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/campaigns/${campaignId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('campaignsList', 'Campaign deleted successfully!');
+          loadCampaigns();
+          updateStats();
+        } else {
+          const error = await response.json();
+          console.error('Server error:', error);
+          showError('campaignsList', error.error || 'Failed to delete campaign');
+        }
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+        showError('campaignsList', 'Network error occurred');
+      }
+    }
+
     // Data loading functions
     async function loadCandidates() {
       try {
@@ -1505,15 +1555,47 @@
         const container = document.getElementById('candidatesList');
         container.innerHTML = candidates.map(candidate => `
           <div class="list-item">
-            <h4>${candidate.name}</h4>
-            <p><strong>${candidate.title}</strong> • ${candidate.location} • ${candidate.experience}</p>
-            <div class="skills">
-              ${candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1;">
+                <h4>${candidate.name}</h4>
+                <p><strong>${candidate.title}</strong> • ${candidate.location} • ${candidate.experience}</p>
+                <div class="skills">
+                  ${candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                </div>
+              </div>
+              <button onclick="deleteCandidate('${candidate.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f56565; color: white; border: none;">
+                🗑️ Delete
+              </button>
             </div>
           </div>
         `).join('');
       } catch (error) {
         console.error('Error loading candidates:', error);
+      }
+    }
+
+    async function deleteCandidate(candidateId) {
+      if (!confirm('Are you sure you want to delete this candidate? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/candidates/${candidateId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('candidatesList', 'Candidate deleted successfully!');
+          loadCandidates();
+          updateStats();
+        } else {
+          const error = await response.json();
+          console.error('Server error:', error);
+          showError('candidatesList', error.error || 'Failed to delete candidate');
+        }
+      } catch (error) {
+        console.error('Error deleting candidate:', error);
+        showError('candidatesList', 'Network error occurred');
       }
     }
 
@@ -1525,8 +1607,15 @@
         const container = document.getElementById('jobsList');
         container.innerHTML = jobs.map(job => `
           <div class="list-item">
-            <h4>${job.title}</h4>
-            <p>${job.description.substring(0, 200)}...</p>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1;">
+                <h4>${job.title}</h4>
+                <p>${job.description.substring(0, 200)}...</p>
+              </div>
+              <button onclick="deleteJob('${job.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f56565; color: white; border: none;">
+                🗑️ Delete
+              </button>
+            </div>
           </div>
         `).join('');
         
@@ -1547,18 +1636,25 @@
         const container = document.getElementById('campaignsList');
         container.innerHTML = campaigns.map(campaign => `
           <div class="list-item">
-            <h4>Campaign #${campaign.id}</h4>
-            <p><strong>Status:</strong> <span class="status-${campaign.status}">${campaign.status.toUpperCase()}</span></p>
-            <p>${campaign.message.substring(0, 200)}...</p>
-            <div class="campaign-actions" style="margin-top: 15px;">
-              <button onclick="viewCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-right: 10px;">View</button>
-              ${campaign.status === 'draft' ? `
-                <button onclick="sendCampaignEmail('${campaign.id}')" class="btn btn-primary" style="margin-right: 10px;">📧 Send Email</button>
-                <button onclick="copyToClipboard('${campaign.id}')" class="btn btn-secondary">📋 Copy Message</button>
-              ` : ''}
-              ${campaign.status === 'sent' ? `
-                <span style="color: #38a169; font-weight: 600;">✅ Sent on ${new Date(campaign.sentAt).toLocaleDateString()}</span>
-              ` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div style="flex: 1;">
+                <h4>Campaign #${campaign.id}</h4>
+                <p><strong>Status:</strong> <span class="status-${campaign.status}">${campaign.status.toUpperCase()}</span></p>
+                <p>${campaign.message.substring(0, 200)}...</p>
+                <div class="campaign-actions" style="margin-top: 15px;">
+                  <button onclick="viewCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-right: 10px;">View</button>
+                  ${campaign.status === 'draft' ? `
+                    <button onclick="sendCampaignEmail('${campaign.id}')" class="btn btn-primary" style="margin-right: 10px;">📧 Send Email</button>
+                    <button onclick="copyToClipboard('${campaign.id}')" class="btn btn-secondary" style="margin-right: 10px;">📋 Copy Message</button>
+                  ` : ''}
+                  ${campaign.status === 'sent' ? `
+                    <span style="color: #38a169; font-weight: 600;">✅ Sent on ${new Date(campaign.sentAt).toLocaleDateString()}</span>
+                  ` : ''}
+                </div>
+              </div>
+              <button onclick="deleteCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f56565; color: white; border: none;">
+                🗑️ Delete
+              </button>
             </div>
           </div>
         `).join('');

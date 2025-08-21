@@ -493,6 +493,66 @@ app.post('/api/cultural-fit', async (req, res) => {
         });
     }
 });
+// Delete a job posting
+app.delete('/api/jobs/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`🗑️ Deleting job: ${id}`);
+        // Get the job first to check if it exists
+        const job = await databaseService.getJob(id);
+        if (!job) {
+            return res.status(404).json({ success: false, error: 'Job not found' });
+        }
+        // Delete from database (you'll need to implement this in databaseService)
+        await databaseService.deleteJob(id);
+        console.log(`✅ Job deleted: ${id}`);
+        res.json({ success: true, message: 'Job deleted successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error deleting job:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete job' });
+    }
+});
+// Delete a candidate
+app.delete('/api/candidates/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`🗑️ Deleting candidate: ${id}`);
+        // Get the candidate first to check if it exists
+        const candidate = await databaseService.getCandidate(id);
+        if (!candidate) {
+            return res.status(404).json({ success: false, error: 'Candidate not found' });
+        }
+        // Delete from database (you'll need to implement this in databaseService)
+        await databaseService.deleteCandidate(id);
+        console.log(`✅ Candidate deleted: ${id}`);
+        res.json({ success: true, message: 'Candidate deleted successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error deleting candidate:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete candidate' });
+    }
+});
+// Delete a campaign
+app.delete('/api/campaigns/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`🗑️ Deleting campaign: ${id}`);
+        // Get the campaign first to check if it exists
+        const campaign = await databaseService.getCampaign(id);
+        if (!campaign) {
+            return res.status(404).json({ success: false, error: 'Campaign not found' });
+        }
+        // Delete from database (you'll need to implement this in databaseService)
+        await databaseService.deleteCampaign(id);
+        console.log(`✅ Campaign deleted: ${id}`);
+        res.json({ success: true, message: 'Campaign deleted successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error deleting campaign:', error);
+        res.status(500).json({ success: false, error: 'Failed to delete campaign' });
+    }
+});
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
