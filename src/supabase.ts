@@ -33,6 +33,8 @@ export interface Database {
           description: string;
           parsed_data?: any;
           created_at: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Insert: {
           id?: string;
@@ -40,6 +42,8 @@ export interface Database {
           description: string;
           parsed_data?: any;
           created_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Update: {
           id?: string;
@@ -47,6 +51,8 @@ export interface Database {
           description?: string;
           parsed_data?: any;
           created_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
       };
       candidates: {
@@ -62,6 +68,8 @@ export interface Database {
           linkedin?: string;
           github?: string;
           created_at: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Insert: {
           id?: string;
@@ -70,11 +78,13 @@ export interface Database {
           phone?: string;
           title: string;
           location: string;
-          experience: string;
+          experience?: string;
           skills: string[];
           linkedin?: string;
           github?: string;
           created_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Update: {
           id?: string;
@@ -88,6 +98,8 @@ export interface Database {
           linkedin?: string;
           github?: string;
           created_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
       };
       campaigns: {
@@ -99,6 +111,8 @@ export interface Database {
           status: 'draft' | 'sent' | 'replied';
           created_at: string;
           sent_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Insert: {
           id?: string;
@@ -108,6 +122,8 @@ export interface Database {
           status?: 'draft' | 'sent' | 'replied';
           created_at?: string;
           sent_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
         Update: {
           id?: string;
@@ -117,6 +133,8 @@ export interface Database {
           status?: 'draft' | 'sent' | 'replied';
           created_at?: string;
           sent_at?: string;
+          is_archived?: boolean;
+          archived_at?: string;
         };
       };
       email_config: {

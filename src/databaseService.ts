@@ -280,7 +280,9 @@ export class DatabaseService {
         skills: data.skills,
         linkedin: data.linkedin,
         github: data.github,
-        createdAt: new Date(data.created_at)
+        createdAt: new Date(data.created_at),
+        isArchived: data.is_archived || false,
+        archivedAt: data.archived_at ? new Date(data.archived_at) : undefined
       };
     } catch (error) {
       console.error('❌ Error fetching candidate:', error);
