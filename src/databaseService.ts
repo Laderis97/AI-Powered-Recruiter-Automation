@@ -9,6 +9,8 @@ export interface JobPosting {
   description: string;
   parsedData?: any;
   createdAt: Date;
+  isArchived?: boolean;
+  archivedAt?: Date;
 }
 
 export interface Candidate {
@@ -23,6 +25,8 @@ export interface Candidate {
   linkedin?: string;
   github?: string;
   createdAt: Date;
+  isArchived?: boolean;
+  archivedAt?: Date;
 }
 
 export interface Campaign {
@@ -33,6 +37,8 @@ export interface Campaign {
   status: 'draft' | 'sent' | 'replied';
   createdAt: Date;
   sentAt?: Date;
+  isArchived?: boolean;
+  archivedAt?: Date;
 }
 
 export interface EmailConfig {
@@ -52,12 +58,18 @@ export class DatabaseService {
   }
 
   // Job methods
-  async getJobs(): Promise<JobPosting[]> {
+  async getJobs(includeArchived: boolean = false): Promise<JobPosting[]> {
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from(TABLES.JOBS)
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -66,7 +78,9 @@ export class DatabaseService {
         title: row.title,
         description: row.description,
         parsedData: row.parsed_data,
-        createdAt: new Date(row.created_at)
+        createdAt: new Date(row.created_at),
+        isArchived: row.is_archived || false,
+        archivedAt: row.archived_at ? new Date(row.archived_at) : undefined
       }));
     } catch (error) {
       console.error('❌ Error fetching jobs:', error);
@@ -136,13 +150,63 @@ export class DatabaseService {
     }
   }
 
-  // Candidate methods
-  async getCandidates(): Promise<Candidate[]> {
+  async archiveJob(id: string): Promise<void> {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
+        .from(TABLES.JOBS)
+        .update({
+          is_archived: true,
+          archived_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error archiving job from database:', error);
+        throw new Error(`Failed to archive job: ${error.message}`);
+      }
+      
+      console.log(`✅ Job archived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in archiveJob:', error);
+      throw error;
+    }
+  }
+
+  async unarchiveJob(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.JOBS)
+        .update({
+          is_archived: false,
+          archived_at: null
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error unarchiving job from database:', error);
+        throw new Error(`Failed to unarchive job: ${error.message}`);
+      }
+      
+      console.log(`✅ Job unarchived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in unarchiveJob:', error);
+      throw error;
+    }
+  }
+
+  // Candidate methods
+  async getCandidates(includeArchived: boolean = false): Promise<Candidate[]> {
+    try {
+      let query = supabase
         .from(TABLES.CANDIDATES)
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -157,7 +221,9 @@ export class DatabaseService {
         skills: row.skills,
         linkedin: row.linkedin,
         github: row.github,
-        createdAt: new Date(row.created_at)
+        createdAt: new Date(row.created_at),
+        isArchived: row.is_archived || false,
+        archivedAt: row.archived_at ? new Date(row.archived_at) : undefined
       }));
     } catch (error) {
       console.error('❌ Error fetching candidates:', error);
@@ -239,13 +305,63 @@ export class DatabaseService {
     }
   }
 
-  // Campaign methods
-  async getCampaigns(): Promise<Campaign[]> {
+  async archiveCandidate(id: string): Promise<void> {
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
+        .from(TABLES.CANDIDATES)
+        .update({
+          is_archived: true,
+          archived_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error archiving candidate from database:', error);
+        throw new Error(`Failed to archive candidate: ${error.message}`);
+      }
+      
+      console.log(`✅ Candidate archived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in archiveCandidate:', error);
+      throw error;
+    }
+  }
+
+  async unarchiveCandidate(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.CANDIDATES)
+        .update({
+          is_archived: false,
+          archived_at: null
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error unarchiving candidate from database:', error);
+        throw new Error(`Failed to unarchive candidate: ${error.message}`);
+      }
+      
+      console.log(`✅ Candidate unarchived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in unarchiveCandidate:', error);
+      throw error;
+    }
+  }
+
+  // Campaign methods
+  async getCampaigns(includeArchived: boolean = false): Promise<Campaign[]> {
+    try {
+      let query = supabase
         .from(TABLES.CAMPAIGNS)
         .select('*')
         .order('created_at', { ascending: false });
+
+      if (!includeArchived) {
+        query = query.eq('is_archived', false);
+      }
+
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -256,7 +372,9 @@ export class DatabaseService {
         message: row.message,
         status: row.status,
         createdAt: new Date(row.created_at),
-        sentAt: row.sent_at ? new Date(row.sent_at) : undefined
+        sentAt: row.sent_at ? new Date(row.sent_at) : undefined,
+        isArchived: row.is_archived || false,
+        archivedAt: row.archived_at ? new Date(row.archived_at) : undefined
       }));
     } catch (error) {
       console.error('❌ Error fetching campaigns:', error);
@@ -349,6 +467,50 @@ export class DatabaseService {
       console.log(`✅ Campaign deleted from database: ${id}`);
     } catch (error) {
       console.error('❌ Error in deleteCampaign:', error);
+      throw error;
+    }
+  }
+
+  async archiveCampaign(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.CAMPAIGNS)
+        .update({
+          is_archived: true,
+          archived_at: new Date().toISOString()
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error archiving campaign from database:', error);
+        throw new Error(`Failed to archive campaign: ${error.message}`);
+      }
+      
+      console.log(`✅ Campaign archived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in archiveCampaign:', error);
+      throw error;
+    }
+  }
+
+  async unarchiveCampaign(id: string): Promise<void> {
+    try {
+      const { error } = await supabase
+        .from(TABLES.CAMPAIGNS)
+        .update({
+          is_archived: false,
+          archived_at: null
+        })
+        .eq('id', id);
+      
+      if (error) {
+        console.error('❌ Error unarchiving campaign from database:', error);
+        throw new Error(`Failed to unarchive campaign: ${error.message}`);
+      }
+      
+      console.log(`✅ Campaign unarchived in database: ${id}`);
+    } catch (error) {
+      console.error('❌ Error in unarchiveCampaign:', error);
       throw error;
     }
   }

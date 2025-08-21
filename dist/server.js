@@ -150,6 +150,16 @@ app.get('/api/candidates', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch candidates' });
     }
 });
+app.get('/api/candidates/archived', async (req, res) => {
+    try {
+        const candidates = await databaseService.getCandidates(true); // includeArchived = true
+        res.json(candidates);
+    }
+    catch (error) {
+        console.error('Error fetching archived candidates:', error);
+        res.status(500).json({ error: 'Failed to fetch archived candidates' });
+    }
+});
 app.get('/api/jobs', async (req, res) => {
     try {
         const jobs = await databaseService.getJobs();
@@ -158,6 +168,16 @@ app.get('/api/jobs', async (req, res) => {
     catch (error) {
         console.error('Error fetching jobs:', error);
         res.status(500).json({ error: 'Failed to fetch jobs' });
+    }
+});
+app.get('/api/jobs/archived', async (req, res) => {
+    try {
+        const jobs = await databaseService.getJobs(true); // includeArchived = true
+        res.json(jobs);
+    }
+    catch (error) {
+        console.error('Error fetching archived jobs:', error);
+        res.status(500).json({ error: 'Failed to fetch archived jobs' });
     }
 });
 app.post('/api/jobs', async (req, res) => {
@@ -214,6 +234,16 @@ app.get('/api/campaigns', async (req, res) => {
     catch (error) {
         console.error('Error fetching campaigns:', error);
         res.status(500).json({ error: 'Failed to fetch campaigns' });
+    }
+});
+app.get('/api/campaigns/archived', async (req, res) => {
+    try {
+        const campaigns = await databaseService.getCampaigns(true); // includeArchived = true
+        res.json(campaigns);
+    }
+    catch (error) {
+        console.error('Error fetching archived campaigns:', error);
+        res.status(500).json({ error: 'Failed to fetch archived campaigns' });
     }
 });
 app.post('/api/campaigns', async (req, res) => {
@@ -563,6 +593,46 @@ app.delete('/api/jobs/:id', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to delete job' });
     }
 });
+// Archive a job posting
+app.post('/api/jobs/:id/archive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Archiving job: ${id}`);
+        // Get the job first to check if it exists
+        const job = await databaseService.getJob(id);
+        if (!job) {
+            return res.status(404).json({ success: false, error: 'Job not found' });
+        }
+        // Archive the job
+        await databaseService.archiveJob(id);
+        console.log(`✅ Job archived: ${id}`);
+        res.json({ success: true, message: 'Job archived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error archiving job:', error);
+        res.status(500).json({ success: false, error: 'Failed to archive job' });
+    }
+});
+// Unarchive a job posting
+app.post('/api/jobs/:id/unarchive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Unarchiving job: ${id}`);
+        // Get the job first to check if it exists
+        const job = await databaseService.getJob(id);
+        if (!job) {
+            return res.status(404).json({ success: false, error: 'Job not found' });
+        }
+        // Unarchive the job
+        await databaseService.unarchiveJob(id);
+        console.log(`✅ Job unarchived: ${id}`);
+        res.json({ success: true, message: 'Job unarchived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error unarchiving job:', error);
+        res.status(500).json({ success: false, error: 'Failed to unarchive job' });
+    }
+});
 // Delete a candidate
 app.delete('/api/candidates/:id', async (req, res) => {
     try {
@@ -583,6 +653,46 @@ app.delete('/api/candidates/:id', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to delete candidate' });
     }
 });
+// Archive a candidate
+app.post('/api/candidates/:id/archive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Archiving candidate: ${id}`);
+        // Get the candidate first to check if it exists
+        const candidate = await databaseService.getCandidate(id);
+        if (!candidate) {
+            return res.status(404).json({ success: false, error: 'Candidate not found' });
+        }
+        // Archive the candidate
+        await databaseService.archiveCandidate(id);
+        console.log(`✅ Candidate archived: ${id}`);
+        res.json({ success: true, message: 'Candidate archived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error archiving candidate:', error);
+        res.status(500).json({ success: false, error: 'Failed to archive candidate' });
+    }
+});
+// Unarchive a candidate
+app.post('/api/candidates/:id/unarchive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Unarchiving candidate: ${id}`);
+        // Get the candidate first to check if it exists
+        const candidate = await databaseService.getCandidate(id);
+        if (!candidate) {
+            return res.status(404).json({ success: false, error: 'Candidate not found' });
+        }
+        // Unarchive the candidate
+        await databaseService.unarchiveCandidate(id);
+        console.log(`✅ Candidate unarchived: ${id}`);
+        res.json({ success: true, message: 'Candidate unarchived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error unarchiving candidate:', error);
+        res.status(500).json({ success: false, error: 'Failed to unarchive candidate' });
+    }
+});
 // Delete a campaign
 app.delete('/api/campaigns/:id', async (req, res) => {
     try {
@@ -601,6 +711,46 @@ app.delete('/api/campaigns/:id', async (req, res) => {
     catch (error) {
         console.error('❌ Error deleting campaign:', error);
         res.status(500).json({ success: false, error: 'Failed to delete campaign' });
+    }
+});
+// Archive a campaign
+app.post('/api/campaigns/:id/archive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Archiving campaign: ${id}`);
+        // Get the campaign first to check if it exists
+        const campaign = await databaseService.getCampaign(id);
+        if (!campaign) {
+            return res.status(404).json({ success: false, error: 'Campaign not found' });
+        }
+        // Archive the campaign
+        await databaseService.archiveCampaign(id);
+        console.log(`✅ Campaign archived: ${id}`);
+        res.json({ success: true, message: 'Campaign archived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error archiving campaign:', error);
+        res.status(500).json({ success: false, error: 'Failed to archive campaign' });
+    }
+});
+// Unarchive a campaign
+app.post('/api/campaigns/:id/unarchive', async (req, res) => {
+    try {
+        const { id } = req.params;
+        console.log(`📦 Unarchiving campaign: ${id}`);
+        // Get the campaign first to check if it exists
+        const campaign = await databaseService.getCampaign(id);
+        if (!campaign) {
+            return res.status(404).json({ success: false, error: 'Campaign not found' });
+        }
+        // Unarchive the campaign
+        await databaseService.unarchiveCampaign(id);
+        console.log(`✅ Campaign unarchived: ${id}`);
+        res.json({ success: true, message: 'Campaign unarchived successfully' });
+    }
+    catch (error) {
+        console.error('❌ Error unarchiving campaign:', error);
+        res.status(500).json({ success: false, error: 'Failed to unarchive campaign' });
     }
 });
 // Start server
