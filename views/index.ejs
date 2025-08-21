@@ -2641,6 +2641,79 @@ ${campaign.message}
       }
     }
 
+    // Delete functions for permanently removing archived items
+    async function deleteCandidate(candidateId) {
+      if (!confirm('Are you sure you want to permanently delete this candidate? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/candidates/${candidateId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('archivedCandidatesList', 'Candidate permanently deleted!');
+          loadArchivedCandidates();
+          updateStats();
+        } else {
+          const error = await response.json();
+          showError('archivedCandidatesList', error.error || 'Failed to delete candidate');
+        }
+      } catch (error) {
+        console.error('Error deleting candidate:', error);
+        showError('archivedCandidatesList', 'Network error occurred');
+      }
+    }
+
+    async function deleteJob(jobId) {
+      if (!confirm('Are you sure you want to permanently delete this job? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/jobs/${jobId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('archivedJobsList', 'Job permanently deleted!');
+          loadArchivedJobs();
+          updateStats();
+        } else {
+          const error = await response.json();
+          showError('archivedJobsList', error.error || 'Failed to delete job');
+        }
+      } catch (error) {
+        console.error('Error deleting job:', error);
+        showError('archivedJobsList', 'Network error occurred');
+      }
+    }
+
+    async function deleteCampaign(campaignId) {
+      if (!confirm('Are you sure you want to permanently delete this campaign? This action cannot be undone.')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/campaigns/${campaignId}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          showSuccess('archivedCampaignsList', 'Campaign permanently deleted!');
+          loadArchivedCampaigns();
+          updateStats();
+        } else {
+          const error = await response.json();
+          showError('archivedCampaignsList', error.error || 'Failed to delete campaign');
+        }
+      } catch (error) {
+        console.error('Error deleting campaign:', error);
+        showError('archivedCampaignsList', 'Network error occurred');
+      }
+    }
+
 
   </script>
 </body>
