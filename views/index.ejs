@@ -1566,26 +1566,86 @@
           if (response.ok && result.success) {
             console.log('Cultural fit result:', result); // Debug log
             
-            // Update lists
-            const strengthsListEl = document.getElementById('strengthsList');
-            const concernsListEl = document.getElementById('concernsList');
-            const recommendationsListEl = document.getElementById('culturalRecommendationsList');
+            // Enhanced debugging: Check tab visibility and element hierarchy
+            const aiAnalysisTab = document.getElementById('ai-analysis');
+            console.log('🔍 AI Analysis tab found:', aiAnalysisTab);
+            console.log('🔍 AI Analysis tab display:', aiAnalysisTab ? aiAnalysisTab.style.display : 'NOT FOUND');
+            console.log('🔍 AI Analysis tab classList:', aiAnalysisTab ? aiAnalysisTab.classList.toString() : 'NOT FOUND');
             
-            if (strengthsListEl) {
-              strengthsListEl.innerHTML = result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('');
+            // Comprehensive DOM element finder
+            let culturalFitScoreDisplayEl = document.getElementById('culturalFitScoreDisplay');
+            let strengthsListEl = document.getElementById('strengthsList');
+            let concernsListEl = document.getElementById('concernsList');
+            let recommendationsListEl = document.getElementById('culturalRecommendationsList');
+            
+            // If elements not found by ID, try searching within the tab
+            if (!culturalFitScoreDisplayEl && aiAnalysisTab) {
+              console.log('🔍 Searching within AI Analysis tab...');
+              culturalFitScoreDisplayEl = aiAnalysisTab.querySelector('#culturalFitScoreDisplay');
+              strengthsListEl = aiAnalysisTab.querySelector('#strengthsList');
+              concernsListEl = aiAnalysisTab.querySelector('#concernsList');
+              recommendationsListEl = aiAnalysisTab.querySelector('#culturalRecommendationsList');
             }
-            if (concernsListEl) {
-              concernsListEl.innerHTML = result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('');
+            
+            // Final fallback: create elements if they don't exist
+            if (!culturalFitScoreDisplayEl) {
+              console.log('⚠️ Creating fallback cultural fit elements...');
+              const culturalFitResults = document.getElementById('culturalFitResults');
+              if (culturalFitResults) {
+                // Create a comprehensive cultural fit display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.innerHTML = `
+                  <h4>🤝 Cultural Fit Assessment Results</h4>
+                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <div style="text-align: center; margin: 25px 0;">
+                      <div style="font-size: 2.5rem; font-weight: 700; color: #667eea; margin-bottom: 8px;">${result.culturalFit.fitScore}%</div>
+                      <div style="font-size: 0.9rem; color: #4a5568; font-weight: 500;">Cultural Fit Score</div>
+                    </div>
+                    
+                    <h5>💪 Strengths</h5>
+                    <ul>${result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('')}</ul>
+                    
+                    <h5>⚠️ Concerns</h5>
+                    <ul>${result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('')}</ul>
+                    
+                    <h5>💡 Recommendations</h5>
+                    <ul>${result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('')}</ul>
+                  </div>
+                `;
+                culturalFitResults.appendChild(fallbackDiv);
+                console.log('✅ Fallback cultural fit display created');
+              }
+            } else {
+              // Update the found elements
+              culturalFitScoreDisplayEl.textContent = `${result.culturalFit.fitScore}%`;
+              if (strengthsListEl) strengthsListEl.innerHTML = result.culturalFit.strengths.map(s => `<li>${s}</li>`).join('');
+              if (concernsListEl) concernsListEl.innerHTML = result.culturalFit.concerns.map(c => `<li>${c}</li>`).join('');
+              if (recommendationsListEl) recommendationsListEl.innerHTML = result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('');
+              console.log('✅ Updated cultural fit elements');
             }
-            if (recommendationsListEl) {
-              recommendationsListEl.innerHTML = result.culturalFit.recommendations.map(r => `<li>${r}</li>`).join('');
-            }
+            
+            console.log('DOM elements found:', {
+              culturalFitScoreDisplay: culturalFitScoreDisplayEl,
+              strengthsList: strengthsListEl,
+              concernsList: concernsListEl,
+              recommendationsList: recommendationsListEl
+            });
             
             // Show results
-            document.getElementById('culturalFitResults').style.display = 'block';
-            document.getElementById('alignmentResults').style.display = 'none';
-            document.getElementById('skillsGapResults').style.display = 'none';
-            document.getElementById('interviewQuestionsResults').style.display = 'none';
+            const culturalFitResultsEl = document.getElementById('culturalFitResults');
+            if (culturalFitResultsEl) {
+              culturalFitResultsEl.style.display = 'block';
+              console.log('Showing cultural fit results');
+            }
+            
+            // Hide other results
+            const alignmentResults = document.getElementById('alignmentResults');
+            const skillsGapResults = document.getElementById('skillsGapResults');
+            const interviewQuestionsResults = document.getElementById('interviewQuestionsResults');
+            
+            if (alignmentResults) alignmentResults.style.display = 'none';
+            if (skillsGapResults) skillsGapResults.style.display = 'none';
+            if (interviewQuestionsResults) interviewQuestionsResults.style.display = 'none';
             
             console.log('✅ Cultural fit assessment completed successfully');
           } else {
