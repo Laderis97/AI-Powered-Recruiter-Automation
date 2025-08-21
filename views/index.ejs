@@ -1362,17 +1362,60 @@
           if (response.ok && result.success) {
             console.log('Interview questions result:', result); // Debug log
             
-            // Update list
-            const interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
-            if (interviewQuestionsListEl) {
+            // Enhanced debugging: Check tab visibility and element hierarchy
+            const aiAnalysisTab = document.getElementById('ai-analysis');
+            console.log('🔍 AI Analysis tab found:', aiAnalysisTab);
+            console.log('🔍 AI Analysis tab display:', aiAnalysisTab ? aiAnalysisTab.style.display : 'NOT FOUND');
+            console.log('🔍 AI Analysis tab classList:', aiAnalysisTab ? aiAnalysisTab.classList.toString() : 'NOT FOUND');
+            
+            // Comprehensive DOM element finder
+            let interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
+            
+            // If element not found by ID, try searching within the tab
+            if (!interviewQuestionsListEl && aiAnalysisTab) {
+              console.log('🔍 Searching within AI Analysis tab...');
+              interviewQuestionsListEl = aiAnalysisTab.querySelector('#interviewQuestionsList');
+            }
+            
+            // Final fallback: create elements if they don't exist
+            if (!interviewQuestionsListEl) {
+              console.log('⚠️ Creating fallback interview questions elements...');
+              const interviewQuestionsResults = document.getElementById('interviewQuestionsResults');
+              if (interviewQuestionsResults) {
+                // Create a simple questions display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.innerHTML = `
+                  <h4>❓ AI-Generated Interview Questions</h4>
+                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <ol>
+                      ${result.questions.map(q => `<li>${q}</li>`).join('')}
+                    </ol>
+                  </div>
+                `;
+                interviewQuestionsResults.appendChild(fallbackDiv);
+                console.log('✅ Fallback interview questions display created');
+              }
+            } else {
+              // Update the found element
               interviewQuestionsListEl.innerHTML = result.questions.map(q => `<li>${q}</li>`).join('');
+              console.log('✅ Updated interview questions list');
             }
             
             // Show results
-            document.getElementById('interviewQuestionsResults').style.display = 'block';
-            document.getElementById('alignmentResults').style.display = 'none';
-            document.getElementById('skillsGapResults').style.display = 'none';
-            document.getElementById('culturalFitResults').style.display = 'none';
+            const interviewQuestionsResultsEl = document.getElementById('interviewQuestionsResults');
+            if (interviewQuestionsResultsEl) {
+              interviewQuestionsResultsEl.style.display = 'block';
+              console.log('Showing interview questions results');
+            }
+            
+            // Hide other results
+            const alignmentResults = document.getElementById('alignmentResults');
+            const skillsGapResults = document.getElementById('skillsGapResults');
+            const culturalFitResults = document.getElementById('culturalFitResults');
+            
+            if (alignmentResults) alignmentResults.style.display = 'none';
+            if (skillsGapResults) skillsGapResults.style.display = 'none';
+            if (culturalFitResults) culturalFitResults.style.display = 'none';
             
             console.log('✅ Interview questions generated successfully');
           } else {
@@ -1407,33 +1450,88 @@
           if (response.ok && result.success) {
             console.log('Categorized interview questions result:', result); // Debug log
 
-            // Fill master list too
-            const interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
-            if (interviewQuestionsListEl) {
+            // Enhanced debugging: Check tab visibility and element hierarchy
+            const aiAnalysisTab = document.getElementById('ai-analysis');
+            console.log('🔍 AI Analysis tab found:', aiAnalysisTab);
+            console.log('🔍 AI Analysis tab display:', aiAnalysisTab ? aiAnalysisTab.style.display : 'NOT FOUND');
+            console.log('🔍 AI Analysis tab classList:', aiAnalysisTab ? aiAnalysisTab.classList.toString() : 'NOT FOUND');
+            
+            // Comprehensive DOM element finder
+            let interviewQuestionsListEl = document.getElementById('interviewQuestionsList');
+            let techEl = document.getElementById('questionsTechnical');
+            let expEl = document.getElementById('questionsExperience');
+            let probEl = document.getElementById('questionsProblem');
+            let leadEl = document.getElementById('questionsLeadership');
+            let cultEl = document.getElementById('questionsCultural');
+            let categorizedContainer = document.getElementById('categorizedQuestions');
+            
+            // If elements not found by ID, try searching within the tab
+            if (!interviewQuestionsListEl && aiAnalysisTab) {
+              console.log('🔍 Searching within AI Analysis tab...');
+              interviewQuestionsListEl = aiAnalysisTab.querySelector('#interviewQuestionsList');
+              techEl = aiAnalysisTab.querySelector('#questionsTechnical');
+              expEl = aiAnalysisTab.querySelector('#questionsExperience');
+              probEl = aiAnalysisTab.querySelector('#questionsProblem');
+              leadEl = aiAnalysisTab.querySelector('#questionsLeadership');
+              cultEl = aiAnalysisTab.querySelector('#questionsCultural');
+              categorizedContainer = aiAnalysisTab.querySelector('#categorizedQuestions');
+            }
+            
+            // Final fallback: create elements if they don't exist
+            if (!interviewQuestionsListEl) {
+              console.log('⚠️ Creating fallback categorized interview questions elements...');
+              const interviewQuestionsResults = document.getElementById('interviewQuestionsResults');
+              if (interviewQuestionsResults) {
+                // Create a comprehensive categorized questions display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.innerHTML = `
+                  <h4>🗂️ Categorized Interview Questions</h4>
+                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h5>🧩 Technical Skills Assessment</h5>
+                    <ul>${result.categorizedQuestions.technical.map(q => `<li>${q}</li>`).join('')}</ul>
+                    
+                    <h5>📘 Experience Validation</h5>
+                    <ul>${result.categorizedQuestions.experience.map(q => `<li>${q}</li>`).join('')}</ul>
+                    
+                    <h5>🧠 Problem-Solving Scenarios</h5>
+                    <ul>${result.categorizedQuestions.problemSolving.map(q => `<li>${q}</li>`).join('')}</ul>
+                    
+                    <h5>🤝 Leadership & Collaboration</h5>
+                    <ul>${result.categorizedQuestions.leadership.map(q => `<li>${q}</li>`).join('')}</ul>
+                    
+                    <h5>🎯 Cultural Fit & Motivation</h5>
+                    <ul>${result.categorizedQuestions.cultural.map(q => `<li>${q}</li>`).join('')}</ul>
+                  </div>
+                `;
+                interviewQuestionsResults.appendChild(fallbackDiv);
+                console.log('✅ Fallback categorized interview questions display created');
+              }
+            } else {
+              // Update the found elements
               interviewQuestionsListEl.innerHTML = result.categorizedQuestions.all.map((q) => `<li>${q}</li>`).join('');
+              if (techEl) techEl.innerHTML = result.categorizedQuestions.technical.map((q) => `<li>${q}</li>`).join('');
+              if (expEl) expEl.innerHTML = result.categorizedQuestions.experience.map((q) => `<li>${q}</li>`).join('');
+              if (probEl) probEl.innerHTML = result.categorizedQuestions.problemSolving.map((q) => `<li>${q}</li>`).join('');
+              if (leadEl) leadEl.innerHTML = result.categorizedQuestions.leadership.map((q) => `<li>${q}</li>`).join('');
+              if (cultEl) cultEl.innerHTML = result.categorizedQuestions.cultural.map((q) => `<li>${q}</li>`).join('');
+              if (categorizedContainer) categorizedContainer.style.display = 'block';
+              console.log('✅ Updated categorized interview questions lists');
             }
 
-            // Update categorized lists
-            const techEl = document.getElementById('questionsTechnical');
-            const expEl = document.getElementById('questionsExperience');
-            const probEl = document.getElementById('questionsProblem');
-            const leadEl = document.getElementById('questionsLeadership');
-            const cultEl = document.getElementById('questionsCultural');
-
-            if (techEl) techEl.innerHTML = result.categorizedQuestions.technical.map((q) => `<li>${q}</li>`).join('');
-            if (expEl) expEl.innerHTML = result.categorizedQuestions.experience.map((q) => `<li>${q}</li>`).join('');
-            if (probEl) probEl.innerHTML = result.categorizedQuestions.problemSolving.map((q) => `<li>${q}</li>`).join('');
-            if (leadEl) leadEl.innerHTML = result.categorizedQuestions.leadership.map((q) => `<li>${q}</li>`).join('');
-            if (cultEl) cultEl.innerHTML = result.categorizedQuestions.cultural.map((q) => `<li>${q}</li>`).join('');
-
-            const categorizedContainer = document.getElementById('categorizedQuestions');
-            if (categorizedContainer) categorizedContainer.style.display = 'block';
-
             // Show results and hide others
-            document.getElementById('interviewQuestionsResults').style.display = 'block';
-            document.getElementById('alignmentResults').style.display = 'none';
-            document.getElementById('skillsGapResults').style.display = 'none';
-            document.getElementById('culturalFitResults').style.display = 'none';
+            const interviewQuestionsResultsEl = document.getElementById('interviewQuestionsResults');
+            if (interviewQuestionsResultsEl) {
+              interviewQuestionsResultsEl.style.display = 'block';
+              console.log('Showing categorized interview questions results');
+            }
+            
+            const alignmentResults = document.getElementById('alignmentResults');
+            const skillsGapResults = document.getElementById('skillsGapResults');
+            const culturalFitResults = document.getElementById('culturalFitResults');
+            
+            if (alignmentResults) alignmentResults.style.display = 'none';
+            if (skillsGapResults) skillsGapResults.style.display = 'none';
+            if (culturalFitResults) culturalFitResults.style.display = 'none';
 
             console.log('✅ Categorized interview questions generated successfully');
           } else {
