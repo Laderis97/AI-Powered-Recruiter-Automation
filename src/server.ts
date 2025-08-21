@@ -1,13 +1,18 @@
 // src/server.ts
 
 import express from 'express';
-import * as dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 import multer from 'multer';
-import { documentParser, ParsedCandidate } from './documentParser.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import * as dotenv from 'dotenv';
+import { documentParser } from './documentParser.js';
 import { parseJobDescription, generateOutreach } from './openai.js';
 import { emailService } from './emailService.js';
 import { databaseService, JobPosting, Candidate, Campaign, EmailConfig } from './databaseService.js';
-import { aiAgent, AlignmentScore, SkillsGap } from './aiAgent.js';
+import { aiAgent } from './aiAgent.js';
+import { type AlignmentScore, type SkillsGap, type CulturalFit } from './schemas.js';
 
 dotenv.config();
 
@@ -422,133 +427,141 @@ app.post('/api/email-config', async (req, res) => {
 });
 
 // AI Role Alignment endpoints
-app.post('/api/role-alignment', async (req, res) => {
-  try {
-    const { candidateId, jobId } = req.body;
-    
-    if (!candidateId || !jobId) {
-      return res.status(400).json({ error: 'Candidate ID and Job ID are required' });
+  // Role alignment analysis
+  app.post('/api/role-alignment', async (req, res) => {
+    try {
+      const { candidateId, jobId } = req.body;
+      
+      if (!candidateId || !jobId) {
+        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+      }
+
+      const candidate = await databaseService.getCandidate(candidateId);
+      const job = await databaseService.getJob(jobId);
+
+      if (!candidate || !job) {
+        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+      }
+
+      const result = await aiAgent.calculateRoleAlignment(candidate, job);
+      
+      if (result.ok) {
+        res.json({ 
+          success: true, 
+          alignment: result.data,
+          message: `Role alignment calculated: ${result.data.overallScore}% match`
+        });
+      } else {
+        console.error('Role alignment failed:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to analyze role alignment' });
+      }
+    } catch (error) {
+      console.error('Error in role alignment:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
     }
+  });
 
-    const candidate = await databaseService.getCandidate(candidateId);
-    const job = await databaseService.getJob(jobId);
-    
-    if (!candidate || !job) {
-      return res.status(404).json({ error: 'Candidate or job not found' });
+  // Skills gap analysis
+  app.post('/api/skills-gap', async (req, res) => {
+    try {
+      const { candidateId, jobId } = req.body;
+      
+      if (!candidateId || !jobId) {
+        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+      }
+
+      const candidate = await databaseService.getCandidate(candidateId);
+      const job = await databaseService.getJob(jobId);
+
+      if (!candidate || !job) {
+        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+      }
+
+      const result = await aiAgent.analyzeSkillsGap(candidate, job);
+      
+      if (result.ok) {
+        res.json({ 
+          success: true, 
+          skillsGap: result.data,
+          message: 'Skills gap analysis completed'
+        });
+      } else {
+        console.error('Skills gap analysis failed:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to analyze skills gap' });
+      }
+    } catch (error) {
+      console.error('Error in skills gap analysis:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
     }
+  });
 
-    console.log('🧠 Calculating role alignment with AI...');
-    const alignment = await aiAgent.calculateRoleAlignment(candidate, job);
-    
-    res.json({ 
-      success: true, 
-      alignment,
-      message: `Role alignment calculated: ${alignment.overallScore}% match`
-    });
-  } catch (error) {
-    console.error('Error calculating role alignment:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to calculate role alignment' 
-    });
-  }
-});
+  // Interview questions generation
+  app.post('/api/interview-questions', async (req, res) => {
+    try {
+      const { candidateId, jobId } = req.body;
+      
+      if (!candidateId || !jobId) {
+        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+      }
 
-app.post('/api/skills-gap', async (req, res) => {
-  try {
-    const { candidateId, jobId } = req.body;
-    
-    if (!candidateId || !jobId) {
-      return res.status(400).json({ error: 'Candidate ID and Job ID are required' });
+      const candidate = await databaseService.getCandidate(candidateId);
+      const job = await databaseService.getJob(jobId);
+
+      if (!candidate || !job) {
+        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+      }
+
+      const result = await aiAgent.generateInterviewQuestions(candidate, job);
+      
+      if (result.ok) {
+        res.json({ 
+          success: true, 
+          questions: result.data,
+          message: `${result.data.length} interview questions generated`
+        });
+      } else {
+        console.error('Interview questions generation failed:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to generate interview questions' });
+      }
+    } catch (error) {
+      console.error('Error in interview questions generation:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
     }
+  });
 
-    const candidate = await databaseService.getCandidate(candidateId);
-    const job = await databaseService.getJob(jobId);
-    
-    if (!candidate || !job) {
-      return res.status(404).json({ error: 'Candidate or job not found' });
+  // Cultural fit assessment
+  app.post('/api/cultural-fit', async (req, res) => {
+    try {
+      const { candidateId, jobId } = req.body;
+      
+      if (!candidateId || !jobId) {
+        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+      }
+
+      const candidate = await databaseService.getCandidate(candidateId);
+      const job = await databaseService.getJob(jobId);
+
+      if (!candidate || !job) {
+        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+      }
+
+      const result = await aiAgent.assessCulturalFit(candidate, job);
+      
+      if (result.ok) {
+        res.json({ 
+          success: true, 
+          culturalFit: result.data,
+          message: `Cultural fit score: ${result.data.fitScore}%`
+        });
+      } else {
+        console.error('Cultural fit assessment failed:', result.error);
+        res.status(500).json({ success: false, error: 'Failed to assess cultural fit' });
+      }
+    } catch (error) {
+      console.error('Error in cultural fit assessment:', error);
+      res.status(500).json({ success: false, error: 'Internal server error' });
     }
-
-    console.log('🔍 Analyzing skills gap with AI...');
-    const skillsGap = await aiAgent.analyzeSkillsGap(candidate, job);
-    
-    res.json({ 
-      success: true, 
-      skillsGap,
-      message: `Skills gap analysis completed`
-    });
-  } catch (error) {
-    console.error('Error analyzing skills gap:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to analyze skills gap' 
-    });
-  }
-});
-
-app.post('/api/interview-questions', async (req, res) => {
-  try {
-    const { candidateId, jobId } = req.body;
-    
-    if (!candidateId || !jobId) {
-      return res.status(400).json({ error: 'Candidate ID and Job ID are required' });
-    }
-
-    const candidate = await databaseService.getCandidate(candidateId);
-    const job = await databaseService.getJob(jobId);
-    
-    if (!candidate || !job) {
-      return res.status(404).json({ error: 'Candidate or job not found' });
-    }
-
-    console.log('❓ Generating interview questions with AI...');
-    const questions = await aiAgent.generateInterviewQuestions(candidate, job);
-    
-    res.json({ 
-      success: true, 
-      questions,
-      message: `Generated ${questions.length} interview questions`
-    });
-  } catch (error) {
-    console.error('Error generating interview questions:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to generate interview questions' 
-    });
-  }
-});
-
-app.post('/api/cultural-fit', async (req, res) => {
-  try {
-    const { candidateId, jobId } = req.body;
-    
-    if (!candidateId || !jobId) {
-      return res.status(400).json({ error: 'Candidate ID and Job ID are required' });
-    }
-
-    const candidate = await databaseService.getCandidate(candidateId);
-    const job = await databaseService.getJob(jobId);
-    
-    if (!candidate || !job) {
-      return res.status(404).json({ error: 'Candidate or job not found' });
-    }
-
-    console.log('🤝 Assessing cultural fit with AI...');
-    const culturalFit = await aiAgent.assessCulturalFit(candidate, job);
-    
-    res.json({ 
-      success: true, 
-      culturalFit,
-      message: `Cultural fit assessment completed: ${culturalFit.fitScore}%`
-    });
-  } catch (error) {
-    console.error('Error assessing cultural fit:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to assess cultural fit' 
-    });
-  }
-});
+  });
 
 // Delete a job posting
 app.delete('/api/jobs/:id', async (req, res) => {

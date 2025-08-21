@@ -1,26 +1,16 @@
 // src/aiAgent.ts
 
-import { callOpenAI } from './openai.js';
-
-export interface AlignmentScore {
-  overallScore: number; // 0-100
-  technicalScore: number; // 0-100
-  experienceScore: number; // 0-100
-  skillsScore: number; // 0-100
-  culturalFitScore: number; // 0-100
-  detailedBreakdown: string;
-  recommendations: string[];
-  interviewQuestions: string[];
-  riskFactors: string[];
-  trainingNeeds: string[];
-}
-
-export interface SkillsGap {
-  missingSkills: string[];
-  skillLevels: { [skill: string]: 'beginner' | 'intermediate' | 'advanced' };
-  criticalGaps: string[];
-  niceToHave: string[];
-}
+import { 
+  AlignmentScoreSchema, 
+  SkillsGapSchema, 
+  CulturalFitSchema,
+  type AlignmentScore,
+  type SkillsGap,
+  type CulturalFit,
+  clamp
+} from './schemas.js';
+import { LlmClient, OpenAILlmClient, type Result } from './llmClient.js';
+import { z } from 'zod';
 
 export interface Candidate {
   id: string;
@@ -40,213 +30,246 @@ export interface JobPosting {
   id: string;
   title: string;
   description: string;
-  parsedData?: any;
+  parsedData?: {
+    skills?: string[];
+    seniority?: 'IC' | 'Manager' | 'Senior' | 'Lead';
+    requirements?: string[];
+  };
   createdAt: Date;
 }
 
 export class AIAgent {
-  constructor() {
-    console.log('🧠 AI Agent initialized for role alignment analysis');
+  constructor(
+    private llm: LlmClient = new OpenAILlmClient(),
+    private log = console
+  ) {
+    this.log.log('🧠 AI Agent initialized for role alignment analysis');
   }
 
   /**
    * Calculate comprehensive role alignment between candidate and job
    */
-  async calculateRoleAlignment(candidate: Candidate, job: JobPosting): Promise<AlignmentScore> {
+  async calculateRoleAlignment(candidate: Candidate, job: JobPosting): Promise<Result<AlignmentScore>> {
     try {
-      const prompt = `
-        Analyze the alignment between a candidate and a job posting.
-        
-        CANDIDATE:
-        - Name: ${candidate.name}
-        - Current Title: ${candidate.title}
-        - Experience: ${candidate.experience}
-        - Skills: ${candidate.skills.join(', ')}
-        - Location: ${candidate.location}
-        
-        JOB POSTING:
-        - Title: ${job.title}
-        - Description: ${job.description}
-        
-        Please provide a comprehensive analysis including:
-        1. Overall alignment score (0-100)
-        2. Technical skills match (0-100)
-        3. Experience level match (0-100)
-        4. Skills alignment (0-100)
-        5. Cultural fit potential (0-100)
-        6. Detailed breakdown of strengths and gaps
-        7. Specific recommendations for improvement
-        8. Relevant interview questions
-        9. Potential risk factors
-        10. Training needs
-        
-        Format the response as a JSON object with these exact keys:
-        {
-          "overallScore": number,
-          "technicalScore": number,
-          "experienceScore": number,
-          "skillsScore": number,
-          "culturalFitScore": number,
-          "detailedBreakdown": "string",
-          "recommendations": ["string"],
-          "interviewQuestions": ["string"],
-          "riskFactors": ["string"],
-          "trainingNeeds": ["string"]
-        }
-      `;
-
-      const response = await callOpenAI(prompt);
+      const prompt = this.buildRoleAlignmentPrompt(candidate, job);
+      const result = await this.llm.completeJSON(prompt, AlignmentScoreSchema);
       
-      try {
-        const alignmentData = JSON.parse(response);
-        return alignmentData as AlignmentScore;
-      } catch (parseError) {
-        console.error('Failed to parse AI response:', parseError);
-        return this.generateFallbackAlignment(candidate, job);
+      if (result.ok) {
+        return result;
       }
+      
+      this.log.error('AI role alignment failed:', result.error);
+      return { ok: true, data: this.generateFallbackAlignment(candidate, job) };
     } catch (error) {
-      console.error('AI role alignment failed:', error);
-      return this.generateFallbackAlignment(candidate, job);
+      this.log.error('Unexpected error in role alignment:', error);
+      return { ok: true, data: this.generateFallbackAlignment(candidate, job) };
     }
   }
 
   /**
    * Analyze skills gap between candidate and job requirements
    */
-  async analyzeSkillsGap(candidate: Candidate, job: JobPosting): Promise<SkillsGap> {
+  async analyzeSkillsGap(candidate: Candidate, job: JobPosting): Promise<Result<SkillsGap>> {
     try {
-      const prompt = `
-        Perform a comprehensive skills gap analysis between a candidate and a job posting.
-        
-        CANDIDATE:
-        - Name: ${candidate.name}
-        - Current Title: ${candidate.title}
-        - Experience: ${candidate.experience}
-        - Skills: ${candidate.skills.join(', ')}
-        - Location: ${candidate.location}
-        
-        JOB POSTING:
-        - Title: ${job.title}
-        - Description: ${job.description}
-        
-        Please analyze the skills gap and provide:
-        
-        1. MISSING CRITICAL SKILLS: Skills that are essential for the role but the candidate doesn't have
-        2. CRITICAL GAPS: Areas where the candidate's skills are insufficient for the role requirements
-        3. NICE TO HAVE: Skills that would be beneficial but aren't essential
-        
-        For each category, provide specific, actionable insights. Consider:
-        - Technical skills mentioned in the job description
-        - Industry-specific knowledge requirements
-        - Tools and technologies mentioned
-        - Experience level requirements
-        - Soft skills and leadership requirements
-        
-        Return as JSON with these exact keys:
-        {
-          "missingSkills": ["specific_skill_1", "specific_skill_2", "specific_skill_3"],
-          "skillLevels": {"skill_name": "beginner/intermediate/advanced"},
-          "criticalGaps": ["critical_gap_1", "critical_gap_2"],
-          "niceToHave": ["nice_to_have_skill_1", "nice_to_have_skill_2"]
-        }
-        
-        Ensure each array contains at least 2-3 specific items. Be detailed and specific about the skills and gaps.
-      `;
-
-      const response = await callOpenAI(prompt);
+      const prompt = this.buildSkillsGapPrompt(candidate, job);
+      const result = await this.llm.completeJSON(prompt, SkillsGapSchema);
       
-      try {
-        const gapData = JSON.parse(response);
-        return gapData as SkillsGap;
-      } catch (parseError) {
-        console.error('Failed to parse skills gap response:', parseError);
-        return this.generateFallbackSkillsGap(candidate, job);
+      if (result.ok) {
+        return result;
       }
+      
+      this.log.error('AI skills gap analysis failed:', result.error);
+      return { ok: true, data: this.generateFallbackSkillsGap(candidate, job) };
     } catch (error) {
-      console.error('AI skills gap analysis failed:', error);
-      return this.generateFallbackSkillsGap(candidate, job);
+      this.log.error('Unexpected error in skills gap analysis:', error);
+      return { ok: true, data: this.generateFallbackSkillsGap(candidate, job) };
     }
   }
 
   /**
    * Generate interview questions based on candidate-job alignment
    */
-  async generateInterviewQuestions(candidate: Candidate, job: JobPosting): Promise<string[]> {
+  async generateInterviewQuestions(candidate: Candidate, job: JobPosting): Promise<Result<string[]>> {
     try {
-      const prompt = `
-        Generate 5-7 relevant interview questions for a candidate applying to this job.
-        
-        CANDIDATE: ${candidate.name} - ${candidate.title} with skills: ${candidate.skills.join(', ')}
-        JOB: ${job.title} - ${job.description}
-        
-        Focus on:
-        - Technical skills assessment
-        - Experience validation
-        - Problem-solving scenarios
-        - Cultural fit questions
-        
-        Return as a JSON array: ["question1", "question2", "question3"]
-      `;
-
-      const response = await callOpenAI(prompt);
+      const prompt = this.buildInterviewQuestionsPrompt(candidate, job);
+      const result = await this.llm.completeJSON(prompt, z.array(z.string()));
       
-      try {
-        const questions = JSON.parse(response);
-        return Array.isArray(questions) ? questions : [];
-      } catch (parseError) {
-        console.error('Failed to parse interview questions:', parseError);
-        return this.generateFallbackInterviewQuestions(candidate, job);
+      if (result.ok) {
+        return { ok: true, data: result.data, raw: result.raw };
       }
+      
+      this.log.error('AI interview questions failed:', result.error);
+      return { ok: true, data: this.generateFallbackInterviewQuestions(candidate, job) };
     } catch (error) {
-      console.error('AI interview questions failed:', error);
-      return this.generateFallbackInterviewQuestions(candidate, job);
+      this.log.error('Unexpected error in interview questions:', error);
+      return { ok: true, data: this.generateFallbackInterviewQuestions(candidate, job) };
     }
   }
 
   /**
    * Assess cultural fit and soft skills
    */
-  async assessCulturalFit(candidate: Candidate, job: JobPosting): Promise<{
-    fitScore: number;
-    strengths: string[];
-    concerns: string[];
-    recommendations: string[];
-  }> {
+  async assessCulturalFit(candidate: Candidate, job: JobPosting): Promise<Result<CulturalFit>> {
     try {
-      const prompt = `
-        Assess the cultural fit and soft skills alignment between a candidate and job.
-        
-        CANDIDATE: ${candidate.name} - ${candidate.title}
-        JOB: ${job.title} - ${job.description}
-        
-        Analyze:
-        - Communication style fit
-        - Team collaboration potential
-        - Leadership qualities
-        - Adaptability to company culture
-        
-        Return as JSON:
-        {
-          "fitScore": 85,
-          "strengths": ["strength1", "strength2"],
-          "concerns": ["concern1"],
-          "recommendations": ["recommendation1"]
-        }
-      `;
-
-      const response = await callOpenAI(prompt);
+      const prompt = this.buildCulturalFitPrompt(candidate, job);
+      const result = await this.llm.completeJSON(prompt, CulturalFitSchema);
       
-      try {
-        const fitData = JSON.parse(response);
-        return fitData;
-      } catch (parseError) {
-        console.error('Failed to parse cultural fit response:', parseError);
-        return this.generateFallbackCulturalFit();
+      if (result.ok) {
+        return result;
       }
+      
+      this.log.error('AI cultural fit assessment failed:', result.error);
+      return { ok: true, data: this.generateFallbackCulturalFit() };
     } catch (error) {
-      console.error('AI cultural fit assessment failed:', error);
-      return this.generateFallbackCulturalFit();
+      this.log.error('Unexpected error in cultural fit assessment:', error);
+      return { ok: true, data: this.generateFallbackCulturalFit() };
     }
+  }
+
+  // Private prompt building methods
+  private buildRoleAlignmentPrompt(candidate: Candidate, job: JobPosting): string {
+    return `You are a strict JSON API. Output only valid JSON matching the provided schema. No prose.
+
+Analyze the alignment between a candidate and a job posting.
+
+CANDIDATE:
+- Name: ${this.redactPII(candidate.name)}
+- Current Title: ${candidate.title}
+- Experience: ${candidate.experience}
+- Skills: ${candidate.skills.join(', ')}
+- Location: ${candidate.location}
+
+JOB POSTING:
+- Title: ${job.title}
+- Description: ${this.truncateDescription(job.description)}
+
+Please provide a comprehensive analysis including:
+1. Overall alignment score (0-100)
+2. Technical skills match (0-100)
+3. Experience level match (0-100)
+4. Skills alignment (0-100)
+5. Cultural fit potential (0-100)
+6. Detailed breakdown of strengths and gaps
+7. Specific recommendations for improvement
+8. Relevant interview questions
+9. Potential risk factors
+10. Training needs
+
+If unsure, use empty arrays; never invent entities not mentioned.
+
+Format the response as a JSON object with these exact keys:
+{
+  "overallScore": number,
+  "technicalScore": number,
+  "experienceScore": number,
+  "skillsScore": number,
+  "culturalFitScore": number,
+  "detailedBreakdown": "string",
+  "recommendations": ["string"],
+  "interviewQuestions": ["string"],
+  "riskFactors": ["string"],
+  "trainingNeeds": ["string"]
+}`;
+  }
+
+  private buildSkillsGapPrompt(candidate: Candidate, job: JobPosting): string {
+    return `You are a strict JSON API. Output only valid JSON matching the provided schema. No prose.
+
+Perform a comprehensive skills gap analysis between a candidate and a job posting.
+
+CANDIDATE:
+- Name: ${this.redactPII(candidate.name)}
+- Current Title: ${candidate.title}
+- Experience: ${candidate.experience}
+- Skills: ${candidate.skills.join(', ')}
+- Location: ${candidate.location}
+
+JOB POSTING:
+- Title: ${job.title}
+- Description: ${this.truncateDescription(job.description)}
+
+Please analyze the skills gap and provide:
+
+1. MISSING CRITICAL SKILLS: Skills that are essential for the role but the candidate doesn't have
+2. CRITICAL GAPS: Areas where the candidate's skills are insufficient for the role requirements
+3. NICE TO HAVE: Skills that would be beneficial but aren't essential
+
+For each category, provide specific, actionable insights. Consider:
+- Technical skills mentioned in the job description
+- Industry-specific knowledge requirements
+- Tools and technologies mentioned
+- Experience level requirements
+- Soft skills and leadership requirements
+
+If unsure, use empty arrays; never invent entities not mentioned.
+
+Return as JSON with these exact keys:
+{
+  "missingSkills": ["specific_skill_1", "specific_skill_2", "specific_skill_3"],
+  "skillLevels": {"skill_name": "beginner/intermediate/advanced"},
+  "criticalGaps": ["critical_gap_1", "critical_gap_2"],
+  "niceToHave": ["nice_to_have_skill_1", "nice_to_have_skill_2"]
+}
+
+Ensure each array contains at least 2-3 specific items. Be detailed and specific about the skills and gaps.`;
+  }
+
+  private buildInterviewQuestionsPrompt(candidate: Candidate, job: JobPosting): string {
+    return `You are a strict JSON API. Output only valid JSON matching the provided schema. No prose.
+
+Generate 5-7 relevant interview questions for a candidate applying to this job.
+
+CANDIDATE: ${this.redactPII(candidate.name)} - ${candidate.title} with skills: ${candidate.skills.join(', ')}
+JOB: ${job.title} - ${this.truncateDescription(job.description)}
+
+Focus on:
+- Technical skills assessment
+- Experience validation
+- Problem-solving scenarios
+- Cultural fit questions
+
+If unsure, use empty arrays; never invent entities not mentioned.
+
+Return as a JSON array: ["question1", "question2", "question3"]`;
+  }
+
+  private buildCulturalFitPrompt(candidate: Candidate, job: JobPosting): string {
+    return `You are a strict JSON API. Output only valid JSON matching the provided schema. No prose.
+
+Assess the cultural fit and soft skills alignment between a candidate and job.
+
+CANDIDATE: ${this.redactPII(candidate.name)} - ${candidate.title}
+JOB: ${job.title} - ${this.truncateDescription(job.description)}
+
+Analyze:
+- Communication style fit
+- Team collaboration potential
+- Leadership qualities
+- Adaptability to company culture
+
+If unsure, use empty arrays; never invent entities not mentioned.
+
+Return as JSON:
+{
+  "fitScore": 85,
+  "strengths": ["strength1", "strength2"],
+  "concerns": ["concern1"],
+  "recommendations": ["recommendation1"]
+}`;
+  }
+
+  // Utility methods
+  private redactPII(text: string): string {
+    // Simple PII redaction - replace emails, phones, and links
+    return text
+      .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL]')
+      .replace(/\b\d{3}[-.]?\d{3}[-.]?\d{4}\b/g, '[PHONE]')
+      .replace(/https?:\/\/[^\s]+/g, '[LINK]');
+  }
+
+  private truncateDescription(description: string, maxLength: number = 2000): string {
+    if (description.length <= maxLength) return description;
+    return description.substring(0, maxLength) + '...';
   }
 
   // Fallback methods when AI fails
@@ -254,12 +277,12 @@ export class AIAgent {
     const skillsMatch = this.calculateBasicSkillsMatch(candidate.skills, job.description);
     
     return {
-      overallScore: Math.round(skillsMatch * 0.7 + 60),
-      technicalScore: Math.round(skillsMatch * 0.8 + 50),
+      overallScore: clamp(skillsMatch * 0.7 + 60),
+      technicalScore: clamp(skillsMatch * 0.8 + 50),
       experienceScore: 70,
-      skillsScore: Math.round(skillsMatch),
+      skillsScore: clamp(skillsMatch),
       culturalFitScore: 75,
-      detailedBreakdown: `Basic analysis: ${candidate.skills.length} skills identified, ${Math.round(skillsMatch)}% match with job requirements.`,
+      detailedBreakdown: `Basic analysis: ${candidate.skills.length} skills identified, ${clamp(skillsMatch)}% match with job requirements.`,
       recommendations: ['Consider additional technical training', 'Review experience requirements'],
       interviewQuestions: [
         'Tell me about your experience with the required technologies',
@@ -275,22 +298,39 @@ export class AIAgent {
     const candidateSkills = candidate.skills.map(s => s.toLowerCase());
     const jobText = job.description.toLowerCase();
     
-    // Enhanced keyword matching for common tech skills
-    const techSkills = [
-      'javascript', 'python', 'react', 'node.js', 'sql', 'aws', 'docker', 'kubernetes',
-      'git', 'html', 'css', 'typescript', 'angular', 'vue', 'java', 'c#', 'php',
-      'mongodb', 'postgresql', 'mysql', 'redis', 'elasticsearch', 'kafka',
-      'jenkins', 'gitlab', 'github', 'azure', 'gcp', 'terraform', 'ansible',
-      'machine learning', 'ai', 'data science', 'analytics', 'agile', 'scrum'
-    ];
+    // Enhanced keyword matching with skill aliases
+    const skillAliases = new Map([
+      ['javascript', ['js', 'es6', 'es2015']],
+      ['python', ['py']],
+      ['react', ['reactjs', 'react.js']],
+      ['node.js', ['nodejs', 'node']],
+      ['typescript', ['ts']],
+      ['docker', ['containerization']],
+      ['kubernetes', ['k8s', 'kube']],
+      ['aws', ['amazon web services', 'amazon']],
+      ['azure', ['microsoft azure']],
+      ['gcp', ['google cloud', 'google cloud platform']],
+      ['machine learning', ['ml', 'ai', 'artificial intelligence']],
+      ['data science', ['analytics', 'data analytics']],
+      ['agile', ['scrum', 'kanban']]
+    ]);
     
-    // Find missing skills
-    const missingSkills = techSkills.filter(skill => 
-      jobText.includes(skill) && !candidateSkills.some(cs => cs.includes(skill))
-    );
+    // Find missing skills with alias matching
+    const missingSkills: string[] = [];
+    for (const [skill, aliases] of skillAliases) {
+      const allVariants = [skill, ...aliases];
+      const isInJob = allVariants.some(variant => jobText.includes(variant));
+      const hasSkill = allVariants.some(variant => 
+        candidateSkills.some(cs => cs.includes(variant))
+      );
+      
+      if (isInJob && !hasSkill) {
+        missingSkills.push(skill);
+      }
+    }
     
     // Identify critical gaps based on job title and description
-    const criticalGaps = [];
+    const criticalGaps: string[] = [];
     if (job.title.toLowerCase().includes('senior') && !candidate.experience?.toLowerCase().includes('senior')) {
       criticalGaps.push('Senior-level experience required');
     }
@@ -307,16 +347,10 @@ export class AIAgent {
     // Nice to have skills
     const niceToHave = missingSkills.slice(3, 6);
     
-    // Skill levels assessment
+    // Skill levels assessment - simplified
     const skillLevels: { [skill: string]: "beginner" | "intermediate" | "advanced" } = {};
     candidateSkills.forEach(skill => {
-      if (skill.includes('senior') || skill.includes('lead')) {
-        skillLevels[skill] = 'advanced';
-      } else if (skill.includes('junior') || skill.includes('entry')) {
-        skillLevels[skill] = 'beginner';
-      } else {
-        skillLevels[skill] = 'intermediate';
-      }
+      skillLevels[skill] = 'intermediate'; // Default to intermediate
     });
 
     return {
@@ -337,7 +371,7 @@ export class AIAgent {
     ];
   }
 
-  private generateFallbackCulturalFit() {
+  private generateFallbackCulturalFit(): CulturalFit {
     return {
       fitScore: 75,
       strengths: ['Professional background', 'Relevant experience'],
@@ -347,12 +381,14 @@ export class AIAgent {
   }
 
   private calculateBasicSkillsMatch(candidateSkills: string[], jobDescription: string): number {
+    if (!candidateSkills.length || !jobDescription) return 0;
+    
     const jobText = jobDescription.toLowerCase();
     const skillMatches = candidateSkills.filter(skill => 
       jobText.includes(skill.toLowerCase())
     ).length;
     
-    return Math.round((skillMatches / Math.max(candidateSkills.length, 1)) * 100);
+    return clamp((skillMatches / candidateSkills.length) * 100);
   }
 }
 
