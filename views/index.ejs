@@ -967,6 +967,9 @@
           return;
         }
         
+        console.log('🔍 Starting role alignment analysis...');
+        console.log('📋 Document ready state:', document.readyState);
+        
         const candidateId = document.getElementById('analysisCandidate').value;
         const jobId = document.getElementById('analysisJob').value;
 
@@ -996,12 +999,72 @@
             console.log('Role alignment result:', result); // Debug log
             console.log('Alignment data:', result.alignment);
             
-            // Debug: Check if DOM elements exist
-            const overallScoreEl = document.getElementById('overallScore');
-            const technicalScoreEl = document.getElementById('technicalScore');
-            const experienceScoreEl = document.getElementById('experienceScore');
-            const skillsScoreEl = document.getElementById('skillsScore');
-            const culturalFitScoreEl = document.getElementById('culturalFitScore');
+            // Enhanced debugging: Check tab visibility and element hierarchy
+            const aiAnalysisTab = document.getElementById('ai-analysis');
+            console.log('🔍 AI Analysis tab found:', aiAnalysisTab);
+            console.log('🔍 AI Analysis tab display:', aiAnalysisTab ? aiAnalysisTab.style.display : 'NOT FOUND');
+            console.log('🔍 AI Analysis tab classList:', aiAnalysisTab ? aiAnalysisTab.classList.toString() : 'NOT FOUND');
+            
+            // Check if tab is visible
+            if (aiAnalysisTab && aiAnalysisTab.classList.contains('hidden')) {
+              console.log('⚠️ AI Analysis tab is hidden!');
+            }
+            
+            // Comprehensive DOM element finder
+            let overallScoreEl = document.getElementById('overallScore');
+            let technicalScoreEl = document.getElementById('technicalScore');
+            let experienceScoreEl = document.getElementById('experienceScore');
+            let skillsScoreEl = document.getElementById('skillsScore');
+            let culturalFitScoreEl = document.getElementById('culturalFitScore');
+            
+            // If elements not found by ID, try searching within the tab
+            if (!overallScoreEl && aiAnalysisTab) {
+              console.log('🔍 Searching within AI Analysis tab...');
+              overallScoreEl = aiAnalysisTab.querySelector('#overallScore');
+              technicalScoreEl = aiAnalysisTab.querySelector('#technicalScore');
+              experienceScoreEl = aiAnalysisTab.querySelector('#experienceScore');
+              skillsScoreEl = aiAnalysisTab.querySelector('#skillsScore');
+              culturalFitScoreEl = aiAnalysisTab.querySelector('#culturalFitScore');
+            }
+            
+            // If still not found, try by class name
+            if (!overallScoreEl) {
+              console.log('🔍 Searching by class name...');
+              const scoreElements = document.querySelectorAll('.score-value');
+              console.log('🔍 Found score elements by class:', scoreElements.length);
+              
+              if (scoreElements.length >= 5) {
+                overallScoreEl = scoreElements[0];
+                technicalScoreEl = scoreElements[1];
+                experienceScoreEl = scoreElements[2];
+                skillsScoreEl = scoreElements[3];
+                culturalFitScoreEl = scoreElements[4];
+                console.log('🔍 Mapped score elements by position');
+              }
+            }
+            
+            // Final fallback: create elements if they don't exist
+            if (!overallScoreEl) {
+              console.log('⚠️ Creating fallback score elements...');
+              const alignmentResults = document.getElementById('alignmentResults');
+              if (alignmentResults) {
+                // Create a simple score display
+                const fallbackDiv = document.createElement('div');
+                fallbackDiv.innerHTML = `
+                  <h4>🎯 Role Alignment Results</h4>
+                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <p><strong>Overall Match:</strong> ${result.alignment.overallScore}%</p>
+                    <p><strong>Technical Skills:</strong> ${result.alignment.technicalScore}%</p>
+                    <p><strong>Experience:</strong> ${result.alignment.experienceScore}%</p>
+                    <p><strong>Skills Match:</strong> ${result.alignment.skillsScore}%</p>
+                    <p><strong>Cultural Fit:</strong> ${result.alignment.culturalFitScore}%</p>
+                    <p><strong>Analysis:</strong> ${result.alignment.detailedBreakdown}</p>
+                  </div>
+                `;
+                alignmentResults.appendChild(fallbackDiv);
+                console.log('✅ Fallback display created');
+              }
+            }
             
             console.log('DOM elements found:', {
               overallScore: overallScoreEl,
@@ -1011,26 +1074,42 @@
               culturalFitScore: culturalFitScoreEl
             });
             
+            // Try to find elements by different methods
+            console.log('🔍 Searching for elements by different methods:');
+            console.log('By ID:', document.getElementById('overallScore'));
+            console.log('By querySelector:', document.querySelector('#overallScore'));
+            console.log('By querySelector in tab:', aiAnalysisTab ? aiAnalysisTab.querySelector('#overallScore') : 'Tab not found');
+            
             // Update score displays
             if (overallScoreEl) {
               overallScoreEl.textContent = `${result.alignment.overallScore}%`;
               console.log('Updated overall score:', result.alignment.overallScore);
+            } else {
+              console.log('❌ Overall score element not found');
             }
             if (technicalScoreEl) {
               technicalScoreEl.textContent = `${result.alignment.technicalScore}%`;
               console.log('Updated technical score:', result.alignment.technicalScore);
+            } else {
+              console.log('❌ Technical score element not found');
             }
             if (experienceScoreEl) {
               experienceScoreEl.textContent = `${result.alignment.experienceScore}%`;
               console.log('Updated experience score:', result.alignment.experienceScore);
+            } else {
+              console.log('❌ Experience score element not found');
             }
             if (skillsScoreEl) {
               skillsScoreEl.textContent = `${result.alignment.skillsScore}%`;
               console.log('Updated skills score:', result.alignment.skillsScore);
+            } else {
+              console.log('❌ Skills score element not found');
             }
             if (culturalFitScoreEl) {
               culturalFitScoreEl.textContent = `${result.alignment.culturalFitScore}%`;
               console.log('Updated cultural fit score:', result.alignment.culturalFitScore);
+            } else {
+              console.log('❌ Cultural fit score element not found');
             }
             
             // Update detailed breakdown
