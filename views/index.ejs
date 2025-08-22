@@ -366,11 +366,12 @@
     }
 
     .analysis-results {
-      background: white;
+      background: var(--color-surface);
       padding: 30px;
       border-radius: 16px;
       margin-top: 20px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      border: 1px solid var(--color-border-subtle);
     }
 
     .score-grid {
@@ -383,26 +384,26 @@
     .score-card {
       text-align: center;
       padding: 20px;
-      background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+      background: var(--color-surface-elevated);
       border-radius: 12px;
-      border: 2px solid #e2e8f0;
+      border: 2px solid var(--color-border-subtle);
     }
 
     .score-value {
       font-size: 2.5rem;
       font-weight: 700;
-      color: #667eea;
+      color: var(--color-primary-600);
       margin-bottom: 8px;
     }
 
     .score-label {
       font-size: 0.9rem;
-      color: #4a5568;
+      color: var(--color-text-secondary);
       font-weight: 500;
     }
 
     .analysis-details h5 {
-      color: #1a202c;
+      color: var(--color-text-primary);
       margin: 25px 0 15px 0;
       font-size: 1.1rem;
       font-weight: 600;
@@ -410,7 +411,7 @@
 
     .analysis-details ul {
       margin-left: 20px;
-      color: #4a5568;
+      color: var(--color-text-secondary);
       line-height: 1.6;
     }
 
@@ -419,7 +420,7 @@
     }
 
     .gap-section h5 {
-      color: #1a202c;
+      color: var(--color-text-primary);
       margin: 20px 0 12px 0;
       font-size: 1rem;
       font-weight: 600;
@@ -427,22 +428,22 @@
 
     .gap-section ul {
       margin-left: 20px;
-      color: #4a5568;
+      color: var(--color-text-secondary);
       line-height: 1.6;
     }
 
     .questions-list ol {
       margin-left: 20px;
-      color: #4a5568;
+      color: var(--color-text-secondary);
       line-height: 1.6;
     }
 
     .questions-list li {
       margin-bottom: 15px;
       padding: 15px;
-      background: #f7fafc;
+      background: var(--color-surface-elevated);
       border-radius: 8px;
-      border-left: 3px solid #667eea;
+      border-left: 3px solid var(--color-primary-500);
     }
 
     .fit-score {
@@ -451,15 +452,15 @@
     }
 
     .fit-details h5 {
-      color: #1a202c;
-      margin: 20px 0 12px 0;
+      color: var(--color-text-primary);
+      margin: 20px 0 15px 0;
       font-size: 1rem;
       font-weight: 600;
     }
 
     .fit-details ul {
       margin-left: 20px;
-      color: #4a5568;
+      color: var(--color-text-secondary);
       line-height: 1.6;
     }
     
@@ -746,6 +747,43 @@
     [data-theme="dark"] .parsed-data-grid > div,
     [data-theme="dark"] .contact-grid > div {
       color: var(--color-text-primary);
+    }
+
+    /* Dark mode overrides for analysis results */
+    [data-theme="dark"] .analysis-results {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border-subtle);
+    }
+
+    [data-theme="dark"] .score-card {
+      background: var(--color-surface-elevated);
+      border: 2px solid var(--color-border-subtle);
+    }
+
+    [data-theme="dark"] .score-value {
+      color: var(--color-primary-400);
+    }
+
+    [data-theme="dark"] .score-label {
+      color: var(--color-text-secondary);
+    }
+
+    [data-theme="dark"] .analysis-details h5,
+    [data-theme="dark"] .gap-section h5,
+    [data-theme="dark"] .fit-details h5 {
+      color: var(--color-text-primary);
+    }
+
+    [data-theme="dark"] .analysis-details ul,
+    [data-theme="dark"] .gap-section ul,
+    [data-theme="dark"] .fit-details ul,
+    [data-theme="dark"] .questions-list ol {
+      color: var(--color-text-secondary);
+    }
+
+    [data-theme="dark"] .questions-list li {
+      background: var(--color-surface-elevated);
+      border-left: 3px solid var(--color-primary-400);
     }
 
     /* General text color overrides for better contrast */
@@ -1478,13 +1516,13 @@
                 const fallbackDiv = document.createElement('div');
                 fallbackDiv.innerHTML = `
                   <h4>🎯 Role Alignment Results</h4>
-                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <p><strong>Overall Match:</strong> ${result.alignment.overallScore}%</p>
-                    <p><strong>Technical Skills:</strong> ${result.alignment.technicalScore}%</p>
-                    <p><strong>Experience:</strong> ${result.alignment.experienceScore}%</p>
-                    <p><strong>Skills Match:</strong> ${result.alignment.skillsScore}%</p>
-                    <p><strong>Cultural Fit:</strong> ${result.alignment.culturalFitScore}%</p>
-                    <p><strong>Analysis:</strong> ${result.alignment.detailedBreakdown}</p>
+                  <div style="background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--color-border-subtle);">
+                    <p style="color: var(--color-text-primary);"><strong>Overall Match:</strong> ${result.alignment.overallScore}%</p>
+                    <p style="color: var(--color-text-primary);"><strong>Technical Skills:</strong> ${result.alignment.technicalScore}%</p>
+                    <p style="color: var(--color-text-primary);"><strong>Experience:</strong> ${result.alignment.experienceScore}%</p>
+                    <p style="color: var(--color-text-primary);"><strong>Skills Match:</strong> ${result.alignment.skillsScore}%</p>
+                    <p style="color: var(--color-text-primary);"><strong>Cultural Fit:</strong> ${result.alignment.culturalFitScore}%</p>
+                    <p style="color: var(--color-text-primary);"><strong>Analysis:</strong> ${result.alignment.detailedBreakdown}</p>
                   </div>
                 `;
                 alignmentResults.appendChild(fallbackDiv);
@@ -1676,15 +1714,15 @@
                 const fallbackDiv = document.createElement('div');
                 fallbackDiv.innerHTML = `
                   <h4>🔍 Skills Gap Analysis Results</h4>
-                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h5>❌ Missing Critical Skills:</h5>
-                    <ul>${result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('')}</ul>
+                  <div style="background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--color-border-subtle);">
+                    <h5 style="color: var(--color-text-primary);">❌ Missing Critical Skills:</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.skillsGap.missingSkills.map(s => `<li>${s}</li>`).join('')}</ul>
                     
-                    <h5>🚨 Critical Gaps:</h5>
-                    <ul>${result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">🚨 Critical Gaps:</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.skillsGap.criticalGaps.map(g => `<li>${g}</li>`).join('')}</ul>
                     
-                    <h5>✨ Nice to Have:</h5>
-                    <ul>${result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">✨ Nice to Have:</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.skillsGap.niceToHave.map(s => `<li>${s}</li>`).join('')}</ul>
                   </div>
                 `;
                 skillsGapResults.appendChild(fallbackDiv);
@@ -1794,8 +1832,8 @@
                 const fallbackDiv = document.createElement('div');
                 fallbackDiv.innerHTML = `
                   <h4>❓ AI-Generated Interview Questions</h4>
-                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <ol>
+                  <div style="background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--color-border-subtle);">
+                    <ol style="color: var(--color-text-secondary);">
                       ${result.questions.map(q => `<li>${q}</li>`).join('')}
                     </ol>
                   </div>
@@ -1894,21 +1932,21 @@
                 const fallbackDiv = document.createElement('div');
                 fallbackDiv.innerHTML = `
                   <h4>🗂️ Categorized Interview Questions</h4>
-                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                    <h5>🧩 Technical Skills Assessment</h5>
-                    <ul>${result.categorizedQuestions.technical.map(q => `<li>${q}</li>`).join('')}</ul>
+                  <div style="background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; margin: 20px 0; border: 1px solid var(--color-border-subtle);">
+                    <h5 style="color: var(--color-text-primary);">🧩 Technical Skills Assessment</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.categorizedQuestions.technical.map(q => `<li>${q}</li>`).join('')}</ul>
                     
-                    <h5>📘 Experience Validation</h5>
-                    <ul>${result.categorizedQuestions.experience.map(q => `<li>${q}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">📘 Experience Validation</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.categorizedQuestions.experience.map(q => `<li>${q}</li>`).join('')}</ul>
                     
-                    <h5>🧠 Problem-Solving Scenarios</h5>
-                    <ul>${result.categorizedQuestions.problemSolving.map(q => `<li>${q}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">🧠 Problem-Solving Scenarios</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.categorizedQuestions.problemSolving.map(q => `<li>${q}</li>`).join('')}</ul>
                     
-                    <h5>🤝 Leadership & Collaboration</h5>
-                    <ul>${result.categorizedQuestions.leadership.map(q => `<li>${q}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">🤝 Leadership & Collaboration</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.categorizedQuestions.leadership.map(q => `<li>${q}</li>`).join('')}</ul>
                     
-                    <h5>🎯 Cultural Fit & Motivation</h5>
-                    <ul>${result.categorizedQuestions.cultural.map(q => `<li>${q}</li>`).join('')}</ul>
+                    <h5 style="color: var(--color-text-primary);">🎯 Cultural Fit & Motivation</h5>
+                    <ul style="color: var(--color-text-secondary);">${result.categorizedQuestions.cultural.map(q => `<li>${q}</li>`).join('')}</ul>
                   </div>
                 `;
                 interviewQuestionsResults.appendChild(fallbackDiv);
@@ -2004,10 +2042,10 @@
                 const fallbackDiv = document.createElement('div');
                 fallbackDiv.innerHTML = `
                   <h4>🤝 Cultural Fit Assessment Results</h4>
-                  <div style="background: #f0f8ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                  <div style="background: var(--color-surface-elevated); padding: 20px; border-radius: 8px; margin: 20px 0;">
                     <div style="text-align: center; margin: 25px 0;">
-                      <div style="font-size: 2.5rem; font-weight: 700; color: #667eea; margin-bottom: 8px;">${result.culturalFit.fitScore}%</div>
-                      <div style="font-size: 0.9rem; color: #4a5568; font-weight: 500;">Cultural Fit Score</div>
+                      <div style="font-size: 2.5rem; font-weight: 700; color: var(--color-primary-600); margin-bottom: 8px;">${result.culturalFit.fitScore}%</div>
+                      <div style="font-size: 0.9rem; color: var(--color-text-secondary); font-weight: 500;">Cultural Fit Score</div>
                     </div>
                     
                     <h5>💪 Strengths</h5>
