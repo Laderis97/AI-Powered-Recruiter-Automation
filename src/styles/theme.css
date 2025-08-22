@@ -69,15 +69,15 @@
   --color-error-800: #991b1b;
   --color-error-900: #7f1d1d;
 
-  /* Semantic Colors */
+  /* Semantic Colors - LIGHT THEME - OPTIMIZED FOR CONTRAST */
   --color-background: #ffffff;
-  --color-surface: rgba(255, 255, 255, 0.95);
-  --color-surface-elevated: rgba(255, 255, 255, 0.98);
-  --color-text-primary: #1a202c;
-  --color-text-secondary: #4a5568;
-  --color-text-muted: #6b7280;
-  --color-border: rgba(255, 255, 255, 0.2);
-  --color-border-subtle: #e5e7eb;
+  --color-surface: #ffffff;  /* Solid white for maximum contrast */
+  --color-surface-elevated: #f8fafc;  /* Very light gray for subtle elevation */
+  --color-text-primary: #0f172a;  /* Darker text for better contrast */
+  --color-text-secondary: #334155;  /* Darker secondary text for better contrast */
+  --color-text-muted: #64748b;  /* Darker muted text for better contrast */
+  --color-border: rgba(148, 163, 184, 0.2);
+  --color-border-subtle: #e2e8f0;  /* Lighter border for subtle separation */
   --color-shadow: rgba(0, 0, 0, 0.1);
   --color-shadow-elevated: rgba(0, 0, 0, 0.15);
 
@@ -87,7 +87,7 @@
   --gradient-success: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
   --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
   --gradient-error: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  --gradient-surface: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%);
+  --gradient-surface: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);  /* Solid colors for better performance */
 }
 
 /* ===== DARK THEME ===== */
@@ -99,10 +99,10 @@
   --color-primary-300: #6366f1;
   --color-primary-400: #818cf8;
   --color-primary-500: #a5b4fc;
-  --color-primary-600: #c7d2fe;
-  --color-primary-700: #ddd6fe;
-  --color-primary-800: #ede9fe;
-  --color-primary-900: #f3f4f6;
+  --color-primary-600: #818cf8;  /* Darker for better contrast */
+  --color-primary-700: #6366f1;  /* Darker for better contrast */
+  --color-primary-800: #4338ca;  /* Darker for better contrast */
+  --color-primary-900: #312e81;  /* Darker for better contrast */
 
   --color-secondary-50: #831843;
   --color-secondary-100: #9d174d;
@@ -159,17 +159,17 @@
   --color-error-800: #fee2e2;
   --color-error-900: #fef2f2;
 
-  /* Semantic Colors - Dark Mode */
+  /* Semantic Colors - Dark Mode - FIXED FOR BETTER CONTRAST */
   --color-background: #0f172a;
-  --color-surface: rgba(30, 41, 59, 0.95);
-  --color-surface-elevated: rgba(51, 65, 85, 0.98);
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #cbd5e1;
-  --color-text-muted: #94a3b8;
-  --color-border: rgba(148, 163, 184, 0.2);
-  --color-border-subtle: #334155;
-  --color-shadow: rgba(0, 0, 0, 0.3);
-  --color-shadow-elevated: rgba(0, 0, 0, 0.4);
+  --color-surface: #1e293b;  /* Solid color instead of rgba for better contrast */
+  --color-surface-elevated: #334155;  /* Solid color instead of rgba for better contrast */
+  --color-text-primary: #f1f5f9;  /* Brighter white for better contrast */
+  --color-text-secondary: #e2e8f0;  /* Brighter secondary text for better contrast */
+  --color-text-muted: #cbd5e1;  /* Brighter muted text for better contrast */
+  --color-border: rgba(148, 163, 184, 0.3);  /* Increased opacity for better visibility */
+  --color-border-subtle: #475569;  /* Lighter border for better contrast */
+  --color-shadow: rgba(0, 0, 0, 0.4);  /* Increased shadow opacity */
+  --color-shadow-elevated: rgba(0, 0, 0, 0.5);  /* Increased elevated shadow opacity */
 
   /* Gradients - Dark Mode */
   --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
@@ -177,7 +177,7 @@
   --gradient-success: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
   --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
   --gradient-error: linear-gradient(135deg, #ef4444 0%, #f97316 100%);
-  --gradient-surface: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(51, 65, 85, 0.98) 100%);
+  --gradient-surface: linear-gradient(135deg, #1e293b 0%, #334155 100%);  /* Solid colors instead of rgba */
 }
 
 /* ===== SPACING ===== */
@@ -316,4 +316,101 @@
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gray-500);
+}
+
+/* ===== ADDITIONAL CONTRAST ENHANCEMENTS ===== */
+
+/* Ensure proper contrast for all text elements */
+[data-theme="dark"] {
+  /* Force proper contrast for critical text elements */
+  --color-text-primary: #f1f5f9 !important;
+  --color-text-secondary: #e2e8f0 !important;
+  --color-text-muted: #cbd5e1 !important;
+  
+  /* Ensure surfaces have proper contrast with text */
+  --color-surface: #1e293b !important;
+  --color-surface-elevated: #334155 !important;
+  
+  /* Ensure borders are visible */
+  --color-border-subtle: #475569 !important;
+}
+
+[data-theme="light"] {
+  /* Force proper contrast for critical text elements */
+  --color-text-primary: #0f172a !important;
+  --color-text-secondary: #334155 !important;
+  --color-text-muted: #64748b !important;
+  
+  /* Ensure surfaces have proper contrast with text */
+  --color-surface: #ffffff !important;
+  --color-surface-elevated: #f8fafc !important;
+  
+  /* Ensure borders are visible */
+  --color-border-subtle: #e2e8f0 !important;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  :root {
+    --color-text-primary: #000000;
+    --color-text-secondary: #333333;
+    --color-surface: #ffffff;
+    --color-surface-elevated: #f0f0f0;
+    --color-border-subtle: #666666;
+  }
+  
+  [data-theme="dark"] {
+    --color-text-primary: #ffffff;
+    --color-text-secondary: #cccccc;
+    --color-surface: #000000;
+    --color-surface-elevated: #1a1a1a;
+    --color-border-subtle: #666666;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-normal: 0ms;
+    --duration-slow: 0ms;
+    --duration-slower: 0ms;
+  }
+  
+  * {
+    animation-duration: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0ms !important;
+  }
+}
+
+/* Focus indicators for better accessibility */
+*:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Ensure buttons have proper contrast */
+.btn, button, input[type="button"], input[type="submit"] {
+  color: var(--color-text-primary);
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.btn:hover, button:hover, input[type="button"]:hover, input[type="submit"]:hover {
+  background: var(--color-surface);
+  border-color: var(--color-primary-500);
+}
+
+/* Ensure form inputs have proper contrast */
+input, textarea, select {
+  color: var(--color-text-primary);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-subtle);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-500);
 }
