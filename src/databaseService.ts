@@ -451,7 +451,9 @@ export class DatabaseService {
         message: data.message,
         status: data.status,
         createdAt: new Date(data.created_at),
-        sentAt: data.sent_at ? new Date(data.sent_at) : undefined
+        sentAt: data.sent_at ? new Date(data.sent_at) : undefined,
+        isArchived: data.is_archived || false,
+        archivedAt: data.archived_at ? new Date(data.archived_at) : undefined
       };
     } catch (error) {
       console.error('❌ Error fetching campaign:', error);
