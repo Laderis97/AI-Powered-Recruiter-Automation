@@ -1996,26 +1996,32 @@
     }
 
     async function archiveJob(jobId) {
+      console.log('🔍 Archive job called with ID:', jobId);
+      console.log('🔍 Type of jobId:', typeof jobId);
+      console.log('🔍 Current jobs in DOM:', document.querySelectorAll('#jobsList .list-item').length);
+      
       if (!confirm('Are you sure you want to archive this job posting? You can unarchive it later from the archive section.')) {
         return;
       }
 
       try {
+        console.log('🔍 Sending archive request for job ID:', jobId);
         const response = await fetch(`/api/jobs/${jobId}/archive`, {
           method: 'POST'
         });
 
         if (response.ok) {
+          console.log('✅ Archive request successful for job ID:', jobId);
           showSuccess('jobsList', 'Job posting archived successfully!');
           loadJobs();
           updateStats();
         } else {
           const error = await response.json();
-          console.error('Server error:', error);
+          console.error('❌ Server error:', error);
           showError('jobsList', error.error || 'Failed to archive job posting');
         }
       } catch (error) {
-        console.error('Error archiving job:', error);
+        console.error('❌ Error archiving job:', error);
         showError('jobsList', 'Network error occurred');
       }
     }
@@ -2139,8 +2145,11 @@
 
     async function loadJobs() {
       try {
+        console.log('🔍 Loading jobs...');
         const response = await fetch('/api/jobs');
         const jobs = await response.json();
+        console.log('🔍 Jobs loaded from API:', jobs.length, 'jobs');
+        console.log('🔍 Job IDs:', jobs.map(j => j.id));
         
         const container = document.getElementById('jobsList');
         container.innerHTML = jobs.map(job => `
@@ -2157,12 +2166,14 @@
           </div>
         `).join('');
         
+        console.log('🔍 Jobs rendered in DOM:', document.querySelectorAll('#jobsList .list-item').length, 'items');
+        
         // Update campaign form dropdown
         const jobSelect = document.getElementById('campaignJob');
         jobSelect.innerHTML = '<option value="">Choose a job posting...</option>' + 
           jobs.map(job => `<option value="${job.id}">${job.title}</option>`).join('');
       } catch (error) {
-        console.error('Error loading jobs:', error);
+        console.error('❌ Error loading jobs:', error);
       }
     }
 
