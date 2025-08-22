@@ -1998,7 +1998,19 @@
     async function archiveJob(jobId) {
       console.log('🔍 Archive job called with ID:', jobId);
       console.log('🔍 Type of jobId:', typeof jobId);
-      console.log('🔍 Current jobs in DOM:', document.querySelectorAll('#jobsList .list-item').length);
+      console.log('🔍 Current jobs in DOM before archive:', document.querySelectorAll('#jobsList .list-item').length);
+      
+      // Log all current job IDs in the DOM
+      const currentJobs = Array.from(document.querySelectorAll('#jobsList .list-item')).map(item => {
+        const button = item.querySelector('button[onclick*="archiveJob"]');
+        if (button) {
+          const onclick = button.getAttribute('onclick');
+          const match = onclick.match(/archiveJob\('([^']+)'\)/);
+          return match ? match[1] : 'unknown';
+        }
+        return 'unknown';
+      });
+      console.log('🔍 Current job IDs in DOM:', currentJobs);
       
       if (!confirm('Are you sure you want to archive this job posting? You can unarchive it later from the archive section.')) {
         return;
@@ -2013,7 +2025,12 @@
         if (response.ok) {
           console.log('✅ Archive request successful for job ID:', jobId);
           showSuccess('jobsList', 'Job posting archived successfully!');
-          loadJobs();
+          
+          // Log before calling loadJobs
+          console.log('🔍 About to call loadJobs() after archiving job:', jobId);
+          await loadJobs();
+          console.log('🔍 loadJobs() completed after archiving job:', jobId);
+          
           updateStats();
         } else {
           const error = await response.json();
@@ -2145,14 +2162,17 @@
 
     async function loadJobs() {
       try {
-        console.log('🔍 Loading jobs...');
+        console.log('🔍 loadJobs() called');
         const response = await fetch('/api/jobs');
         const jobs = await response.json();
         console.log('🔍 Jobs loaded from API:', jobs.length, 'jobs');
         console.log('🔍 Job IDs:', jobs.map(j => j.id));
+        console.log('🔍 Job archive status:', jobs.map(j => ({ id: j.id, isArchived: j.isArchived })));
         
         const container = document.getElementById('jobsList');
-        container.innerHTML = jobs.map(job => `
+        console.log('🔍 Container element:', container);
+        
+        const jobsHTML = jobs.map(job => `
           <div class="list-item">
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="flex: 1;">
@@ -2165,6 +2185,10 @@
             </div>
           </div>
         `).join('');
+        
+        console.log('🔍 Generated HTML for jobs:', jobsHTML.substring(0, 200) + '...');
+        
+        container.innerHTML = jobsHTML;
         
         console.log('🔍 Jobs rendered in DOM:', document.querySelectorAll('#jobsList .list-item').length, 'items');
         
