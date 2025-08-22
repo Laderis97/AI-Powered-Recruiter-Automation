@@ -589,6 +589,100 @@
     .close:hover {
       opacity: 1;
     }
+
+    /* Expandable content styles */
+    .expandable-item {
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .expandable-item:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .item-header {
+      transition: background-color 0.2s ease;
+      padding: 15px;
+      border-radius: 12px;
+    }
+
+    .item-header:hover {
+      background-color: var(--bg-secondary);
+    }
+
+    .expand-icon {
+      font-size: 1.2rem;
+      transition: transform 0.2s ease;
+      user-select: none;
+    }
+
+    .item-details {
+      animation: slideDown 0.3s ease-out;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .details-section {
+      margin-bottom: 20px;
+    }
+
+    .details-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .parsed-data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .parsed-data-grid > div {
+      background: var(--bg-primary);
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid var(--primary-color);
+    }
+
+    .skills-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .skill-tag {
+      background: var(--primary-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .contact-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .contact-grid > div {
+      background: var(--bg-primary);
+      padding: 12px;
+      border-radius: 6px;
+      border-left: 3px solid var(--primary-color);
+    }
     
     .modal-body {
       padding: 30px;
@@ -2115,18 +2209,49 @@
         
         const container = document.getElementById('candidatesList');
         container.innerHTML = candidates.map(candidate => `
-          <div class="list-item">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div class="list-item expandable-item">
+            <div class="item-header" style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" onclick="toggleCandidateDetails('${candidate.id}')">
               <div style="flex: 1;">
-                <h4>${candidate.name}</h4>
-                <p><strong>${candidate.title}</strong> • ${candidate.location} • ${candidate.experience}</p>
-                <div class="skills">
+                <h4 style="margin: 0; color: var(--primary-color);">${candidate.name}</h4>
+                <p style="margin: 5px 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>${candidate.title}</strong> • ${candidate.location} • ${candidate.experience}
+                </p>
+                <div class="skills" style="margin-top: 8px;">
+                  ${candidate.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                  ${candidate.skills.length > 3 ? `<span class="skill-tag">+${candidate.skills.length - 3} more</span>` : ''}
+                </div>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="expand-icon" id="expand-icon-candidate-${candidate.id}">▶️</span>
+                <button onclick="event.stopPropagation(); archiveCandidate('${candidate.id}')" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
+                  📦 Archive
+                </button>
+              </div>
+            </div>
+            <div class="item-details" id="candidate-details-${candidate.id}" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+              <div class="details-section">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Contact Information</h5>
+                <div class="contact-grid">
+                  ${candidate.email ? `<div><strong>Email:</strong> <a href="mailto:${candidate.email}" style="color: var(--primary-color);">${candidate.email}</a></div>` : ''}
+                  ${candidate.phone ? `<div><strong>Phone:</strong> <a href="tel:${candidate.phone}" style="color: var(--primary-color);">${candidate.phone}</a></div>` : ''}
+                  ${candidate.linkedin ? `<div><strong>LinkedIn:</strong> <a href="${candidate.linkedin}" target="_blank" style="color: var(--primary-color);">View Profile</a></div>` : ''}
+                  ${candidate.github ? `<div><strong>GitHub:</strong> <a href="${candidate.github}" target="_blank" style="color: var(--primary-color);">View Profile</a></div>` : ''}
+                </div>
+              </div>
+              <div class="details-section" style="margin-top: 20px;">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">All Skills</h5>
+                <div class="skills-tags">
                   ${candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
                 </div>
               </div>
-              <button onclick="archiveCandidate('${candidate.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
-                📦 Archive
-              </button>
+              <div class="details-section" style="margin-top: 20px;">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Experience Details</h5>
+                <p style="margin: 0; line-height: 1.6;">${candidate.experience}</p>
+              </div>
+              <div class="details-section" style="margin-top: 20px;">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Profile Created</h5>
+                <p style="margin: 0; color: var(--text-secondary);">${new Date(candidate.createdAt).toLocaleDateString()}</p>
+              </div>
             </div>
           </div>
         `).join('');
@@ -2173,15 +2298,62 @@
         console.log('🔍 Container element:', container);
         
         const jobsHTML = jobs.map(job => `
-          <div class="list-item">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div class="list-item expandable-item">
+            <div class="item-header" style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" onclick="toggleJobDetails('${job.id}')">
               <div style="flex: 1;">
-                <h4>${job.title}</h4>
-                <p>${job.description.substring(0, 200)}...</p>
+                <h4 style="margin: 0; color: var(--primary-color);">${job.title}</h4>
+                <p style="margin: 5px 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  Created: ${new Date(job.createdAt).toLocaleDateString()}
+                </p>
               </div>
-              <button onclick="archiveJob('${job.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
-                📦 Archive
-              </button>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="expand-icon" id="expand-icon-${job.id}">▶️</span>
+                <button onclick="event.stopPropagation(); archiveJob('${job.id}')" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
+                  📦 Archive
+                </button>
+              </div>
+            </div>
+            <div class="item-details" id="job-details-${job.id}" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+              <div class="details-section">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Job Description</h5>
+                <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${job.description}</p>
+              </div>
+              ${job.parsedData ? `
+                <div class="details-section" style="margin-top: 20px;">
+                  <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">AI Parsed Details</h5>
+                  <div class="parsed-data-grid">
+                    ${job.parsedData.location && job.parsedData.location !== 'N/A' ? `<div><strong>Location:</strong> ${job.parsedData.location}</div>` : ''}
+                    ${job.parsedData.employmentType && job.parsedData.employmentType !== 'N/A' ? `<div><strong>Type:</strong> ${job.parsedData.employmentType}</div>` : ''}
+                    ${job.parsedData.experienceLevel && job.parsedData.experienceLevel !== 'N/A' ? `<div><strong>Experience:</strong> ${job.parsedData.experienceLevel}</div>` : ''}
+                    ${job.parsedData.salaryRange && job.parsedData.salaryRange !== 'N/A' ? `<div><strong>Salary:</strong> ${job.parsedData.salaryRange}</div>` : ''}
+                    ${job.parsedData.industry && job.parsedData.industry !== 'N/A' ? `<div><strong>Industry:</strong> ${job.parsedData.industry}</div>` : ''}
+                  </div>
+                  ${job.parsedData.skills && job.parsedData.skills.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Required Skills:</strong>
+                      <div class="skills-tags">
+                        ${job.parsedData.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${job.parsedData.responsibilities && job.parsedData.responsibilities.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Key Responsibilities:</strong>
+                      <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${job.parsedData.responsibilities.map(resp => `<li>${resp}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
+                  ${job.parsedData.qualifications && job.parsedData.qualifications.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Qualifications:</strong>
+                      <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${job.parsedData.qualifications.map(qual => `<li>${qual}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         `).join('');
@@ -2210,26 +2382,45 @@
         
         const container = document.getElementById('campaignsList');
         container.innerHTML = campaigns.map(campaign => `
-          <div class="list-item">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+          <div class="list-item expandable-item">
+            <div class="item-header" style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" onclick="toggleCampaignDetails('${campaign.id}')">
               <div style="flex: 1;">
-                <h4>Campaign #${campaign.id}</h4>
-                <p><strong>Status:</strong> <span class="status-${campaign.status}">${campaign.status.toUpperCase()}</span></p>
-                <p>${campaign.message.substring(0, 200)}...</p>
-                <div class="campaign-actions" style="margin-top: 15px;">
-                  <button onclick="viewCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-right: 10px;">View</button>
+                <h4 style="margin: 0; color: var(--primary-color);">Campaign #${campaign.id}</h4>
+                <p style="margin: 5px 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  <strong>Status:</strong> <span class="status-${campaign.status}">${campaign.status.toUpperCase()}</span>
+                  ${campaign.sentAt ? ` • Sent: ${new Date(campaign.sentAt).toLocaleDateString()}` : ''}
+                </p>
+                <p style="margin: 5px 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  Created: ${new Date(campaign.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="expand-icon" id="expand-icon-campaign-${campaign.id}">▶️</span>
+                <button onclick="event.stopPropagation(); archiveCampaign('${campaign.id}')" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
+                  📦 Archive
+                </button>
+              </div>
+            </div>
+            <div class="item-details" id="campaign-details-${campaign.id}" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+              <div class="details-section">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Full Message</h5>
+                <div style="background: var(--bg-primary); padding: 15px; border-radius: 6px; border-left: 4px solid var(--primary-color);">
+                  <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${campaign.message}</p>
+                </div>
+              </div>
+              <div class="details-section" style="margin-top: 20px;">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Campaign Actions</h5>
+                <div class="campaign-actions" style="display: flex; gap: 10px; flex-wrap: wrap;">
+                  <button onclick="viewCampaign('${campaign.id}')" class="btn btn-secondary">View Details</button>
                   ${campaign.status === 'draft' ? `
-                    <button onclick="sendCampaignEmail('${campaign.id}')" class="btn btn-primary" style="margin-right: 10px;">📧 Send Email</button>
-                    <button onclick="copyToClipboard('${campaign.id}')" class="btn btn-secondary" style="margin-right: 10px;">📋 Copy Message</button>
+                    <button onclick="sendCampaignEmail('${campaign.id}')" class="btn btn-primary">📧 Send Email</button>
+                    <button onclick="copyToClipboard('${campaign.id}')" class="btn btn-secondary">📋 Copy Message</button>
                   ` : ''}
                   ${campaign.status === 'sent' ? `
-                    <span style="color: #38a169; font-weight: 600;">✅ Sent on ${new Date(campaign.sentAt).toLocaleDateString()}</span>
+                    <span style="color: #38a169; font-weight: 600; padding: 8px 12px; background: #f0fff4; border-radius: 4px;">✅ Sent on ${new Date(campaign.sentAt).toLocaleDateString()}</span>
                   ` : ''}
                 </div>
               </div>
-              <button onclick="archiveCampaign('${campaign.id}')" class="btn btn-secondary" style="margin-left: 15px; padding: 8px 16px; font-size: 0.9rem; background: #f39c12; color: white; border: none;">
-                📦 Archive
-              </button>
             </div>
           </div>
         `).join('');
@@ -2571,15 +2762,63 @@ ${campaign.message}
         }
         
         container.innerHTML = jobs.map(job => `
-          <div class="archive-item">
-            <div class="archive-item-content">
-              <h4>${job.title}</h4>
-              <p>${job.description.substring(0, 200)}...</p>
-              <p class="archived-date">Archived on: ${new Date(job.archivedAt).toLocaleDateString()}</p>
+          <div class="archive-item expandable-item">
+            <div class="item-header" style="display: flex; justify-content: space-between; align-items: flex-start; cursor: pointer;" onclick="toggleArchivedJobDetails('${job.id}')">
+              <div class="archive-item-content" style="flex: 1;">
+                <h4 style="margin: 0; color: var(--primary-color);">${job.title}</h4>
+                <p style="margin: 5px 0; color: var(--text-secondary); font-size: 0.9rem;">
+                  Archived on: ${new Date(job.archivedAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div style="display: flex; align-items: center; gap: 10px;">
+                <span class="expand-icon" id="expand-icon-archived-job-${job.id}">▶️</span>
+                <div class="archive-actions">
+                  <button onclick="event.stopPropagation(); unarchiveJob('${job.id}')" class="btn-unarchive">📤 Unarchive</button>
+                  <button onclick="event.stopPropagation(); deleteJob('${job.id}')" class="btn-delete">🗑️ Delete</button>
+                </div>
+              </div>
             </div>
-            <div class="archive-actions">
-              <button onclick="unarchiveJob('${job.id}')" class="btn-unarchive">📤 Unarchive</button>
-              <button onclick="deleteJob('${job.id}')" class="btn-delete">🗑️ Delete</button>
+            <div class="item-details" id="archived-job-details-${job.id}" style="display: none; margin-top: 15px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+              <div class="details-section">
+                <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">Job Description</h5>
+                <p style="margin: 0; line-height: 1.6; white-space: pre-wrap;">${job.description}</p>
+              </div>
+              ${job.parsedData ? `
+                <div class="details-section" style="margin-top: 20px;">
+                  <h5 style="margin: 0 0 10px 0; color: var(--text-primary);">AI Parsed Details</h5>
+                  <div class="parsed-data-grid">
+                    ${job.parsedData.location && job.parsedData.location !== 'N/A' ? `<div><strong>Location:</strong> ${job.parsedData.location}</div>` : ''}
+                    ${job.parsedData.employmentType && job.parsedData.employmentType !== 'N/A' ? `<div><strong>Type:</strong> ${job.parsedData.employmentType}</div>` : ''}
+                    ${job.parsedData.experienceLevel && job.parsedData.experienceLevel !== 'N/A' ? `<div><strong>Experience:</strong> ${job.parsedData.experienceLevel}</div>` : ''}
+                    ${job.parsedData.salaryRange && job.parsedData.salaryRange !== 'N/A' ? `<div><strong>Salary:</strong> ${job.parsedData.salaryRange}</div>` : ''}
+                    ${job.parsedData.industry && job.parsedData.industry !== 'N/A' ? `<div><strong>Industry:</strong> ${job.parsedData.industry}</div>` : ''}
+                  </div>
+                  ${job.parsedData.skills && job.parsedData.skills.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Required Skills:</strong>
+                      <div class="skills-tags">
+                        ${job.parsedData.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join('')}
+                      </div>
+                    </div>
+                  ` : ''}
+                  ${job.parsedData.responsibilities && job.parsedData.responsibilities.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Key Responsibilities:</strong>
+                      <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${job.parsedData.responsibilities.map(resp => `<li>${resp}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
+                  ${job.parsedData.qualifications && job.parsedData.qualifications.length > 0 ? `
+                    <div style="margin-top: 15px;">
+                      <strong>Qualifications:</strong>
+                      <ul style="margin: 10px 0; padding-left: 20px;">
+                        ${job.parsedData.qualifications.map(qual => `<li>${qual}</li>`).join('')}
+                      </ul>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
             </div>
           </div>
         `).join('');
@@ -2768,6 +3007,58 @@ ${campaign.message}
       }
     }
 
+    // Toggle functions for expandable content
+    function toggleJobDetails(jobId) {
+      const detailsElement = document.getElementById(`job-details-${jobId}`);
+      const expandIcon = document.getElementById(`expand-icon-${jobId}`);
+      
+      if (detailsElement.style.display === 'none') {
+        detailsElement.style.display = 'block';
+        expandIcon.textContent = '🔽';
+      } else {
+        detailsElement.style.display = 'none';
+        expandIcon.textContent = '▶️';
+      }
+    }
+
+    function toggleCandidateDetails(candidateId) {
+      const detailsElement = document.getElementById(`candidate-details-${candidateId}`);
+      const expandIcon = document.getElementById(`expand-icon-candidate-${candidateId}`);
+      
+      if (detailsElement.style.display === 'none') {
+        detailsElement.style.display = 'block';
+        expandIcon.textContent = '🔽';
+      } else {
+        detailsElement.style.display = 'none';
+        expandIcon.textContent = '▶️';
+      }
+    }
+
+    function toggleCampaignDetails(campaignId) {
+      const detailsElement = document.getElementById(`campaign-details-${campaignId}`);
+      const expandIcon = document.getElementById(`expand-icon-campaign-${campaignId}`);
+      
+      if (detailsElement.style.display === 'none') {
+        detailsElement.style.display = 'block';
+        expandIcon.textContent = '🔽';
+      } else {
+        detailsElement.style.display = 'none';
+        expandIcon.textContent = '▶️';
+      }
+    }
+
+    function toggleArchivedJobDetails(jobId) {
+      const detailsElement = document.getElementById(`archived-job-details-${jobId}`);
+      const expandIcon = document.getElementById(`expand-icon-archived-job-${jobId}`);
+      
+      if (detailsElement.style.display === 'none') {
+        detailsElement.style.display = 'block';
+        expandIcon.textContent = '🔽';
+      } else {
+        detailsElement.style.display = 'none';
+        expandIcon.textContent = '▶️';
+      }
+    }
 
   </script>
 </body>
