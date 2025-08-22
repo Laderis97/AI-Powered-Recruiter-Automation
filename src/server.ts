@@ -170,8 +170,9 @@ app.get('/api/candidates', async (req, res) => {
 
 app.get('/api/candidates/archived', async (req, res) => {
   try {
-    const candidates = await databaseService.getCandidates(true); // includeArchived = true
-    res.json(candidates);
+    const allCandidates = await databaseService.getCandidates(true); // includeArchived = true
+    const archivedCandidates = allCandidates.filter(candidate => candidate.isArchived);
+    res.json(archivedCandidates);
   } catch (error) {
     console.error('Error fetching archived candidates:', error);
     res.status(500).json({ error: 'Failed to fetch archived candidates' });
@@ -190,8 +191,9 @@ app.get('/api/jobs', async (req, res) => {
 
 app.get('/api/jobs/archived', async (req, res) => {
   try {
-    const jobs = await databaseService.getJobs(true); // includeArchived = true
-    res.json(jobs);
+    const allJobs = await databaseService.getJobs(true); // includeArchived = true
+    const archivedJobs = allJobs.filter(job => job.isArchived);
+    res.json(archivedJobs);
   } catch (error) {
     console.error('Error fetching archived jobs:', error);
     res.status(500).json({ error: 'Failed to fetch archived jobs' });
@@ -260,8 +262,9 @@ app.get('/api/campaigns', async (req, res) => {
 
 app.get('/api/campaigns/archived', async (req, res) => {
   try {
-    const campaigns = await databaseService.getCampaigns(true); // includeArchived = true
-    res.json(campaigns);
+    const allCampaigns = await databaseService.getCampaigns(true); // includeArchived = true
+    const archivedCampaigns = allCampaigns.filter(campaign => campaign.isArchived);
+    res.json(archivedCampaigns);
   } catch (error) {
     console.error('Error fetching archived campaigns:', error);
     res.status(500).json({ error: 'Failed to fetch archived campaigns' });
