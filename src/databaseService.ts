@@ -124,7 +124,9 @@ export class DatabaseService {
         title: data.title,
         description: data.description,
         parsedData: data.parsed_data,
-        createdAt: new Date(data.created_at)
+        createdAt: new Date(data.created_at),
+        isArchived: data.is_archived || false,
+        archivedAt: data.archived_at ? new Date(data.archived_at) : undefined
       };
     } catch (error) {
       console.error('❌ Error fetching job:', error);
