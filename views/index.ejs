@@ -2196,6 +2196,8 @@
         const jobSelect = document.getElementById('campaignJob');
         jobSelect.innerHTML = '<option value="">Choose a job posting...</option>' + 
           jobs.map(job => `<option value="${job.id}">${job.title}</option>`).join('');
+        
+        console.log('🔍 Campaign job dropdown updated with', jobs.length, 'jobs');
       } catch (error) {
         console.error('❌ Error loading jobs:', error);
       }
@@ -2556,8 +2558,11 @@ ${campaign.message}
 
     async function loadArchivedJobs() {
       try {
+        console.log('🔍 Loading archived jobs...');
         const response = await fetch('/api/jobs/archived');
         const jobs = await response.json();
+        console.log('🔍 Archived jobs loaded:', jobs.length, 'jobs');
+        console.log('🔍 Archived job IDs:', jobs.map(j => j.id));
         
         const container = document.getElementById('archivedJobsList');
         if (jobs.length === 0) {
@@ -2578,6 +2583,8 @@ ${campaign.message}
             </div>
           </div>
         `).join('');
+        
+        console.log('🔍 Archived jobs rendered in DOM:', document.querySelectorAll('#archivedJobsList .archive-item').length, 'items');
       } catch (error) {
         console.error('Error loading archived jobs:', error);
       }
@@ -2621,8 +2628,9 @@ ${campaign.message}
 
         if (response.ok) {
           showSuccess('archivedCandidatesList', 'Candidate unarchived successfully!');
-          loadArchivedCandidates();
-          loadCandidates();
+          // Refresh both lists to ensure proper state
+          await loadArchivedCandidates();
+          await loadCandidates();
           updateStats();
         } else {
           const error = await response.json();
@@ -2636,21 +2644,27 @@ ${campaign.message}
 
     async function unarchiveJob(jobId) {
       try {
+        console.log('🔍 Unarchiving job with ID:', jobId);
         const response = await fetch(`/api/jobs/${jobId}/unarchive`, {
           method: 'POST'
         });
 
         if (response.ok) {
+          console.log('✅ Job unarchived successfully:', jobId);
           showSuccess('archivedJobsList', 'Job unarchived successfully!');
-          loadArchivedJobs();
-          loadJobs();
+          // Refresh both lists to ensure proper state
+          console.log('🔍 Refreshing archived jobs list...');
+          await loadArchivedJobs();
+          console.log('🔍 Refreshing main jobs list...');
+          await loadJobs();
           updateStats();
         } else {
           const error = await response.json();
+          console.error('❌ Server error unarchiving job:', error);
           showError('archivedJobsList', error.error || 'Failed to unarchive job');
         }
       } catch (error) {
-        console.error('Error unarchiving job:', error);
+        console.error('❌ Error unarchiving job:', error);
         showError('archivedJobsList', 'Network error occurred');
       }
     }
@@ -2663,8 +2677,9 @@ ${campaign.message}
 
         if (response.ok) {
           showSuccess('archivedCampaignsList', 'Campaign unarchived successfully!');
-          loadArchivedCampaigns();
-          loadCampaigns();
+          // Refresh both lists to ensure proper state
+          await loadArchivedCampaigns();
+          await loadCampaigns();
           updateStats();
         } else {
           const error = await response.json();
@@ -2707,20 +2722,24 @@ ${campaign.message}
       }
 
       try {
+        console.log('🔍 Permanently deleting job with ID:', jobId);
         const response = await fetch(`/api/jobs/${jobId}`, {
           method: 'DELETE'
         });
 
         if (response.ok) {
+          console.log('✅ Job permanently deleted:', jobId);
           showSuccess('archivedJobsList', 'Job permanently deleted!');
-          loadArchivedJobs();
+          // Refresh archived list since the job is now gone
+          await loadArchivedJobs();
           updateStats();
         } else {
           const error = await response.json();
+          console.error('❌ Server error deleting job:', error);
           showError('archivedJobsList', error.error || 'Failed to delete job');
         }
       } catch (error) {
-        console.error('Error deleting job:', error);
+        console.error('❌ Error deleting job:', error);
         showError('archivedJobsList', 'Network error occurred');
       }
     }
