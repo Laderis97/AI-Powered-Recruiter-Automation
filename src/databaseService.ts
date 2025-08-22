@@ -73,6 +73,8 @@ export class DatabaseService {
 
       if (error) throw error;
 
+      console.log('🔍 Database query result:', { includeArchived, dataCount: data?.length, rawData: data });
+
       return data.map(row => ({
         id: row.id,
         title: row.title,
@@ -155,6 +157,8 @@ export class DatabaseService {
 
   async archiveJob(id: string): Promise<void> {
     try {
+      console.log('🔍 Archiving job with ID:', id);
+      
       const { error } = await supabase
         .from(TABLES.JOBS)
         .update({
@@ -169,6 +173,15 @@ export class DatabaseService {
       }
       
       console.log(`✅ Job archived in database: ${id}`);
+      
+      // Verify the archive operation
+      const { data: verifyData } = await supabase
+        .from(TABLES.JOBS)
+        .select('is_archived, archived_at')
+        .eq('id', id)
+        .single();
+      
+      console.log('🔍 Archive verification:', { id, verifyData });
     } catch (error) {
       console.error('❌ Error in archiveJob:', error);
       throw error;
