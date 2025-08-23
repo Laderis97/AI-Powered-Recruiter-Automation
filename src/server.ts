@@ -13,7 +13,7 @@ import { emailService } from './emailService.js';
 import { databaseService, JobPosting, Candidate, Campaign, EmailConfig } from './databaseService.js';
 import { aiAgent } from './aiAgent.js';
 import { type AlignmentScore, type SkillsGap, type CulturalFit } from './schemas.js';
-import { Request, Response, NextFunction } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
@@ -34,8 +34,8 @@ function checkAccess(req: Request, res: Response, next: NextFunction) {
     return next();
   }
   
-  // Check for token in query parameter, header, or cookie
-  const providedToken = req.query.token || req.headers['x-access-token'] || req.cookies?.accessToken;
+  // Check for token in query parameter or header
+  const providedToken = req.query.token || req.headers['x-access-token'];
   
   if (providedToken === accessToken) {
     return next();

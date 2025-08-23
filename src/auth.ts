@@ -6,8 +6,8 @@ dotenv.config();
 
 // Simple authentication middleware
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  // Check if user is authenticated (you can implement your own logic here)
-  const isAuthenticated = req.session?.user || req.headers['x-api-key'] === process.env.API_KEY;
+  // Check if user is authenticated via API key header
+  const isAuthenticated = req.headers['x-api-key'] === process.env.API_KEY;
   
   if (!isAuthenticated) {
     return res.status(401).json({ error: 'Authentication required' });
@@ -23,14 +23,7 @@ export interface User {
   role: 'admin' | 'user';
 }
 
-// Optional: Add session management
-export function createSession(req: Request, user: User) {
-  req.session = req.session || {};
-  req.session.user = user;
-}
-
-export function destroySession(req: Request) {
-  if (req.session) {
-    req.session.destroy(() => {});
-  }
+// Simple token validation for access control
+export function validateAccessToken(token: string): boolean {
+  return token === process.env.ACCESS_TOKEN;
 }
