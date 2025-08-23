@@ -468,32 +468,91 @@ Return valid JSON matching the CulturalFit schema exactly.`;
       ? semanticAnalysis.missingSkills 
       : missingSkills;
     
+    // Generate contextual analysis based on job title and candidate background
+    const contextualGaps = this.generateContextualSkillsGaps(job, candidate, config);
+    
     // Ensure we have meaningful results
-    const criticalGaps = finalMissingSkills.slice(0, Math.min(3, finalMissingSkills.length));
-    const niceToHave = finalMissingSkills.slice(3, Math.min(6, finalMissingSkills.length));
+    const criticalGaps = finalMissingSkills.length > 0 
+      ? finalMissingSkills.slice(0, Math.min(3, finalMissingSkills.length))
+      : contextualGaps.critical;
     
-    // If still no results, provide generic but useful analysis
-    if (criticalGaps.length === 0) {
-      if (jobSkills.length > 0) {
-        criticalGaps.push('Technical skills assessment required', 'Experience verification needed');
-      } else {
-        criticalGaps.push('Job requirements analysis needed', 'Skills evaluation required');
-      }
-    }
-    
-    if (niceToHave.length === 0) {
-      if (jobSkills.length > 0) {
-        niceToHave.push('Additional domain knowledge', 'Industry-specific experience');
-      } else {
-        niceToHave.push('Role-specific skills review', 'Professional development areas');
-      }
-    }
+    const niceToHave = finalMissingSkills.length > 0 
+      ? finalMissingSkills.slice(3, Math.min(6, finalMissingSkills.length))
+      : contextualGaps.niceToHave;
     
     return {
-      missingSkills: finalMissingSkills.length > 0 ? finalMissingSkills : ['Skills assessment required', 'Technical evaluation needed'],
+      missingSkills: finalMissingSkills.length > 0 ? finalMissingSkills : contextualGaps.missing,
       skillLevels,
-      criticalGaps: criticalGaps.length > 0 ? criticalGaps : ['Critical skills evaluation needed', 'Core competencies review'],
-      niceToHave: niceToHave.length > 0 ? niceToHave : ['Additional skills review recommended', 'Professional development areas']
+      criticalGaps: criticalGaps.length > 0 ? criticalGaps : contextualGaps.critical,
+      niceToHave: niceToHave.length > 0 ? niceToHave : contextualGaps.niceToHave
+    };
+  }
+
+  /**
+   * Generate contextual skills gaps based on job title and candidate background
+   */
+  private generateContextualSkillsGaps(job: JobPosting, candidate: Candidate, config: AnalysisConfig) {
+    const jobTitle = job.title.toLowerCase();
+    const candidateTitle = candidate.title.toLowerCase();
+    const industry = config.industry;
+    
+    // Common technical skills by role type
+    const technicalSkills = {
+      'frontend': ['JavaScript', 'React', 'CSS', 'HTML', 'TypeScript', 'Vue', 'Angular'],
+      'backend': ['Node.js', 'Python', 'Java', 'C#', 'Go', 'Database Design', 'API Design'],
+      'fullstack': ['JavaScript', 'React', 'Node.js', 'Database', 'API Design', 'DevOps'],
+      'data': ['Python', 'SQL', 'Machine Learning', 'Data Analysis', 'Statistics', 'Pandas'],
+      'devops': ['Docker', 'Kubernetes', 'AWS', 'CI/CD', 'Terraform', 'Monitoring'],
+      'mobile': ['React Native', 'Flutter', 'iOS Development', 'Android Development', 'Mobile UI/UX']
+    };
+    
+    // Determine role type from job title
+    let roleType = 'general';
+    if (jobTitle.includes('frontend') || jobTitle.includes('ui') || jobTitle.includes('react')) {
+      roleType = 'frontend';
+    } else if (jobTitle.includes('backend') || jobTitle.includes('api') || jobTitle.includes('server')) {
+      roleType = 'backend';
+    } else if (jobTitle.includes('fullstack') || jobTitle.includes('full-stack')) {
+      roleType = 'fullstack';
+    } else if (jobTitle.includes('data') || jobTitle.includes('ml') || jobTitle.includes('ai')) {
+      roleType = 'data';
+    } else if (jobTitle.includes('devops') || jobTitle.includes('infrastructure')) {
+      roleType = 'devops';
+    } else if (jobTitle.includes('mobile') || jobTitle.includes('ios') || jobTitle.includes('android')) {
+      roleType = 'mobile';
+    }
+    
+    // Generate contextual missing skills
+    const roleSkills = technicalSkills[roleType as keyof typeof technicalSkills] || technicalSkills.fullstack;
+    const candidateSkillSet = new Set(candidate.skills.map(s => this.normalizeSkill(s)));
+    
+    const contextualMissingSkills = roleSkills.filter(skill => 
+      !candidateSkillSet.has(this.normalizeSkill(skill))
+    );
+    
+    // Seniority-based additional skills
+    const senioritySkills = {
+      'IC': ['Technical depth', 'Problem solving', 'Code quality'],
+      'Senior': ['Technical leadership', 'Mentoring', 'System design'],
+      'Manager': ['Team leadership', 'Project management', 'Stakeholder management'],
+      'Lead': ['Technical strategy', 'Architecture decisions', 'Team development']
+    };
+    
+    const levelSkills = senioritySkills[config.seniority] || senioritySkills.IC;
+    
+    return {
+      missing: [
+        ...contextualMissingSkills.slice(0, 3),
+        ...levelSkills.slice(0, 2)
+      ],
+      critical: [
+        ...contextualMissingSkills.slice(0, 2),
+        levelSkills[0]
+      ],
+      niceToHave: [
+        ...contextualMissingSkills.slice(3, 5),
+        ...levelSkills.slice(1, 3)
+      ]
     };
   }
 
