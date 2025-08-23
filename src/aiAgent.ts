@@ -10,6 +10,7 @@ import {
   clamp
 } from './schemas.js';
 import { LlmClient, OpenAILlmClient, type Result } from './llmClient.js';
+import { SemanticSearchService, type SemanticAnalysis } from './semanticSearch.js';
 import { z } from 'zod';
 
 export interface Candidate {
@@ -58,11 +59,14 @@ export class AIAgent {
     focus: 'balanced'
   };
 
+  private semanticSearch: SemanticSearchService;
+
   constructor(
     private llm: LlmClient = new OpenAILlmClient(),
     private log = console
   ) {
-    this.log.log('🧠 Enhanced AI Agent initialized with multi-model support');
+    this.semanticSearch = new SemanticSearchService();
+    this.log.log('🧠 Enhanced AI Agent initialized with multi-model support and semantic search');
   }
 
   /**
@@ -75,7 +79,14 @@ export class AIAgent {
   ): Promise<Result<AlignmentScore>> {
     try {
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
-      const prompt = this.buildEnhancedRoleAlignmentPrompt(candidate, job, analysisConfig);
+      
+      // Use semantic search for better skill analysis
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(
+        candidate.skills, 
+        job.parsedData?.skills || []
+      );
+      
+      const prompt = this.buildEnhancedRoleAlignmentPrompt(candidate, job, analysisConfig, semanticAnalysis);
       const result = await this.llm.completeJSON(prompt, AlignmentScoreSchema);
       
       if (result.ok) {
@@ -84,10 +95,11 @@ export class AIAgent {
       }
       
       this.log.error('AI role alignment failed:', result.error);
-      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
     } catch (error) {
       this.log.error('Unexpected error in role alignment:', error);
-      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig) };
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
+      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
     }
   }
 
@@ -101,7 +113,14 @@ export class AIAgent {
   ): Promise<Result<SkillsGap>> {
     try {
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
-      const prompt = this.buildEnhancedSkillsGapPrompt(candidate, job, analysisConfig);
+      
+      // Use semantic search for comprehensive skills analysis
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(
+        candidate.skills, 
+        job.parsedData?.skills || []
+      );
+      
+      const prompt = this.buildEnhancedSkillsGapPrompt(candidate, job, analysisConfig, semanticAnalysis);
       const result = await this.llm.completeJSON(prompt, SkillsGapSchema);
       
       if (result.ok) {
@@ -110,10 +129,11 @@ export class AIAgent {
       }
       
       this.log.error('AI skills gap analysis failed:', result.error);
-      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig, semanticAnalysis) };
     } catch (error) {
       this.log.error('Unexpected error in skills gap analysis:', error);
-      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig) };
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
+      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig, semanticAnalysis) };
     }
   }
 
@@ -211,11 +231,12 @@ export class AIAgent {
     }
   }
 
-  // Enhanced prompt builders with role-specific analysis
+  // Enhanced prompt builders with semantic analysis
   private buildEnhancedRoleAlignmentPrompt(
     candidate: Candidate, 
     job: JobPosting, 
-    config: AnalysisConfig
+    config: AnalysisConfig,
+    semanticAnalysis: SemanticAnalysis
   ): string {
     const roleContext = this.getRoleContext(config.seniority, config.industry);
     
@@ -237,10 +258,17 @@ JOB POSTING:
 - Description: ${job.description}
 - Parsed Skills: ${job.parsedData?.skills?.join(', ') || 'Not parsed'}
 
+SEMANTIC SKILLS ANALYSIS:
+- Overall Similarity: ${semanticAnalysis.overallSimilarity}%
+- Exact Matches: ${semanticAnalysis.skillMatches.filter(m => m.category === 'exact').length}
+- Semantic Matches: ${semanticAnalysis.skillMatches.filter(m => m.category === 'semantic').length}
+- Missing Skills: ${semanticAnalysis.missingSkills.join(', ')}
+- Related Skills: ${semanticAnalysis.relatedSkills.join(', ')}
+
 ANALYSIS REQUIREMENTS:
 - Technical Score: Evaluate technical skills match (0-100)
 - Experience Score: Assess experience level fit (0-100)  
-- Skills Score: Calculate skills overlap percentage (0-100)
+- Skills Score: Use semantic analysis similarity: ${semanticAnalysis.overallSimilarity}%
 - Cultural Score: Evaluate cultural and soft skills fit (0-100)
 - Overall Score: Weighted average based on ${JSON.stringify(config.weights)}
 
@@ -252,12 +280,20 @@ Return valid JSON matching the AlignmentScore schema exactly.`;
   private buildEnhancedSkillsGapPrompt(
     candidate: Candidate, 
     job: JobPosting, 
-    config: AnalysisConfig
+    config: AnalysisConfig,
+    semanticAnalysis: SemanticAnalysis
   ): string {
     return `You are a technical recruiter specializing in ${config.industry} roles. Analyze the skills gap between this candidate and job requirements.
 
 CANDIDATE SKILLS: ${candidate.skills.join(', ')}
 JOB REQUIREMENTS: ${job.parsedData?.skills?.join(', ') || 'Extracted from description'}
+
+SEMANTIC ANALYSIS RESULTS:
+- Overall Similarity: ${semanticAnalysis.overallSimilarity}%
+- Exact Matches: ${semanticAnalysis.skillMatches.filter(m => m.category === 'exact').map(m => m.skill).join(', ')}
+- Semantic Matches: ${semanticAnalysis.skillMatches.filter(m => m.category === 'semantic').map(m => `${m.skill} (${Math.round(m.confidence * 100)}% confidence)`).join(', ')}
+- Missing Skills: ${semanticAnalysis.missingSkills.join(', ')}
+- Related Skills: ${semanticAnalysis.relatedSkills.join(', ')}
 
 Analyze:
 1. Missing critical skills (must-have for the role)
@@ -369,22 +405,23 @@ Return valid JSON matching the CulturalFit schema exactly.`;
     }
   }
 
-  // Enhanced fallback generators
+  // Enhanced fallback generators with semantic analysis
   private generateEnhancedFallbackAlignment(
     candidate: Candidate, 
     job: JobPosting, 
-    config: AnalysisConfig
+    config: AnalysisConfig,
+    semanticAnalysis: SemanticAnalysis
   ): AlignmentScore {
-    const skillsMatch = this.calculateSkillsOverlap(candidate.skills, job.parsedData?.skills || []);
+    const skillsScore = semanticAnalysis.overallSimilarity;
     const experienceScore = this.assessExperienceFit(candidate.experience, config.seniority);
     
     return {
-      overallScore: clamp((skillsMatch + experienceScore + 70 + 75) / 4),
-      technicalScore: clamp(skillsMatch),
+      overallScore: clamp((skillsScore + experienceScore + 70 + 75) / 4),
+      technicalScore: clamp(skillsScore),
       experienceScore: clamp(experienceScore),
-      skillsScore: clamp(skillsMatch),
+      skillsScore: clamp(skillsScore),
       culturalFitScore: 75,
-      detailedBreakdown: `Fallback analysis: Skills overlap ${skillsMatch}%, Experience level ${experienceScore}%`,
+      detailedBreakdown: `Enhanced fallback analysis: Semantic skills similarity ${skillsScore}%, Experience level ${experienceScore}%`,
       recommendations: ['Conduct detailed technical interview', 'Verify experience claims', 'Assess cultural fit in person'],
       interviewQuestions: ['Tell me about your most challenging technical project', 'How do you approach learning new technologies?', 'Describe a time you had to work with a difficult team member'],
       riskFactors: ['Limited technical depth verification', 'Experience level uncertainty'],
@@ -395,12 +432,9 @@ Return valid JSON matching the CulturalFit schema exactly.`;
   private generateEnhancedFallbackSkillsGap(
     candidate: Candidate, 
     job: JobPosting, 
-    config: AnalysisConfig
+    config: AnalysisConfig,
+    semanticAnalysis: SemanticAnalysis
   ): SkillsGap {
-    const candidateSkills = new Set(candidate.skills.map(s => s.toLowerCase()));
-    const jobSkills = new Set((job.parsedData?.skills || []).map(s => s.toLowerCase()));
-    
-    const missingSkills = Array.from(jobSkills).filter(skill => !candidateSkills.has(skill));
     const skillLevels: Record<string, "beginner" | "intermediate" | "advanced"> = {};
     
     candidate.skills.forEach(skill => {
@@ -408,10 +442,10 @@ Return valid JSON matching the CulturalFit schema exactly.`;
     });
     
     return {
-      missingSkills: missingSkills.slice(0, 5), // Top 5 missing skills
+      missingSkills: semanticAnalysis.missingSkills.slice(0, 5),
       skillLevels,
-      criticalGaps: missingSkills.slice(0, 3), // Top 3 critical gaps
-      niceToHave: missingSkills.slice(3, 6) // Nice-to-have skills
+      criticalGaps: semanticAnalysis.missingSkills.slice(0, 3),
+      niceToHave: semanticAnalysis.missingSkills.slice(3, 6)
     };
   }
 
