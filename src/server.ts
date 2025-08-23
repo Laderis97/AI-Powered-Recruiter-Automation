@@ -682,6 +682,181 @@ app.post('/api/email-config', async (req, res) => {
     }
   });
 
+// Enhanced AI Analysis endpoints
+app.post('/api/ai/enhanced-role-alignment', async (req, res) => {
+  try {
+    const { candidateId, jobId, config } = req.body;
+    
+    if (!candidateId || !jobId) {
+      return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+    }
+
+    const candidate = await databaseService.getCandidate(candidateId);
+    const job = await databaseService.getJob(jobId);
+
+    if (!candidate || !job) {
+      return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+    }
+
+    const result = await aiAgent.calculateRoleAlignment(candidate, job, config);
+    
+    if (result.ok && result.data) {
+      res.json({ 
+        success: true, 
+        alignment: result.data,
+        provider: result.provider,
+        model: result.model,
+        latency: result.latency,
+        message: `Enhanced role alignment calculated: ${result.data.overallScore}% match`
+      });
+    } else {
+      console.error('Enhanced role alignment failed:', result.error);
+      res.status(500).json({ success: false, error: 'Failed to analyze role alignment' });
+    }
+  } catch (error) {
+    console.error('Error in enhanced role alignment:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+app.post('/api/ai/enhanced-skills-gap', async (req, res) => {
+  try {
+    const { candidateId, jobId, config } = req.body;
+    
+    if (!candidateId || !jobId) {
+      return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+    }
+
+    const candidate = await databaseService.getCandidate(candidateId);
+    const job = await databaseService.getJob(jobId);
+
+    if (!candidate || !job) {
+      return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+    }
+
+    const result = await aiAgent.analyzeSkillsGap(candidate, job, config);
+    
+    if (result.ok && result.data) {
+      res.json({ 
+        success: true, 
+        skillsGap: result.data,
+        provider: result.provider,
+        model: result.model,
+        latency: result.latency,
+        message: 'Enhanced skills gap analysis completed'
+      });
+    } else {
+      console.error('Enhanced skills gap analysis failed:', result.error);
+      res.status(500).json({ success: false, error: 'Failed to analyze skills gap' });
+    }
+  } catch (error) {
+    console.error('Error in enhanced skills gap analysis:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+app.post('/api/ai/semantic-search', async (req, res) => {
+  try {
+    const { candidateSkills, jobSkills } = req.body;
+    
+    if (!candidateSkills || !jobSkills) {
+      return res.status(400).json({ success: false, error: 'Candidate skills and job skills are required' });
+    }
+
+    // Import semantic search service
+    const { SemanticSearchService } = await import('./semanticSearch.js');
+    const semanticSearch = new SemanticSearchService();
+    
+    const analysis = semanticSearch.analyzeSkills(candidateSkills, jobSkills);
+    
+    res.json({ 
+      success: true, 
+      semanticAnalysis: analysis,
+      message: 'Semantic skills analysis completed'
+    });
+  } catch (error) {
+    console.error('Error in semantic search:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+app.post('/api/ai/predictive-analytics', async (req, res) => {
+  try {
+    const { candidateId, jobId, location, industry } = req.body;
+    
+    if (!candidateId || !jobId) {
+      return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+    }
+
+    const candidate = await databaseService.getCandidate(candidateId);
+    const job = await databaseService.getJob(jobId);
+
+    if (!candidate || !job) {
+      return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+    }
+
+    // Import predictive analytics service
+    const { PredictiveAnalyticsService } = await import('./predictiveAnalytics.js');
+    const predictiveAnalytics = new PredictiveAnalyticsService();
+    
+    // Get market intelligence
+    const marketData = predictiveAnalytics.getMarketIntelligence(
+      job.title,
+      location || candidate.location,
+      industry || 'technology',
+      job.parsedData?.seniority || 'IC'
+    );
+    
+    // Predict candidate success
+    const prediction = predictiveAnalytics.predictCandidateSuccess(candidate, job, marketData);
+    
+    // Calculate hiring metrics
+    const hiringMetrics = predictiveAnalytics.calculateHiringMetrics(
+      job.title,
+      industry || 'technology',
+      location || candidate.location
+    );
+    
+    res.json({ 
+      success: true, 
+      prediction,
+      marketIntelligence: marketData,
+      hiringMetrics,
+      message: 'Predictive analytics completed'
+    });
+  } catch (error) {
+    console.error('Error in predictive analytics:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+app.get('/api/ai/market-intelligence/:role', async (req, res) => {
+  try {
+    const { role } = req.params;
+    const { location, industry, seniority } = req.query;
+    
+    // Import predictive analytics service
+    const { PredictiveAnalyticsService } = await import('./predictiveAnalytics.js');
+    const predictiveAnalytics = new PredictiveAnalyticsService();
+    
+    const marketData = predictiveAnalytics.getMarketIntelligence(
+      role,
+      location as string || 'Remote',
+      industry as string || 'technology',
+      seniority as string || 'IC'
+    );
+    
+    res.json({ 
+      success: true, 
+      marketIntelligence: marketData,
+      message: 'Market intelligence retrieved'
+    });
+  } catch (error) {
+    console.error('Error in market intelligence:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
 // Delete a job posting
 app.delete('/api/jobs/:id', async (req, res) => {
   try {
