@@ -408,6 +408,15 @@ Return valid JSON matching the CulturalFit schema exactly.`;
     }
   }
 
+  /**
+   * Normalize skill names for comparison
+   */
+  private normalizeSkill(skill: string): string {
+    return skill.toLowerCase()
+      .replace(/[^a-z0-9]/g, '')
+      .replace(/\s+/g, '');
+  }
+
   // Enhanced fallback generators with semantic analysis
   private generateEnhancedFallbackAlignment(
     candidate: Candidate, 
@@ -440,15 +449,51 @@ Return valid JSON matching the CulturalFit schema exactly.`;
   ): SkillsGap {
     const skillLevels: Record<string, "beginner" | "intermediate" | "advanced"> = {};
     
+    // Generate skill levels for candidate skills
     candidate.skills.forEach(skill => {
       skillLevels[skill] = this.assessSkillLevel(skill, candidate.experience);
     });
     
+    // Generate meaningful missing skills based on job requirements
+    const jobSkills = job.parsedData?.skills || [];
+    const candidateSkillSet = new Set(candidate.skills.map(s => this.normalizeSkill(s)));
+    
+    // Find skills that the job requires but candidate doesn't have
+    const missingSkills = jobSkills.filter(jobSkill => 
+      !candidateSkillSet.has(this.normalizeSkill(jobSkill))
+    );
+    
+    // If semantic analysis has results, use them; otherwise generate fallback
+    const finalMissingSkills = semanticAnalysis.missingSkills.length > 0 
+      ? semanticAnalysis.missingSkills 
+      : missingSkills;
+    
+    // Ensure we have meaningful results
+    const criticalGaps = finalMissingSkills.slice(0, Math.min(3, finalMissingSkills.length));
+    const niceToHave = finalMissingSkills.slice(3, Math.min(6, finalMissingSkills.length));
+    
+    // If still no results, provide generic but useful analysis
+    if (criticalGaps.length === 0) {
+      if (jobSkills.length > 0) {
+        criticalGaps.push('Technical skills assessment required', 'Experience verification needed');
+      } else {
+        criticalGaps.push('Job requirements analysis needed', 'Skills evaluation required');
+      }
+    }
+    
+    if (niceToHave.length === 0) {
+      if (jobSkills.length > 0) {
+        niceToHave.push('Additional domain knowledge', 'Industry-specific experience');
+      } else {
+        niceToHave.push('Role-specific skills review', 'Professional development areas');
+      }
+    }
+    
     return {
-      missingSkills: semanticAnalysis.missingSkills.slice(0, 5),
+      missingSkills: finalMissingSkills.length > 0 ? finalMissingSkills : ['Skills assessment required', 'Technical evaluation needed'],
       skillLevels,
-      criticalGaps: semanticAnalysis.missingSkills.slice(0, 3),
-      niceToHave: semanticAnalysis.missingSkills.slice(3, 6)
+      criticalGaps: criticalGaps.length > 0 ? criticalGaps : ['Critical skills evaluation needed', 'Core competencies review'],
+      niceToHave: niceToHave.length > 0 ? niceToHave : ['Additional skills review recommended', 'Professional development areas']
     };
   }
 
