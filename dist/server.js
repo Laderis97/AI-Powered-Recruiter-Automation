@@ -14,6 +14,41 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
+// Add access control middleware
+function checkAccess(req, res, next) {
+    const accessToken = process.env.ACCESS_TOKEN;
+    // If no access token is set, allow public access
+    if (!accessToken) {
+        return next();
+    }
+    // Check for token in query parameter or header
+    const providedToken = req.query.token || req.headers['x-access-token'];
+    if (providedToken === accessToken) {
+        return next();
+    }
+    // If token doesn't match, show access denied
+    if (req.path.startsWith('/api/')) {
+        return res.status(401).json({ error: 'Access denied' });
+    }
+    // For web routes, show a simple access form
+    if (req.path === '/') {
+        return res.send(`
+      <html>
+        <head><title>Access Required</title></head>
+        <body>
+          <h2>Access Required</h2>
+          <form method="GET">
+            <input type="password" name="token" placeholder="Enter access token" required>
+            <button type="submit">Access Application</button>
+          </form>
+        </body>
+      </html>
+    `);
+    }
+    res.status(401).send('Access denied');
+}
+// Apply access control to all routes
+app.use(checkAccess);
 // Multer configuration for file uploads
 const upload = multer({
     storage: multer.diskStorage({
@@ -152,8 +187,9 @@ app.get('/api/candidates', async (req, res) => {
 });
 app.get('/api/candidates/archived', async (req, res) => {
     try {
-        const candidates = await databaseService.getCandidates(true); // includeArchived = true
-        res.json(candidates);
+        const allCandidates = await databaseService.getCandidates(true); // includeArchived = true
+        const archivedCandidates = allCandidates.filter(candidate => candidate.isArchived);
+        res.json(archivedCandidates);
     }
     catch (error) {
         console.error('Error fetching archived candidates:', error);
@@ -172,8 +208,9 @@ app.get('/api/jobs', async (req, res) => {
 });
 app.get('/api/jobs/archived', async (req, res) => {
     try {
-        const jobs = await databaseService.getJobs(true); // includeArchived = true
-        res.json(jobs);
+        const allJobs = await databaseService.getJobs(true); // includeArchived = true
+        const archivedJobs = allJobs.filter(job => job.isArchived);
+        res.json(archivedJobs);
     }
     catch (error) {
         console.error('Error fetching archived jobs:', error);
@@ -238,8 +275,9 @@ app.get('/api/campaigns', async (req, res) => {
 });
 app.get('/api/campaigns/archived', async (req, res) => {
     try {
-        const campaigns = await databaseService.getCampaigns(true); // includeArchived = true
-        res.json(campaigns);
+        const allCampaigns = await databaseService.getCampaigns(true); // includeArchived = true
+        const archivedCampaigns = allCampaigns.filter(campaign => campaign.isArchived);
+        res.json(archivedCampaigns);
     }
     catch (error) {
         console.error('Error fetching archived campaigns:', error);
@@ -571,6 +609,550 @@ app.post('/api/cultural-fit', async (req, res) => {
     catch (error) {
         console.error('Error in cultural fit assessment:', error);
         res.status(500).json({ success: false, error: 'Internal server error' });
+    }
+});
+// Enhanced AI Analysis endpoints
+app.post('/api/ai/enhanced-role-alignment', async (req, res) => {
+    try {
+        const { candidateId, jobId, config } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidate(candidateId);
+        const job = await databaseService.getJob(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.calculateRoleAlignment(candidate, job, config);
+        if (result.ok && result.data) {
+            res.json({
+                success: true,
+                alignment: result.data,
+                provider: result.provider,
+                model: result.model,
+                latency: result.latency,
+                message: `Enhanced role alignment calculated: ${result.data.overallScore}% match`
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                error: result.error || 'Role alignment analysis failed',
+                provider: result.provider,
+                latency: result.latency
+            });
+        }
+    }
+    catch (error) {
+        console.error('Enhanced role alignment error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during role alignment analysis'
+        });
+    }
+});
+app.post('/api/ai/enhanced-skills-gap', async (req, res) => {
+    try {
+        const { candidateId, jobId, config } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidate(candidateId);
+        const job = await databaseService.getJob(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.analyzeSkillsGap(candidate, job, config);
+        if (result.ok && result.data) {
+            res.json({
+                success: true,
+                skillsGap: result.data,
+                provider: result.provider,
+                model: result.model,
+                latency: result.latency,
+                message: 'Enhanced skills gap analysis completed'
+            });
+        }
+        else {
+            res.status(500).json({
+                success: false,
+                error: result.error || 'Skills gap analysis failed',
+                provider: result.provider,
+                latency: result.latency
+            });
+        }
+    }
+    catch (error) {
+        console.error('Enhanced skills gap error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during skills gap analysis'
+        });
+    }
+});
+// Semantic Search endpoints
+app.post('/api/ai/semantic-search', async (req, res) => {
+    try {
+        const { candidateSkills, jobSkills } = req.body;
+        if (!candidateSkills || !jobSkills) {
+            return res.status(400).json({ success: false, error: 'Candidate skills and job skills are required' });
+        }
+        const semanticSearch = new (await import('./semanticSearch.js')).SemanticSearchService();
+        const analysis = semanticSearch.analyzeSkills(candidateSkills, jobSkills);
+        res.json({
+            success: true,
+            analysis,
+            message: 'Semantic skills analysis completed'
+        });
+    }
+    catch (error) {
+        console.error('Semantic search error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during semantic search'
+        });
+    }
+});
+// Predictive Analytics endpoints
+app.post('/api/ai/predictive-analytics', async (req, res) => {
+    try {
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidate(candidateId);
+        const job = await databaseService.getJob(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const predictiveAnalytics = new (await import('./predictiveAnalytics.js')).PredictiveAnalyticsService();
+        const prediction = await predictiveAnalytics.predictCandidateSuccess(candidate, job);
+        const marketIntelligence = await predictiveAnalytics.getMarketIntelligence(job);
+        const hiringMetrics = await predictiveAnalytics.getHiringMetrics();
+        res.json({
+            success: true,
+            prediction,
+            marketIntelligence,
+            hiringMetrics,
+            message: 'Predictive analytics completed'
+        });
+    }
+    catch (error) {
+        console.error('Predictive analytics error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during predictive analytics'
+        });
+    }
+});
+// Advanced Assessment endpoints
+app.post('/api/ai/advanced-assessment', async (req, res) => {
+    try {
+        const { candidateId, jobId, assessmentType, config } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidate(candidateId);
+        const job = await databaseService.getJob(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const advancedAssessment = new (await import('./advancedAssessment.js')).AdvancedAssessmentEngine();
+        let assessment;
+        switch (assessmentType) {
+            case 'behavioral':
+                assessment = advancedAssessment.assessBehavioralProfile(candidate, job, config?.interviewResponses);
+                break;
+            case 'technical':
+                assessment = advancedAssessment.assessTechnicalCapabilities(candidate, job, config?.technicalQuestions);
+                break;
+            case 'soft-skills':
+                assessment = advancedAssessment.evaluateSoftSkills(candidate, job, config?.behavioralQuestions);
+                break;
+            case 'leadership':
+                assessment = advancedAssessment.assessLeadershipPotential(candidate, job, config?.assessmentData);
+                break;
+            case 'comprehensive':
+            default:
+                assessment = advancedAssessment.performComprehensiveAssessment(candidate, job, config);
+                break;
+        }
+        res.json({
+            success: true,
+            assessment,
+            assessmentType: assessmentType || 'comprehensive',
+            message: 'Advanced assessment completed'
+        });
+    }
+    catch (error) {
+        console.error('Advanced assessment error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during advanced assessment'
+        });
+    }
+});
+// Machine Learning endpoints
+app.post('/api/ai/machine-learning/predict', async (req, res) => {
+    try {
+        const { candidateId, jobId, assessmentData } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidate(candidateId);
+        const job = await databaseService.getJob(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const prediction = await machineLearning.predictCandidateSuccess(candidate, job, assessmentData);
+        res.json({
+            success: true,
+            prediction,
+            message: 'Machine learning prediction completed'
+        });
+    }
+    catch (error) {
+        console.error('Machine learning prediction error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during machine learning prediction'
+        });
+    }
+});
+app.post('/api/ai/machine-learning/train', async (req, res) => {
+    try {
+        const { trainingData } = req.body;
+        if (!trainingData || !Array.isArray(trainingData)) {
+            return res.status(400).json({ success: false, error: 'Training data array is required' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const result = await machineLearning.trainModels(trainingData);
+        res.json({
+            success: true,
+            result,
+            message: 'Machine learning models training completed'
+        });
+    }
+    catch (error) {
+        console.error('Machine learning training error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during model training'
+        });
+    }
+});
+app.get('/api/ai/machine-learning/performance', async (req, res) => {
+    try {
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const performance = await machineLearning.getModelPerformance();
+        res.json({
+            success: true,
+            performance,
+            message: 'Model performance metrics retrieved'
+        });
+    }
+    catch (error) {
+        console.error('Machine learning performance error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving performance metrics'
+        });
+    }
+});
+app.get('/api/ai/machine-learning/insights', async (req, res) => {
+    try {
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const insights = await machineLearning.getContinuousLearningInsights();
+        res.json({
+            success: true,
+            insights,
+            message: 'Continuous learning insights retrieved'
+        });
+    }
+    catch (error) {
+        console.error('Machine learning insights error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving insights'
+        });
+    }
+});
+// AI Orchestrator endpoints
+app.post('/api/ai/orchestrator/workflow', async (req, res) => {
+    try {
+        const { workflowType, candidateId, jobId, priority, config, metadata } = req.body;
+        if (!workflowType || !candidateId || !jobId || !priority) {
+            return res.status(400).json({
+                success: false,
+                error: 'Workflow type, candidate ID, job ID, and priority are required'
+            });
+        }
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const workflowRequest = {
+            workflowType,
+            candidateId,
+            jobId,
+            priority,
+            config,
+            metadata: metadata ? { ...metadata, timestamp: new Date() } : undefined
+        };
+        const workflowResult = await orchestrator.executeWorkflow(workflowRequest);
+        res.json({
+            success: true,
+            workflow: workflowResult,
+            message: 'AI workflow executed successfully'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator workflow error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during workflow execution'
+        });
+    }
+});
+app.get('/api/ai/orchestrator/workflow/:workflowId', async (req, res) => {
+    try {
+        const { workflowId } = req.params;
+        if (!workflowId) {
+            return res.status(400).json({ success: false, error: 'Workflow ID is required' });
+        }
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const workflowStatus = orchestrator.getWorkflowStatus(workflowId);
+        if (!workflowStatus) {
+            return res.status(404).json({ success: false, error: 'Workflow not found' });
+        }
+        res.json({
+            success: true,
+            workflow: workflowStatus,
+            message: 'Workflow status retrieved successfully'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator workflow status error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving workflow status'
+        });
+    }
+});
+app.post('/api/ai/orchestrator/workflow/:workflowId/cancel', async (req, res) => {
+    try {
+        const { workflowId } = req.params;
+        if (!workflowId) {
+            return res.status(400).json({ success: false, error: 'Workflow ID is required' });
+        }
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const result = await orchestrator.cancelWorkflow(workflowId);
+        res.json({
+            success: true,
+            result,
+            message: 'Workflow cancellation processed'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator workflow cancellation error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during workflow cancellation'
+        });
+    }
+});
+app.get('/api/ai/orchestrator/health', async (req, res) => {
+    try {
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const health = orchestrator.getServiceHealth();
+        res.json({
+            success: true,
+            health,
+            message: 'Service health status retrieved'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator health check error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during health check'
+        });
+    }
+});
+app.get('/api/ai/orchestrator/metrics', async (req, res) => {
+    try {
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const metrics = orchestrator.getPerformanceMetrics();
+        res.json({
+            success: true,
+            metrics,
+            message: 'Performance metrics retrieved'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator metrics error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving performance metrics'
+        });
+    }
+});
+app.post('/api/ai/orchestrator/config', async (req, res) => {
+    try {
+        const { config } = req.body;
+        if (!config) {
+            return res.status(400).json({ success: false, error: 'Configuration object is required' });
+        }
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const result = await orchestrator.updateConfig(config);
+        res.json({
+            success: true,
+            result,
+            message: 'Orchestrator configuration updated'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator config update error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error updating configuration'
+        });
+    }
+});
+app.post('/api/ai/orchestrator/cache/clear', async (req, res) => {
+    try {
+        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+        const result = await orchestrator.clearCache();
+        res.json({
+            success: true,
+            result,
+            message: 'Cache cleared successfully'
+        });
+    }
+    catch (error) {
+        console.error('AI orchestrator cache clear error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error clearing cache'
+        });
+    }
+});
+// A/B Testing endpoints
+app.post('/api/ai/ab-test/setup', async (req, res) => {
+    try {
+        const { testConfig } = req.body;
+        if (!testConfig) {
+            return res.status(400).json({ success: false, error: 'Test configuration is required' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const result = await machineLearning.setupABTest(testConfig);
+        res.json({
+            success: true,
+            result,
+            message: 'A/B test setup completed'
+        });
+    }
+    catch (error) {
+        console.error('A/B test setup error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error during A/B test setup'
+        });
+    }
+});
+app.get('/api/ai/ab-test/:testId/variant', async (req, res) => {
+    try {
+        const { testId } = req.params;
+        const { candidateId } = req.query;
+        if (!testId || !candidateId) {
+            return res.status(400).json({ success: false, error: 'Test ID and candidate ID are required' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const variant = machineLearning.getABTestVariant(testId, candidateId);
+        if (!variant) {
+            return res.status(404).json({ success: false, error: 'A/B test variant not found' });
+        }
+        res.json({
+            success: true,
+            variant,
+            message: 'A/B test variant retrieved'
+        });
+    }
+    catch (error) {
+        console.error('A/B test variant error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving A/B test variant'
+        });
+    }
+});
+app.post('/api/ai/ab-test/:testId/result', async (req, res) => {
+    try {
+        const { testId } = req.params;
+        const { variantId, candidateId, metrics } = req.body;
+        if (!testId || !variantId || !candidateId || !metrics) {
+            return res.status(400).json({
+                success: false,
+                error: 'Test ID, variant ID, candidate ID, and metrics are required'
+            });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const result = await machineLearning.recordABTestResult(testId, variantId, candidateId, metrics);
+        res.json({
+            success: true,
+            result,
+            message: 'A/B test result recorded'
+        });
+    }
+    catch (error) {
+        console.error('A/B test result recording error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error recording A/B test result'
+        });
+    }
+});
+app.get('/api/ai/ab-test/:testId/results', async (req, res) => {
+    try {
+        const { testId } = req.params;
+        if (!testId) {
+            return res.status(400).json({ success: false, error: 'Test ID is required' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const result = await machineLearning.getABTestResults(testId);
+        res.json({
+            success: true,
+            result,
+            message: 'A/B test results retrieved'
+        });
+    }
+    catch (error) {
+        console.error('A/B test results error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error retrieving A/B test results'
+        });
+    }
+});
+// Feedback and Continuous Learning endpoints
+app.post('/api/ai/feedback', async (req, res) => {
+    try {
+        const { feedback } = req.body;
+        if (!feedback) {
+            return res.status(400).json({ success: false, error: 'Feedback data is required' });
+        }
+        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+        const result = await machineLearning.recordFeedback(feedback);
+        res.json({
+            success: true,
+            result,
+            message: 'Feedback recorded successfully'
+        });
+    }
+    catch (error) {
+        console.error('Feedback recording error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Internal server error recording feedback'
+        });
     }
 });
 // Delete a job posting

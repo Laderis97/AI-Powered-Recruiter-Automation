@@ -99,7 +99,7 @@ export class AIAgent {
     } catch (error) {
       this.log.error('Unexpected error in role alignment:', error);
       const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
-      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
+      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, config, semanticAnalysis) };
     }
   }
 
@@ -133,7 +133,7 @@ export class AIAgent {
     } catch (error) {
       this.log.error('Unexpected error in skills gap analysis:', error);
       const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
-      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig, semanticAnalysis) };
+      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, config, semanticAnalysis) };
     }
   }
 
@@ -159,7 +159,7 @@ export class AIAgent {
       return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, analysisConfig) };
     } catch (error) {
       this.log.error('Unexpected error in interview questions generation:', error);
-      return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, config) };
     }
   }
 
