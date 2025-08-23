@@ -13,5 +13,8 @@ services:
         value: production
       - key: PORT
         value: 10000
+      - key: ACCESS_TOKEN
+        sync: false
+        optional: true
     healthCheckPath: /
     autoDeploy: true

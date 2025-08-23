@@ -13,6 +13,7 @@ import { emailService } from './emailService.js';
 import { databaseService, JobPosting, Candidate, Campaign, EmailConfig } from './databaseService.js';
 import { aiAgent } from './aiAgent.js';
 import { type AlignmentScore, type SkillsGap, type CulturalFit } from './schemas.js';
+import { Request, Response, NextFunction } from 'express';
 
 dotenv.config();
 
@@ -23,6 +24,49 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
+
+// Add access control middleware
+function checkAccess(req: Request, res: Response, next: NextFunction) {
+  const accessToken = process.env.ACCESS_TOKEN;
+  
+  // If no access token is set, allow public access
+  if (!accessToken) {
+    return next();
+  }
+  
+  // Check for token in query parameter, header, or cookie
+  const providedToken = req.query.token || req.headers['x-access-token'] || req.cookies?.accessToken;
+  
+  if (providedToken === accessToken) {
+    return next();
+  }
+  
+  // If token doesn't match, show access denied
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Access denied' });
+  }
+  
+  // For web routes, show a simple access form
+  if (req.path === '/') {
+    return res.send(`
+      <html>
+        <head><title>Access Required</title></head>
+        <body>
+          <h2>Access Required</h2>
+          <form method="GET">
+            <input type="password" name="token" placeholder="Enter access token" required>
+            <button type="submit">Access Application</button>
+          </form>
+        </body>
+      </html>
+    `);
+  }
+  
+  res.status(401).send('Access denied');
+}
+
+// Apply access control to all routes
+app.use(checkAccess);
 
 // Multer configuration for file uploads
 const upload = multer({
