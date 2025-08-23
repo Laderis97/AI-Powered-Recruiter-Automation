@@ -84,16 +84,16 @@ export interface PerformanceMetrics {
 }
 
 export class AIOrchestrator {
-  private aiAgent: AIAgent;
-  private semanticSearch: SemanticSearchService;
-  private predictiveAnalytics: PredictiveAnalyticsService;
-  private advancedAssessment: AdvancedAssessmentEngine;
-  private machineLearning: MachineLearningService;
+  private aiAgent!: AIAgent;
+  private semanticSearch!: SemanticSearchService;
+  private predictiveAnalytics!: PredictiveAnalyticsService;
+  private advancedAssessment!: AdvancedAssessmentEngine;
+  private machineLearning!: MachineLearningService;
   
   private config: OrchestrationConfig;
   private workflows: Map<string, WorkflowResult> = new Map();
   private serviceHealth: Map<string, ServiceHealth> = new Map();
-  private performanceMetrics: PerformanceMetrics;
+  private performanceMetrics!: PerformanceMetrics;
   private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
   
   constructor(config: Partial<OrchestrationConfig> = {}) {
@@ -342,29 +342,34 @@ export class AIOrchestrator {
       'culturalFit'
     ));
     
-    // Semantic analysis
-    if (this.config.enableSemanticSearch) {
-      services.push(this.executeWithFallback(
-        () => this.semanticSearch.analyzeSkills(candidate.skills || [], job.parsedData?.skills || []),
-        'semanticAnalysis'
-      ));
-    }
-    
-    // Predictive analytics
-    if (this.config.enablePredictiveAnalytics) {
-      services.push(this.executeWithFallback(
-        () => this.predictiveAnalytics.predictCandidateSuccess(candidate, job),
-        'predictiveAnalytics'
-      ));
-    }
-    
-    // Advanced assessment
-    if (this.config.enableAdvancedAssessment) {
-      services.push(this.executeWithFallback(
-        () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
-        'advancedAssessment'
-      ));
-    }
+          // Semantic analysis
+      if (this.config.enableSemanticSearch) {
+        services.push(this.executeWithFallback(
+          async () => this.semanticSearch.analyzeSkills(candidate.skills || [], job.parsedData?.skills || []),
+          'semanticAnalysis'
+        ));
+      }
+      
+      // Predictive analytics
+      if (this.config.enablePredictiveAnalytics) {
+        services.push(this.executeWithFallback(
+          async () => this.predictiveAnalytics.predictCandidateSuccess(candidate, job, {
+            salaryRange: { min: 80000, median: 120000, max: 200000, currency: 'USD' },
+            skillsDemand: [],
+            marketRate: 120000,
+            competitorAnalysis: []
+          }),
+          'predictiveAnalytics'
+        ));
+      }
+      
+      // Advanced assessment
+      if (this.config.enableAdvancedAssessment) {
+        services.push(this.executeWithFallback(
+          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+          'advancedAssessment'
+        ));
+      }
     
     // Machine learning prediction
     if (this.config.enableMachineLearning) {
@@ -439,18 +444,13 @@ export class AIOrchestrator {
     // Leadership assessment focuses on leadership potential
     const services: Promise<any>[] = [];
     
-    // Advanced assessment with leadership focus
-    if (this.config.enableAdvancedAssessment) {
-      services.push(this.executeWithFallback(
-        () => this.advancedAssessment.performComprehensiveAssessment(candidate, job, {
-          focus: 'leadership',
-          includeTechnical: false,
-          includeBehavioral: true,
-          includeSoftSkills: true
-        }),
-        'advancedAssessment'
-      ));
-    }
+          // Advanced assessment with leadership focus
+      if (this.config.enableAdvancedAssessment) {
+        services.push(this.executeWithFallback(
+          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+          'advancedAssessment'
+        ));
+      }
     
     // Cultural fit assessment
     services.push(this.executeWithFallback(
@@ -483,18 +483,13 @@ export class AIOrchestrator {
     // Technical deep dive focuses on technical capabilities
     const services: Promise<any>[] = [];
     
-    // Advanced technical assessment
-    if (this.config.enableAdvancedAssessment) {
-      services.push(this.executeWithFallback(
-        () => this.advancedAssessment.performComprehensiveAssessment(candidate, job, {
-          focus: 'technical',
-          includeTechnical: true,
-          includeBehavioral: false,
-          includeSoftSkills: false
-        }),
-        'advancedAssessment'
-      ));
-    }
+          // Advanced technical assessment
+      if (this.config.enableAdvancedAssessment) {
+        services.push(this.executeWithFallback(
+          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+          'advancedAssessment'
+        ));
+      }
     
     // Technical skills gap analysis
     services.push(this.executeWithFallback(

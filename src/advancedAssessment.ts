@@ -712,16 +712,18 @@ export class AdvancedAssessmentEngine {
     codeQuality: string
   ): number {
     const scores = {
-      coding: { beginner: 25, intermediate: 50, advanced: 75, expert: 95 },
-      problemSolving: { basic: 20, analytical: 50, creative: 75, strategic: 90 },
-      systemDesign: { none: 0, basic: 30, intermediate: 60, advanced: 85 },
-      debugging: { basic: 25, methodical: 50, efficient: 75, expert: 90 },
-      codeQuality: { poor: 20, adequate: 45, good: 70, excellent: 90 }
+      coding: { beginner: 25, intermediate: 50, advanced: 75, expert: 95 } as const,
+      problemSolving: { basic: 20, analytical: 50, creative: 75, strategic: 90 } as const,
+      systemDesign: { none: 0, basic: 30, intermediate: 60, advanced: 85 } as const,
+      debugging: { basic: 25, methodical: 50, efficient: 75, expert: 90 } as const,
+      codeQuality: { poor: 20, adequate: 45, good: 70, excellent: 90 } as const
     };
 
-    const total = scores.coding[coding] + scores.problemSolving[problemSolving] + 
-                  scores.systemDesign[systemDesign] + scores.debugging[debugging] + 
-                  scores.codeQuality[codeQuality];
+    const total = (scores.coding[coding as keyof typeof scores.coding] || 0) + 
+                  (scores.problemSolving[problemSolving as keyof typeof scores.problemSolving] || 0) + 
+                  (scores.systemDesign[systemDesign as keyof typeof scores.systemDesign] || 0) + 
+                  (scores.debugging[debugging as keyof typeof scores.debugging] || 0) + 
+                  (scores.codeQuality[codeQuality as keyof typeof scores.codeQuality] || 0);
     
     return Math.round(total / 5);
   }

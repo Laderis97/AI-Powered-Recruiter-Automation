@@ -99,7 +99,8 @@ export class AIAgent {
     } catch (error) {
       this.log.error('Unexpected error in role alignment:', error);
       const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
-      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, config, semanticAnalysis) };
+      const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
+      return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
     }
   }
 
@@ -133,7 +134,8 @@ export class AIAgent {
     } catch (error) {
       this.log.error('Unexpected error in skills gap analysis:', error);
       const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
-      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, config, semanticAnalysis) };
+      const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
+      return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig, semanticAnalysis) };
     }
   }
 
@@ -159,7 +161,8 @@ export class AIAgent {
       return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, analysisConfig) };
     } catch (error) {
       this.log.error('Unexpected error in interview questions generation:', error);
-      return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, config) };
+      const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
+      return { ok: true, data: this.generateEnhancedFallbackInterviewQuestions(candidate, job, analysisConfig) };
     }
   }
 
@@ -198,10 +201,10 @@ export class AIAgent {
       }
       
       this.log.error('AI categorized questions generation failed:', result.error);
-      return { ok: true, data: this.generateEnhancedFallbackCategorizedQuestions(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackCategorizedQuestions(candidate, job, { ...this.defaultConfig, ...config }) };
     } catch (error) {
       this.log.error('Unexpected error in categorized questions generation:', error);
-      return { ok: true, data: this.generateEnhancedFallbackCategorizedQuestions(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackCategorizedQuestions(candidate, job, { ...this.defaultConfig, ...config }) };
     }
   }
 
@@ -227,7 +230,7 @@ export class AIAgent {
       return { ok: true, data: this.generateEnhancedFallbackCulturalFit(candidate, job, analysisConfig) };
     } catch (error) {
       this.log.error('Unexpected error in cultural fit assessment:', error);
-      return { ok: true, data: this.generateEnhancedFallbackCulturalFit(candidate, job, analysisConfig) };
+      return { ok: true, data: this.generateEnhancedFallbackCulturalFit(candidate, job, { ...this.defaultConfig, ...config }) };
     }
   }
 

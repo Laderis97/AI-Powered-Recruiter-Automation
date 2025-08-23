@@ -470,7 +470,7 @@ app.post('/api/role-alignment', async (req, res) => {
             res.json({
                 success: true,
                 alignment: result.data,
-                message: `Role alignment calculated: ${result.data.overallScore}% match`
+                message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`
             });
         }
         else {
@@ -530,7 +530,7 @@ app.post('/api/interview-questions', async (req, res) => {
             res.json({
                 success: true,
                 questions: result.data,
-                message: `${result.data.length} interview questions generated`
+                message: `${result.data?.length || 0} interview questions generated`
             });
         }
         else {
@@ -560,14 +560,14 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
             res.json({
                 success: true,
                 categorizedQuestions: result.data,
-                message: `${result.data.all.length} categorized interview questions generated`,
+                message: `${result.data?.all?.length || 0} categorized interview questions generated`,
                 summary: {
-                    technical: result.data.technical.length,
-                    experience: result.data.experience.length,
-                    problemSolving: result.data.problemSolving.length,
-                    leadership: result.data.leadership.length,
-                    cultural: result.data.cultural.length,
-                    total: result.data.all.length
+                    technical: result.data?.technical?.length || 0,
+                    experience: result.data?.experience?.length || 0,
+                    problemSolving: result.data?.problemSolving?.length || 0,
+                    leadership: result.data?.leadership?.length || 0,
+                    cultural: result.data?.cultural?.length || 0,
+                    total: result.data?.all?.length || 0
                 }
             });
         }
@@ -598,7 +598,7 @@ app.post('/api/cultural-fit', async (req, res) => {
             res.json({
                 success: true,
                 culturalFit: result.data,
-                message: `Cultural fit score: ${result.data.fitScore}%`
+                message: `Cultural fit score: ${result.data?.fitScore || 0}%`
             });
         }
         else {
@@ -726,9 +726,14 @@ app.post('/api/ai/predictive-analytics', async (req, res) => {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
         const predictiveAnalytics = new (await import('./predictiveAnalytics.js')).PredictiveAnalyticsService();
-        const prediction = await predictiveAnalytics.predictCandidateSuccess(candidate, job);
-        const marketIntelligence = await predictiveAnalytics.getMarketIntelligence(job);
-        const hiringMetrics = await predictiveAnalytics.getHiringMetrics();
+        const prediction = await predictiveAnalytics.predictCandidateSuccess(candidate, job, {
+            salaryRange: { min: 80000, median: 120000, max: 200000, currency: 'USD' },
+            skillsDemand: [],
+            marketRate: 120000,
+            competitorAnalysis: []
+        });
+        const marketIntelligence = await predictiveAnalytics.getMarketIntelligence(job.title, candidate.location || 'Remote', 'technology', job.parsedData?.seniority || 'IC');
+        const hiringMetrics = await predictiveAnalytics.calculateHiringMetrics(job.title, 'technology', candidate.location || 'Remote');
         res.json({
             success: true,
             prediction,
