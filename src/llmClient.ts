@@ -50,7 +50,7 @@ export class OpenAILlmClient implements LlmClient {
             messages: [
               {
                 role: "system",
-                content: "You are an expert AI recruiter assistant. Always respond with valid JSON that matches the requested schema exactly. If you cannot provide the requested data, provide reasonable fallback values that match the schema."
+                content: "You are an expert AI recruiter with 10+ years of experience in technical recruitment. You specialize in analyzing candidate-job matches, identifying skills gaps, and generating targeted interview questions. Always respond with valid JSON that matches the requested schema exactly. Provide detailed, actionable insights that help recruiters make informed decisions."
               },
               {
                 role: "user",
@@ -118,7 +118,7 @@ export class OpenAILlmClient implements LlmClient {
             messages: [
               {
                 role: "system",
-                content: "You are an expert AI recruiter assistant. Provide clear, professional, and actionable responses."
+                content: "You are an expert AI recruiter with 10+ years of experience in technical recruitment. Provide clear, professional, and actionable responses that help recruiters evaluate candidates effectively."
               },
               {
                 role: "user",
@@ -163,45 +163,4 @@ export class OpenAILlmClient implements LlmClient {
   }
 }
 
-// Fallback client for when OpenAI fails
-export class FallbackLlmClient implements LlmClient {
-  constructor(private fallbackStrategies: LlmClient[]) {}
 
-  async completeJSON<T>(prompt: string, schema: z.ZodSchema<T>): Promise<Result<T>> {
-    for (const client of this.fallbackStrategies) {
-      try {
-        const result = await client.completeJSON(prompt, schema);
-        if (result.ok) {
-          return result;
-        }
-      } catch (error) {
-        console.warn('Fallback client failed:', error);
-        continue;
-      }
-    }
-    
-    return {
-      ok: false,
-      error: 'All LLM clients failed'
-    };
-  }
-
-  async completeText(prompt: string): Promise<Result<string>> {
-    for (const client of this.fallbackStrategies) {
-      try {
-        const result = await client.completeText(prompt);
-        if (result.ok) {
-          return result;
-        }
-      } catch (error) {
-        console.warn('Fallback client failed:', error);
-        continue;
-      }
-    }
-    
-    return {
-      ok: false,
-      error: 'All LLM clients failed'
-    };
-  }
-}

@@ -9,7 +9,7 @@ import {
   type CulturalFit,
   clamp
 } from './schemas.js';
-import { LlmClient, OpenAILlmClient, type Result } from './llmClient.js';
+import { OpenAILlmClient, type Result } from './llmClient.js';
 import { SemanticSearchService, type SemanticAnalysis } from './semanticSearch.js';
 import { z } from 'zod';
 
@@ -62,18 +62,17 @@ export class AIAgent {
   private semanticSearch: SemanticSearchService;
 
   constructor(
-    private llm: LlmClient = new OpenAILlmClient(),
+    private llm: OpenAILlmClient = new OpenAILlmClient(),
     private log = console
   ) {
     this.semanticSearch = new SemanticSearchService();
     
-    // Check if OpenAI API is available, if not use mock client
+    // Ensure OpenAI API key is configured
     if (!process.env.OPENAI_API_KEY) {
-      this.log.warn('⚠️ OpenAI API key not configured - using enhanced fallback analysis');
-      this.llm = new MockAILlmClient();
+      this.log.warn('⚠️ OpenAI API key not configured - AI analysis will use enhanced fallback methods');
     }
     
-    this.log.log('🧠 Enhanced AI Agent initialized with multi-model support and semantic search');
+    this.log.log('🧠 Enhanced AI Agent initialized with OpenAI integration and semantic search');
   }
 
   /**
@@ -714,133 +713,7 @@ Return valid JSON matching the CulturalFit schema exactly.`;
   }
 }
 
-// Mock AI Client for when OpenAI API is not available
-class MockAILlmClient implements LlmClient {
-  async completeJSON<T>(prompt: string, schema: z.ZodSchema<T>): Promise<Result<T>> {
-    // Simulate AI processing delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    // Parse the prompt to understand what's being requested
-    const promptLower = prompt.toLowerCase();
-    
-    if (promptLower.includes('role alignment') || promptLower.includes('alignment')) {
-      return {
-        ok: true,
-        data: {
-          overallScore: 78,
-          technicalScore: 82,
-          experienceScore: 75,
-          skillsScore: 80,
-          culturalFitScore: 76,
-          detailedBreakdown: "AI analysis shows strong technical alignment with some experience gaps. Candidate demonstrates solid foundation in required skills with room for growth in advanced areas.",
-          recommendations: [
-            "Conduct technical assessment to verify skill depth",
-            "Evaluate leadership potential through behavioral questions",
-            "Assess cultural fit through team collaboration scenarios"
-          ],
-          interviewQuestions: [
-            "Describe a complex technical challenge you solved recently",
-            "How do you approach mentoring junior team members?",
-            "Tell me about a time you had to adapt to changing requirements"
-          ],
-          riskFactors: [
-            "Limited exposure to large-scale systems",
-            "Team leadership experience needs verification"
-          ],
-          trainingNeeds: [
-            "Advanced system architecture principles",
-            "Team management and stakeholder communication"
-          ]
-        } as T,
-        provider: 'MockAI',
-        model: 'mock-gpt-4',
-        latency: 100
-      };
-    }
-    
-    if (promptLower.includes('skills gap') || promptLower.includes('gap')) {
-      return {
-        ok: true,
-        data: {
-          missingSkills: ['Advanced System Design', 'Cloud Architecture', 'Team Leadership'],
-          skillLevels: {
-            'JavaScript': 'advanced',
-            'React': 'intermediate',
-            'Node.js': 'intermediate'
-          },
-          criticalGaps: ['System Architecture', 'Cloud Infrastructure'],
-          niceToHave: ['DevOps Experience', 'Mentoring Skills', 'Stakeholder Management']
-        } as T,
-        provider: 'MockAI',
-        model: 'mock-gpt-4',
-        latency: 100
-      };
-    }
-    
-    if (promptLower.includes('interview questions') || promptLower.includes('questions')) {
-      return {
-        ok: true,
-        data: [
-          "Describe your most challenging technical project and how you approached it",
-          "How do you stay updated with emerging technologies in your field?",
-          "Tell me about a time you had to lead a team through a difficult situation",
-          "What's your approach to debugging complex production issues?",
-          "How do you handle conflicting priorities and deadlines?",
-          "Describe a time you had to learn a new technology quickly for a project"
-        ] as T,
-        provider: 'MockAI',
-        model: 'mock-gpt-4',
-        latency: 100
-      };
-    }
-    
-    if (promptLower.includes('cultural fit') || promptLower.includes('cultural')) {
-      return {
-        ok: true,
-        data: {
-          fitScore: 78,
-          strengths: [
-            'Strong technical background aligns with role requirements',
-            'Demonstrates collaborative approach in past projects',
-            'Shows adaptability and learning mindset'
-          ],
-          concerns: [
-            'Limited exposure to company culture and values',
-            'Team dynamics preferences need further assessment'
-          ],
-          recommendations: [
-            'Conduct behavioral interview to assess communication style',
-            'Evaluate team collaboration preferences',
-            'Assess alignment with company values and mission'
-          ]
-        } as T,
-        provider: 'MockAI',
-        model: 'mock-gpt-4',
-        latency: 100
-      };
-    }
-    
-    // Default fallback
-    return {
-      ok: false,
-      error: 'Mock AI client cannot process this request type',
-      provider: 'MockAI',
-      latency: 100
-    };
-  }
-  
-  async completeText(prompt: string): Promise<Result<string>> {
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
-    return {
-      ok: true,
-      data: "Mock AI analysis completed. This is a simulated response for demonstration purposes.",
-      provider: 'MockAI',
-      model: 'mock-gpt-4',
-      latency: 100
-    };
-  }
-}
+
 
 // Export singleton instance
 export const aiAgent = new AIAgent();
