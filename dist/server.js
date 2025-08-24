@@ -1340,6 +1340,10 @@ app.post('/api/campaigns/:id/unarchive', async (req, res) => {
         res.status(500).json({ success: false, error: 'Failed to unarchive campaign' });
     }
 });
+// Modern Dashboard Route
+app.get('/modern', (req, res) => {
+    res.render('modern-dashboard');
+});
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
