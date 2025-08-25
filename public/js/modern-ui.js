@@ -835,12 +835,20 @@ class ModernUI {
   }
 }
 
-// ===== RESUME UPLOAD FUNCTIONALITY =====
+// ===== GLOBAL VARIABLES =====
 
 // Global variables for resume upload
 let selectedFiles = [];
 let uploadQueue = [];
 let parsedResults = [];
+
+// Global variables for job management
+let jobsData = [];
+
+// Global variables for candidate management
+let candidatesData = [];
+
+// ===== RESUME UPLOAD FUNCTIONALITY =====
 
 // Function to open the resume upload modal
 function openResumeUploadModal() {
@@ -1267,8 +1275,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Global functions for onclick handlers
-window.openResumeModal = openResumeModal;
-window.closeResumeModal = closeResumeModal;
+window.openResumeUploadModal = openResumeUploadModal;
+window.closeResumeUploadModal = closeResumeUploadModal;
 window.processUploads = processUploads;
 window.clearResults = clearResults;
 window.openBulkUpload = openBulkUpload;
@@ -1453,7 +1461,6 @@ document.head.appendChild(style);
 // ===== JOB MANAGEMENT FUNCTIONALITY =====
 
 // Global variables for job management
-let jobsData = [];
 let currentJobId = null;
 
 // Function to open the Add Job modal
@@ -1770,9 +1777,6 @@ function initializeJobManagement() {
 }
 
 // ===== CANDIDATE MANAGEMENT FUNCTIONALITY =====
-
-// Global variables for candidate management
-let candidatesData = [];
 
 // Function to load candidates from the server
 async function loadCandidates() {
