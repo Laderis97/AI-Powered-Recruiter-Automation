@@ -1886,29 +1886,32 @@ function createCandidateCard(candidate) {
       displayTitle = displayTitle.substring(0, 50) + '...';
     }
     
-    card.innerHTML = `
-      <div class="candidate-avatar" data-morph>${initials}</div>
-      <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
-      <p class="candidate-title">${displayTitle}</p>
-      <div class="candidate-skills">
-        ${skills}
-      </div>
-      <div class="candidate-meta">
-        <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
-        <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
-      </div>
-      <div class="candidate-actions">
-        <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id || 'unknown'}')">
-          <i class="fas fa-eye"></i>
-        </button>
-        <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id || 'unknown'}')">
-          <i class="fas fa-envelope"></i>
-        </button>
-        <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id || 'unknown'}')">
-          <i class="fas fa-archive"></i>
-        </button>
-      </div>
-    `;
+         const cardHTML = `
+       <div class="candidate-avatar" data-morph>${initials}</div>
+       <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
+       <p class="candidate-title">${displayTitle}</p>
+       <div class="candidate-skills">
+         ${skills}
+       </div>
+       <div class="candidate-meta">
+         <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
+         <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
+       </div>
+       <div class="candidate-actions">
+         <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id || 'unknown'}')">
+           <i class="fas fa-eye"></i>
+         </button>
+         <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id || 'unknown'}')">
+           <i class="fas fa-envelope"></i>
+         </button>
+         <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id || 'unknown'}')">
+           <i class="fas fa-archive"></i>
+         </button>
+       </div>
+     `;
+     
+     console.log('Generated card HTML:', cardHTML);
+     card.innerHTML = cardHTML;
     
     return card;
   } catch (error) {

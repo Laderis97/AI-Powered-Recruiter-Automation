@@ -229,6 +229,11 @@ Return only valid JSON. If a field is not found, use null or empty string as app
       }
     }
     
+    // If no title found, set a default
+    if (!title) {
+      title = 'Professional';
+    }
+    
     // Extract location
     let location = undefined;
     const locationMatch = text.match(/(?:location|address|city)[:\s]+([^,\n]+)/i);
