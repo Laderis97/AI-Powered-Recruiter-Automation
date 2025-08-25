@@ -1221,6 +1221,8 @@ function getNotificationIcon(type) {
 
 // Initialize resume upload when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('DOMContentLoaded: Starting initialization...');
+  
   // Initialize ModernUI
   const modernUI = new ModernUI();
   
@@ -1232,6 +1234,19 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Initialize candidate management functionality
   initializeCandidateManagement();
+  
+  // Test candidate data after a short delay
+  setTimeout(() => {
+    console.log('DOMContentLoaded: Testing candidate data after delay...');
+    console.log('candidatesData at test time:', candidatesData);
+    console.log('candidatesData length at test time:', candidatesData.length);
+    
+    // Force a re-render to see if that helps
+    if (candidatesData.length > 0) {
+      console.log('DOMContentLoaded: Forcing re-render of candidates...');
+      renderCandidates();
+    }
+  }, 2000);
   
   // Close modal when clicking outside
   const modal = document.getElementById('resumeUploadModal');
@@ -1762,32 +1777,51 @@ let candidatesData = [];
 // Function to load candidates from the server
 async function loadCandidates() {
   try {
+    console.log('loadCandidates: Starting to fetch candidates...');
     showCandidatesLoading();
     
     const response = await fetch('/api/candidates');
+    console.log('loadCandidates: Response status:', response.status);
+    
     if (response.ok) {
       const data = await response.json();
-      console.log('Candidates data received:', data);
+      console.log('loadCandidates: Raw data received:', data);
+      console.log('loadCandidates: Data type:', typeof data);
+      console.log('loadCandidates: Data length:', Array.isArray(data) ? data.length : 'Not an array');
+      
       candidatesData = data || [];
-      console.log('Candidates data processed:', candidatesData);
+      console.log('loadCandidates: Processed candidatesData:', candidatesData);
+      console.log('loadCandidates: candidatesData length:', candidatesData.length);
+      
       renderCandidates();
     } else {
-      console.error('Failed to load candidates');
+      console.error('loadCandidates: Failed to load candidates, status:', response.status);
       showCandidatesEmpty();
     }
   } catch (error) {
-    console.error('Error loading candidates:', error);
+    console.error('loadCandidates: Error loading candidates:', error);
     showCandidatesEmpty();
   }
 }
 
 // Function to render candidates in the grid
 function renderCandidates() {
+  console.log('renderCandidates called with data:', candidatesData);
+  
   const candidatesGrid = document.getElementById('candidatesGrid');
   const loadingState = document.getElementById('candidatesLoading');
   const emptyState = document.getElementById('candidatesEmpty');
   
-  if (!candidatesGrid) return;
+  console.log('DOM elements found:', {
+    candidatesGrid: !!candidatesGrid,
+    loadingState: !!loadingState,
+    emptyState: !!emptyState
+  });
+  
+  if (!candidatesGrid) {
+    console.error('candidatesGrid element not found!');
+    return;
+  }
   
   // Hide loading and empty states
   if (loadingState) loadingState.style.display = 'none';
@@ -1796,14 +1830,24 @@ function renderCandidates() {
   // Clear existing content
   candidatesGrid.innerHTML = '';
   
+  console.log('candidatesData length:', candidatesData.length);
+  
   if (candidatesData.length === 0) {
+    console.log('No candidates data, showing empty state');
     showCandidatesEmpty();
     return;
   }
   
-  candidatesData.forEach(candidate => {
+  console.log('Creating candidate cards for', candidatesData.length, 'candidates');
+  candidatesData.forEach((candidate, index) => {
+    console.log(`Creating card ${index + 1}:`, candidate);
     const candidateCard = createCandidateCard(candidate);
-    candidatesGrid.appendChild(candidateCard);
+    if (candidateCard) {
+      candidatesGrid.appendChild(candidateCard);
+      console.log(`Card ${index + 1} added to grid`);
+    } else {
+      console.error(`Failed to create card for candidate ${index + 1}:`, candidate);
+    }
   });
 }
 
@@ -1993,9 +2037,16 @@ function renderFilteredCandidates(filteredCandidates) {
 
 // Initialize candidate management functionality
 function initializeCandidateManagement() {
+  console.log('initializeCandidateManagement: Starting initialization...');
+  
   // Add event listeners for candidate filters
   const statusFilter = document.querySelector('[data-track="candidate-status-filter"]');
   const sortFilter = document.querySelector('[data-track="candidate-sort"]');
+  
+  console.log('initializeCandidateManagement: Found filters:', {
+    statusFilter: !!statusFilter,
+    sortFilter: !!sortFilter
+  });
   
   if (statusFilter) {
     statusFilter.addEventListener('change', filterCandidates);
@@ -2006,5 +2057,6 @@ function initializeCandidateManagement() {
   }
 
   // Load initial candidates
+  console.log('initializeCandidateManagement: Loading initial candidates...');
   loadCandidates();
 }
