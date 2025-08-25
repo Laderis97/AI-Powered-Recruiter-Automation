@@ -896,7 +896,9 @@
   border: 1px solid var(--color-border);
   max-width: 600px;
   width: 90%;
-  max-height: 80vh;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   animation: slideUp 0.3s ease-out;
 }
@@ -935,7 +937,8 @@
 .modal-body {
   padding: var(--space-6);
   overflow-y: auto;
-  max-height: 60vh;
+  flex: 1;
+  min-height: 0;
 }
 
 .modal-footer {
@@ -946,6 +949,7 @@
   padding: var(--space-6);
   border-top: 1px solid var(--color-border);
   background: var(--color-background-subtle);
+  flex-shrink: 0;
 }
 
 /* Upload Zone */
@@ -1577,8 +1581,9 @@
 }
 
 .job-form {
-  max-height: 70vh;
   overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .form-section {
@@ -1677,5 +1682,19 @@
   .modal-large {
     width: 98%;
     margin: var(--space-2);
+  }
+  
+  .modal-content {
+    max-height: 95vh;
+    width: 95%;
+  }
+  
+  .modal-footer {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  
+  .modal-footer .btn {
+    width: 100%;
   }
 }
