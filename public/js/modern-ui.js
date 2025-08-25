@@ -1767,7 +1767,9 @@ async function loadCandidates() {
     const response = await fetch('/api/candidates');
     if (response.ok) {
       const data = await response.json();
+      console.log('Candidates data received:', data);
       candidatesData = data || [];
+      console.log('Candidates data processed:', candidatesData);
       renderCandidates();
     } else {
       console.error('Failed to load candidates');
@@ -1807,45 +1809,78 @@ function renderCandidates() {
 
 // Function to create a candidate card element
 function createCandidateCard(candidate) {
-  const card = document.createElement('div');
-  card.className = 'candidate-card';
-  card.setAttribute('data-stagger', '');
-  card.setAttribute('data-track', 'candidate-card');
-  card.setAttribute('data-candidate-id', candidate.id);
-  
-  // Generate initials for avatar
-  const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
-  
-  // Display skills (limit to 3)
-  const skills = candidate.skills && candidate.skills.length > 0 
-    ? candidate.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('')
-    : '<em>No skills detected</em>';
-  
-  card.innerHTML = `
-    <div class="candidate-avatar" data-morph>${initials}</div>
-    <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
-    <p class="candidate-title">${candidate.title || 'No title specified'}</p>
-    <div class="candidate-skills">
-      ${skills}
-    </div>
-    <div class="candidate-meta">
-      <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
-      <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
-    </div>
-    <div class="candidate-actions">
-      <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id}')">
-        <i class="fas fa-eye"></i>
-      </button>
-      <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id}')">
-        <i class="fas fa-envelope"></i>
-      </button>
-      <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id}')">
-        <i class="fas fa-archive"></i>
-      </button>
-    </div>
-  `;
-  
-  return card;
+  try {
+    const card = document.createElement('div');
+    card.className = 'candidate-card';
+    card.setAttribute('data-stagger', '');
+    card.setAttribute('data-track', 'candidate-card');
+    card.setAttribute('data-candidate-id', candidate.id || 'unknown');
+    
+    // Generate initials for avatar
+    const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
+    
+    // Display skills (limit to 3) - handle both array and string formats
+    let skills = '<em>No skills detected</em>';
+    if (candidate.skills) {
+      if (Array.isArray(candidate.skills)) {
+        skills = candidate.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+      } else if (typeof candidate.skills === 'string') {
+        // Handle case where skills might be a comma-separated string
+        const skillsArray = candidate.skills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+        skills = skillsArray.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+      }
+    }
+    
+    // Clean up title - if it contains too much info, extract just the job title part
+    let displayTitle = candidate.title || 'No title specified';
+    if (displayTitle.length > 50) {
+      // If title is very long, it might contain concatenated data
+      displayTitle = displayTitle.substring(0, 50) + '...';
+    }
+    
+    card.innerHTML = `
+      <div class="candidate-avatar" data-morph>${initials}</div>
+      <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
+      <p class="candidate-title">${displayTitle}</p>
+      <div class="candidate-skills">
+        ${skills}
+      </div>
+      <div class="candidate-meta">
+        <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
+        <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
+      </div>
+      <div class="candidate-actions">
+        <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id || 'unknown'}')">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id || 'unknown'}')">
+          <i class="fas fa-envelope"></i>
+        </button>
+        <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id || 'unknown'}')">
+          <i class="fas fa-archive"></i>
+        </button>
+      </div>
+    `;
+    
+    return card;
+  } catch (error) {
+    console.error('Error creating candidate card:', error, candidate);
+    // Return a fallback card
+    const fallbackCard = document.createElement('div');
+    fallbackCard.className = 'candidate-card error';
+    fallbackCard.innerHTML = `
+      <div class="candidate-avatar" data-morph>?</div>
+      <h3 class="candidate-name">Error Loading Candidate</h3>
+      <p class="candidate-title">Data format issue</p>
+      <div class="candidate-skills">
+        <em>Unable to display skills</em>
+      </div>
+      <div class="candidate-meta">
+        <span class="candidate-location"><i class="fas fa-exclamation-triangle"></i> Data Error</span>
+      </div>
+    `;
+    return fallbackCard;
+  }
 }
 
 // Function to show loading state
