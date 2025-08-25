@@ -1,0 +1,5 @@
+[33md322810[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix resume upload button functionality - Connect Upload Resume button to modal and add proper event listeners
+[33md07e6ca[m Enable resume parsing on modern dashboard - Add comprehensive resume upload modal with drag & drop, file processing, progress tracking, and modern UI feedback
+[33m3eccb74[m Fix CSS text visibility issues - Restore modern-design.css and modern-dashboard.css with proper CSS variables and text contrast
+[33m827727c[m Phase 3: Implement Higher Complexity Features - AI-driven personalization, advanced animations, real-time updates, and advanced search/filtering
+[33m82af9ea[m Implement Phase 2: Medium complexity features - stats counters, enhanced card interactions, notification system, and loading states

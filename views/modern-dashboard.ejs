@@ -266,6 +266,151 @@
     </div>
   </section>
 
+  <!-- Jobs Section -->
+  <section id="jobs" class="jobs">
+    <div class="container">
+      <div class="section-header" data-stagger>
+        <h2 class="section-title">Job Management</h2>
+        <p class="section-subtitle">
+          Create, manage, and optimize job postings with AI-powered insights
+        </p>
+      </div>
+      
+      <div class="jobs-actions" data-stagger>
+        <button class="btn btn-primary" data-track="add-job" onclick="openAddJobModal()">
+          <i class="fas fa-plus"></i>
+          Add New Job
+        </button>
+        <div class="jobs-filters">
+          <select class="filter-select" data-track="job-status-filter">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="draft">Draft</option>
+            <option value="closed">Closed</option>
+          </select>
+          <select class="filter-select" data-track="job-type-filter">
+            <option value="all">All Types</option>
+            <option value="full-time">Full-time</option>
+            <option value="part-time">Part-time</option>
+            <option value="contract">Contract</option>
+            <option value="remote">Remote</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="jobs-grid" id="jobsGrid">
+        <!-- Jobs will be dynamically loaded here -->
+        <div class="job-card" data-stagger data-track="job-card">
+          <div class="job-header">
+            <div class="job-title-section">
+              <h3 class="job-title">Senior Frontend Developer</h3>
+              <span class="job-status active">Active</span>
+            </div>
+            <div class="job-actions">
+              <button class="btn-icon" title="Edit Job" data-track="edit-job">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon" title="View Applications" data-track="view-applications">
+                <i class="fas fa-users"></i>
+              </button>
+              <button class="btn-icon" title="More Options" data-track="job-more">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="job-details">
+            <div class="job-meta">
+              <span class="job-location"><i class="fas fa-map-marker-alt"></i> San Francisco, CA</span>
+              <span class="job-type"><i class="fas fa-clock"></i> Full-time</span>
+              <span class="job-salary"><i class="fas fa-dollar-sign"></i> $120k - $150k</span>
+            </div>
+            
+            <p class="job-description">
+              We're looking for a Senior Frontend Developer to join our team and help build amazing user experiences...
+            </p>
+            
+            <div class="job-skills">
+              <span class="skill-tag">React</span>
+              <span class="skill-tag">TypeScript</span>
+              <span class="skill-tag">Node.js</span>
+              <span class="skill-tag">+3 more</span>
+            </div>
+          </div>
+          
+          <div class="job-stats">
+            <div class="stat-item">
+              <span class="stat-number">24</span>
+              <span class="stat-label">Applications</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">8</span>
+              <span class="stat-label">Interviews</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">3</span>
+              <span class="stat-label">Finalists</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="job-card" data-stagger data-track="job-card">
+          <div class="job-header">
+            <div class="job-title-section">
+              <h3 class="job-title">Data Scientist</h3>
+              <span class="job-status active">Active</span>
+            </div>
+            <div class="job-actions">
+              <button class="btn-icon" title="Edit Job" data-track="edit-job">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="btn-icon" title="View Applications" data-track="view-applications">
+                <i class="fas fa-users"></i>
+              </button>
+              <button class="btn-icon" title="More Options" data-track="job-more">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="job-details">
+            <div class="job-meta">
+              <span class="job-location"><i class="fas fa-map-marker-alt"></i> Remote</span>
+              <span class="job-type"><i class="fas fa-clock"></i> Full-time</span>
+              <span class="job-salary"><i class="fas fa-dollar-sign"></i> $130k - $160k</span>
+            </div>
+            
+            <p class="job-description">
+              Join our data science team to build machine learning models and drive insights from large datasets...
+            </p>
+            
+            <div class="job-skills">
+              <span class="skill-tag">Python</span>
+              <span class="skill-tag">Machine Learning</span>
+              <span class="skill-tag">SQL</span>
+              <span class="skill-tag">+2 more</span>
+            </div>
+          </div>
+          
+          <div class="job-stats">
+            <div class="stat-item">
+              <span class="stat-number">18</span>
+              <span class="stat-label">Applications</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">6</span>
+              <span class="stat-label">Interviews</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">2</span>
+              <span class="stat-label">Finalists</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Candidates Section -->
   <section id="candidates" class="candidates">
     <div class="container">
@@ -470,6 +615,162 @@
         <button class="btn btn-primary" id="processBtn" onclick="processUploads()" style="display: none;">
           <i class="fas fa-magic"></i>
           Process Resumes
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Job Modal -->
+  <div id="addJobModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 class="modal-title">📝 Create New Job Posting</h3>
+        <button class="modal-close" onclick="closeAddJobModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <form id="addJobForm" class="job-form">
+          <div class="form-section">
+            <h4>Basic Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jobTitle">Job Title *</label>
+                <input type="text" id="jobTitle" name="title" required placeholder="e.g., Senior Frontend Developer">
+              </div>
+              <div class="form-group">
+                <label for="jobDepartment">Department</label>
+                <select id="jobDepartment" name="department">
+                  <option value="">Select Department</option>
+                  <option value="engineering">Engineering</option>
+                  <option value="design">Design</option>
+                  <option value="product">Product</option>
+                  <option value="marketing">Marketing</option>
+                  <option value="sales">Sales</option>
+                  <option value="hr">Human Resources</option>
+                  <option value="finance">Finance</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jobLocation">Location *</label>
+                <input type="text" id="jobLocation" name="location" required placeholder="e.g., San Francisco, CA or Remote">
+              </div>
+              <div class="form-group">
+                <label for="jobType">Employment Type *</label>
+                <select id="jobType" name="employmentType" required>
+                  <option value="">Select Type</option>
+                  <option value="full-time">Full-time</option>
+                  <option value="part-time">Part-time</option>
+                  <option value="contract">Contract</option>
+                  <option value="internship">Internship</option>
+                  <option value="freelance">Freelance</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jobSalary">Salary Range</label>
+                <input type="text" id="jobSalary" name="salary" placeholder="e.g., $80k - $120k">
+              </div>
+              <div class="form-group">
+                <label for="jobExperience">Experience Level</label>
+                <select id="jobExperience" name="experienceLevel">
+                  <option value="">Select Level</option>
+                  <option value="entry">Entry Level</option>
+                  <option value="mid">Mid Level</option>
+                  <option value="senior">Senior Level</option>
+                  <option value="lead">Lead</option>
+                  <option value="principal">Principal</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h4>Job Description</h4>
+            <div class="form-group">
+              <label for="jobDescription">Description *</label>
+              <textarea id="jobDescription" name="description" rows="6" required 
+                placeholder="Describe the role, responsibilities, and what makes this position exciting..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="jobResponsibilities">Key Responsibilities</label>
+              <textarea id="jobResponsibilities" name="responsibilities" rows="4" 
+                placeholder="List the main responsibilities and duties..."></textarea>
+            </div>
+            
+            <div class="form-group">
+              <label for="jobRequirements">Requirements & Qualifications</label>
+              <textarea id="jobRequirements" name="requirements" rows="4" 
+                placeholder="List required skills, experience, and qualifications..."></textarea>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h4>Skills & Requirements</h4>
+            <div class="form-group">
+              <label for="jobSkills">Required Skills</label>
+              <input type="text" id="jobSkills" name="skills" 
+                placeholder="e.g., React, TypeScript, Node.js (comma separated)">
+              <small>Enter skills separated by commas</small>
+            </div>
+            
+            <div class="form-group">
+              <label for="jobNiceToHave">Nice to Have</label>
+              <input type="text" id="jobNiceToHave" name="niceToHave" 
+                placeholder="e.g., AWS, Docker, Kubernetes (comma separated)">
+              <small>Optional skills that would be beneficial</small>
+            </div>
+          </div>
+          
+          <div class="form-section">
+            <h4>Additional Information</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jobBenefits">Benefits</label>
+                <textarea id="jobBenefits" name="benefits" rows="3" 
+                  placeholder="Health insurance, 401k, flexible hours, etc..."></textarea>
+              </div>
+              <div class="form-group">
+                <label for="jobPerks">Perks</label>
+                <textarea id="jobPerks" name="perks" rows="3" 
+                  placeholder="Free lunch, gym membership, remote work, etc..."></textarea>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label for="jobStartDate">Expected Start Date</label>
+                <input type="date" id="jobStartDate" name="startDate">
+              </div>
+              <div class="form-group">
+                <label for="jobStatus">Status</label>
+                <select id="jobStatus" name="status">
+                  <option value="draft">Draft</option>
+                  <option value="active">Active</option>
+                  <option value="paused">Paused</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeAddJobModal()">Cancel</button>
+        <button class="btn btn-secondary" onclick="saveAsDraft()">
+          <i class="fas fa-save"></i>
+          Save as Draft
+        </button>
+        <button class="btn btn-primary" onclick="publishJob()">
+          <i class="fas fa-paper-plane"></i>
+          Publish Job
         </button>
       </div>
     </div>

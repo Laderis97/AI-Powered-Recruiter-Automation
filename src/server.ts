@@ -98,7 +98,7 @@ const upload = multer({
 app.get('/', async (req, res) => {
   try {
     const analytics = await databaseService.getAnalytics();
-    res.render('index', {
+  res.render('index', {
       jobsCount: analytics.totalJobs,
       candidatesCount: analytics.totalCandidates,
       campaignsCount: analytics.totalCampaigns
@@ -205,7 +205,7 @@ app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req
 app.get('/api/candidates', async (req, res) => {
   try {
     const candidates = await databaseService.getCandidates();
-    res.json(candidates);
+  res.json(candidates);
   } catch (error) {
     console.error('Error fetching candidates:', error);
     res.status(500).json({ error: 'Failed to fetch candidates' });
@@ -1299,7 +1299,7 @@ app.post('/api/ai/feedback', async (req, res) => {
 // Delete a job posting
 app.delete('/api/jobs/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     console.log(`🗑️ Deleting job: ${id}`);
     
     // Get the job first to check if it exists
@@ -1322,7 +1322,7 @@ app.delete('/api/jobs/:id', async (req, res) => {
 // Archive a job posting
 app.post('/api/jobs/:id/archive', async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     console.log(`📦 Archiving job: ${id}`);
     
     // Get the job first to check if it exists
@@ -1345,7 +1345,7 @@ app.post('/api/jobs/:id/archive', async (req, res) => {
 // Unarchive a job posting
 app.post('/api/jobs/:id/unarchive', async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     console.log(`📦 Unarchiving job: ${id}`);
     
     // Get the job first to check if it exists

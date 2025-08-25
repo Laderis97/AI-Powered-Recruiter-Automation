@@ -1115,6 +1115,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize resume upload functionality
   initializeResumeUpload();
   
+  // Initialize job management functionality
+  initializeJobManagement();
+  
   // Close modal when clicking outside
   const modal = document.getElementById('resumeUploadModal');
   if (modal) {
@@ -1139,6 +1142,15 @@ window.closeResumeModal = closeResumeModal;
 window.processUploads = processUploads;
 window.clearResults = clearResults;
 window.openBulkUpload = openBulkUpload;
+
+// Job management global functions
+window.openAddJobModal = openAddJobModal;
+window.closeAddJobModal = closeAddJobModal;
+window.saveAsDraft = saveAsDraft;
+window.publishJob = publishJob;
+window.editJob = editJob;
+window.viewApplications = viewApplications;
+window.showJobOptions = showJobOptions;
 
 // Add CSS animations and styles
 const style = document.createElement('style');
@@ -1302,3 +1314,322 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
+
+// ===== JOB MANAGEMENT FUNCTIONALITY =====
+
+// Global variables for job management
+let jobsData = [];
+let currentJobId = null;
+
+// Function to open the Add Job modal
+function openAddJobModal() {
+  const modal = document.getElementById('addJobModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    // Reset form
+    resetJobForm();
+  }
+}
+
+// Function to close the Add Job modal
+function closeAddJobModal() {
+  const modal = document.getElementById('addJobModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    // Reset form
+    resetJobForm();
+  }
+}
+
+// Function to reset the job form
+function resetJobForm() {
+  const form = document.getElementById('addJobForm');
+  if (form) {
+    form.reset();
+    currentJobId = null;
+  }
+}
+
+// Function to save job as draft
+function saveAsDraft() {
+  const formData = getJobFormData();
+  if (formData) {
+    formData.status = 'draft';
+    submitJob(formData, 'Job saved as draft successfully!');
+  }
+}
+
+// Function to publish job
+function publishJob() {
+  const formData = getJobFormData();
+  if (formData) {
+    formData.status = 'active';
+    submitJob(formData, 'Job published successfully!');
+  }
+}
+
+// Function to get job form data
+function getJobFormData() {
+  const form = document.getElementById('addJobForm');
+  if (!form) return null;
+
+  const formData = new FormData(form);
+  const jobData = {
+    title: formData.get('title') || '',
+    department: formData.get('department') || '',
+    location: formData.get('location') || '',
+    employmentType: formData.get('employmentType') || '',
+    salary: formData.get('salary') || '',
+    experienceLevel: formData.get('experienceLevel') || '',
+    description: formData.get('description') || '',
+    responsibilities: formData.get('responsibilities') || '',
+    requirements: formData.get('requirements') || '',
+    skills: formData.get('skills') || '',
+    niceToHave: formData.get('niceToHave') || '',
+    benefits: formData.get('benefits') || '',
+    perks: formData.get('perks') || '',
+    startDate: formData.get('startDate') || '',
+    status: formData.get('status') || 'draft'
+  };
+
+  // Validate required fields
+  if (!jobData.title || !jobData.location || !jobData.employmentType || !jobData.description) {
+    showNotification('Please fill in all required fields.', 'error');
+    return null;
+  }
+
+  return jobData;
+}
+
+// Function to submit job data
+async function submitJob(jobData, successMessage) {
+  try {
+    showNotification('Saving job...', 'info');
+    
+    const response = await fetch('/api/jobs', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(jobData)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      showNotification(successMessage, 'success');
+      closeAddJobModal();
+      loadJobs(); // Refresh jobs list
+    } else {
+      const error = await response.json();
+      showNotification(error.message || 'Failed to save job', 'error');
+    }
+  } catch (error) {
+    console.error('Error submitting job:', error);
+    showNotification('Failed to save job. Please try again.', 'error');
+  }
+}
+
+// Function to load jobs from the server
+async function loadJobs() {
+  try {
+    const response = await fetch('/api/jobs');
+    if (response.ok) {
+      const data = await response.json();
+      jobsData = data.jobs || [];
+      renderJobs();
+    } else {
+      console.error('Failed to load jobs');
+    }
+  } catch (error) {
+    console.error('Error loading jobs:', error);
+  }
+}
+
+// Function to render jobs in the grid
+function renderJobs() {
+  const jobsGrid = document.getElementById('jobsGrid');
+  if (!jobsGrid) return;
+
+  // Clear existing content
+  jobsGrid.innerHTML = '';
+
+  if (jobsData.length === 0) {
+    jobsGrid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1; text-align: center; padding: var(--space-8);">
+        <div style="font-size: 3rem; margin-bottom: var(--space-4);">📋</div>
+        <h3 style="margin-bottom: var(--space-2); color: var(--color-text-primary);">No Jobs Yet</h3>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+          Create your first job posting to get started with recruitment.
+        </p>
+        <button class="btn btn-primary" onclick="openAddJobModal()">
+          <i class="fas fa-plus"></i>
+          Create First Job
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  jobsData.forEach(job => {
+    const jobCard = createJobCard(job);
+    jobsGrid.appendChild(jobCard);
+  });
+}
+
+// Function to create a job card element
+function createJobCard(job) {
+  const card = document.createElement('div');
+  card.className = 'job-card';
+  card.setAttribute('data-stagger', '');
+  card.setAttribute('data-track', 'job-card');
+  card.setAttribute('data-job-id', job.id);
+
+  const skills = job.skills ? job.skills.split(',').slice(0, 3) : [];
+  const skillsDisplay = skills.map(skill => `<span class="skill-tag">${skill.trim()}</span>`).join('');
+  const moreSkills = job.skills ? job.skills.split(',').length - 3 : 0;
+
+  card.innerHTML = `
+    <div class="job-header">
+      <div class="job-title-section">
+        <h3 class="job-title">${job.title}</h3>
+        <span class="job-status ${job.status}">${job.status}</span>
+      </div>
+      <div class="job-actions">
+        <button class="btn-icon" title="Edit Job" data-track="edit-job" onclick="editJob('${job.id}')">
+          <i class="fas fa-edit"></i>
+        </button>
+        <button class="btn-icon" title="View Applications" data-track="view-applications" onclick="viewApplications('${job.id}')">
+          <i class="fas fa-users"></i>
+        </button>
+        <button class="btn-icon" title="More Options" data-track="job-more" onclick="showJobOptions('${job.id}')">
+          <i class="fas fa-ellipsis-v"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="job-details">
+      <div class="job-meta">
+        <span class="job-location"><i class="fas fa-map-marker-alt"></i> ${job.location}</span>
+        <span class="job-type"><i class="fas fa-clock"></i> ${job.employmentType}</span>
+        ${job.salary ? `<span class="job-salary"><i class="fas fa-dollar-sign"></i> ${job.salary}</span>` : ''}
+      </div>
+      
+      <p class="job-description">
+        ${job.description.substring(0, 150)}${job.description.length > 150 ? '...' : ''}
+      </p>
+      
+      <div class="job-skills">
+        ${skillsDisplay}
+        ${moreSkills > 0 ? `<span class="skill-tag">+${moreSkills} more</span>` : ''}
+      </div>
+    </div>
+    
+    <div class="job-stats">
+      <div class="stat-item">
+        <span class="stat-number">${job.applications || 0}</span>
+        <span class="stat-label">Applications</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${job.interviews || 0}</span>
+        <span class="stat-label">Interviews</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${job.finalists || 0}</span>
+        <span class="stat-label">Finalists</span>
+      </div>
+    </div>
+  `;
+
+  return card;
+}
+
+// Function to edit a job
+function editJob(jobId) {
+  const job = jobsData.find(j => j.id === jobId);
+  if (!job) return;
+
+  currentJobId = jobId;
+  populateJobForm(job);
+  openAddJobModal();
+}
+
+// Function to populate job form with existing data
+function populateJobForm(job) {
+  const form = document.getElementById('addJobForm');
+  if (!form) return;
+
+  // Populate form fields
+  form.querySelector('[name="title"]').value = job.title || '';
+  form.querySelector('[name="department"]').value = job.department || '';
+  form.querySelector('[name="location"]').value = job.location || '';
+  form.querySelector('[name="employmentType"]').value = job.employmentType || '';
+  form.querySelector('[name="salary"]').value = job.salary || '';
+  form.querySelector('[name="experienceLevel"]').value = job.experienceLevel || '';
+  form.querySelector('[name="description"]').value = job.description || '';
+  form.querySelector('[name="responsibilities"]').value = job.responsibilities || '';
+  form.querySelector('[name="requirements"]').value = job.requirements || '';
+  form.querySelector('[name="skills"]').value = job.skills || '';
+  form.querySelector('[name="niceToHave"]').value = job.niceToHave || '';
+  form.querySelector('[name="benefits"]').value = job.benefits || '';
+  form.querySelector('[name="perks"]').value = job.perks || '';
+  form.querySelector('[name="startDate"]').value = job.startDate || '';
+  form.querySelector('[name="status"]').value = job.status || 'draft';
+}
+
+// Function to view applications for a job
+function viewApplications(jobId) {
+  showNotification('Applications feature coming soon!', 'info');
+  // TODO: Implement applications view
+}
+
+// Function to show job options menu
+function showJobOptions(jobId) {
+  showNotification('Job options menu coming soon!', 'info');
+  // TODO: Implement job options menu
+}
+
+// Function to filter jobs
+function filterJobs() {
+  const statusFilter = document.querySelector('[data-track="job-status-filter"]').value;
+  const typeFilter = document.querySelector('[data-track="job-type-filter"]').value;
+  
+  const filteredJobs = jobsData.filter(job => {
+    const statusMatch = statusFilter === 'all' || job.status === statusFilter;
+    const typeMatch = typeFilter === 'all' || job.employmentType === typeFilter;
+    return statusMatch && typeMatch;
+  });
+
+  renderFilteredJobs(filteredJobs);
+}
+
+// Function to render filtered jobs
+function renderFilteredJobs(filteredJobs) {
+  const jobsGrid = document.getElementById('jobsGrid');
+  if (!jobsGrid) return;
+
+  jobsGrid.innerHTML = '';
+  filteredJobs.forEach(job => {
+    const jobCard = createJobCard(job);
+    jobsGrid.appendChild(jobCard);
+  });
+}
+
+// Initialize job management functionality
+function initializeJobManagement() {
+  // Add event listeners for job filters
+  const statusFilter = document.querySelector('[data-track="job-status-filter"]');
+  const typeFilter = document.querySelector('[data-track="job-type-filter"]');
+  
+  if (statusFilter) {
+    statusFilter.addEventListener('change', filterJobs);
+  }
+  
+  if (typeFilter) {
+    typeFilter.addEventListener('change', filterJobs);
+  }
+
+  // Load initial jobs
+  loadJobs();
+}
