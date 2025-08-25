@@ -206,10 +206,7 @@
   font-weight: var(--font-weight-black);
   line-height: 1.1;
   margin-bottom: var(--space-6);
-  background: var(--gradient-text);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--color-text-primary);
 }
 
 .gradient-text {
@@ -248,6 +245,7 @@
   box-shadow: var(--shadow-2xl);
   border: 1px solid var(--color-border);
   animation: float 6s ease-in-out infinite;
+  color: var(--color-text-primary);
 }
 
 .floating-card:nth-child(2) {
