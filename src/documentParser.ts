@@ -3,7 +3,6 @@
 import fs from 'fs-extra';
 import path from 'path';
 import mammoth from 'mammoth';
-import pdf from 'pdf-parse';
 import { callOpenAI } from './openai.js';
 
 export interface ParsedCandidate {
@@ -80,6 +79,8 @@ export class DocumentParser {
   private async parsePDF(filePath: string): Promise<string> {
     try {
       const dataBuffer = await fs.readFile(filePath);
+      // Use dynamic import to avoid test file access during module loading
+      const pdf = (await import('pdf-parse')).default;
       const data = await pdf(dataBuffer);
       return data.text;
     } catch (error) {
