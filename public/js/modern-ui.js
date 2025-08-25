@@ -772,10 +772,366 @@ class ModernUI {
   }
 }
 
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  window.modernUI = new ModernUI();
+// ===== RESUME UPLOAD FUNCTIONALITY =====
+
+// Global variables for resume upload
+let selectedFiles = [];
+let uploadQueue = [];
+
+// Initialize resume upload functionality
+function initializeResumeUpload() {
+  const uploadZone = document.getElementById('uploadZone');
+  const fileInput = document.getElementById('resumeFileInput');
+  
+  if (uploadZone) {
+    // Drag and drop functionality
+    uploadZone.addEventListener('dragover', handleDragOver);
+    uploadZone.addEventListener('dragleave', handleDragLeave);
+    uploadZone.addEventListener('drop', handleDrop);
+    uploadZone.addEventListener('click', () => fileInput.click());
+  }
+  
+  if (fileInput) {
+    fileInput.addEventListener('change', handleFileSelect);
+  }
+  
+  // Add click handlers for upload buttons
+  const uploadResumeBtn = document.querySelector('[data-track="quick-upload-resume"]');
+  if (uploadResumeBtn) {
+    uploadResumeBtn.addEventListener('click', openResumeModal);
+  }
+}
+
+// Modal functions
+function openResumeModal() {
+  const modal = document.getElementById('resumeUploadModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    resetUploadState();
+  }
+}
+
+function closeResumeModal() {
+  const modal = document.getElementById('resumeUploadModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    resetUploadState();
+  }
+}
+
+function resetUploadState() {
+  selectedFiles = [];
+  uploadQueue = [];
+  hideProgress();
+  hideResults();
+  hideProcessButton();
+  updateUploadZone();
+}
+
+// Drag and drop handlers
+function handleDragOver(e) {
+  e.preventDefault();
+  const uploadZone = document.getElementById('uploadZone');
+  if (uploadZone) {
+    uploadZone.classList.add('dragover');
+  }
+}
+
+function handleDragLeave(e) {
+  e.preventDefault();
+  const uploadZone = document.getElementById('uploadZone');
+  if (uploadZone) {
+    uploadZone.classList.remove('dragover');
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  const uploadZone = document.getElementById('uploadZone');
+  if (uploadZone) {
+    uploadZone.classList.remove('dragover');
+  }
+  
+  const files = Array.from(e.dataTransfer.files);
+  addFilesToQueue(files);
+}
+
+function handleFileSelect(e) {
+  const files = Array.from(e.target.files);
+  addFilesToQueue(files);
+}
+
+function addFilesToQueue(files) {
+  const validFiles = files.filter(file => {
+    const validTypes = ['.pdf', '.docx', '.doc', '.txt'];
+    const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+    return validTypes.includes(fileExtension);
+  });
+  
+  if (validFiles.length === 0) {
+    showNotification('No valid files selected. Supported formats: PDF, DOCX, DOC, TXT', 'error');
+    return;
+  }
+  
+  selectedFiles = [...selectedFiles, ...validFiles];
+  updateFileList();
+  showProcessButton();
+  
+  if (validFiles.length !== files.length) {
+    showNotification(`${files.length - validFiles.length} files were skipped (unsupported format)`, 'warning');
+  }
+}
+
+function updateFileList() {
+  const resultsContent = document.getElementById('resultsContent');
+  if (!resultsContent) return;
+  
+  resultsContent.innerHTML = `
+    <div class="file-list">
+      ${selectedFiles.map((file, index) => `
+        <div class="file-item" data-file-index="${index}">
+          <div class="file-icon">
+            <i class="fas fa-file-alt"></i>
+          </div>
+          <div class="file-info">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${formatFileSize(file.size)}</div>
+          </div>
+          <div class="file-status pending">Pending</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Upload processing
+function processUploads() {
+  if (selectedFiles.length === 0) {
+    showNotification('No files selected for upload', 'error');
+    return;
+  }
+  
+  hideProcessButton();
+  showProgress();
+  updateProgress(0, 'Preparing files...');
+  
+  // Process files sequentially to avoid overwhelming the server
+  processFilesSequentially(selectedFiles, 0);
+}
+
+async function processFilesSequentially(files, index) {
+  if (index >= files.length) {
+    // All files processed
+    updateProgress(100, 'Upload complete!');
+    setTimeout(() => {
+      hideProgress();
+      showResults();
+      showNotification(`${files.length} resume(s) processed successfully!`, 'success');
+    }, 1000);
+    return;
+  }
+  
+  const file = files[index];
+  const progress = Math.round((index / files.length) * 100);
+  updateProgress(progress, `Processing ${file.name}...`);
+  
+  try {
+    await uploadSingleFile(file, index);
+    updateFileStatus(index, 'success', 'Processed successfully');
+  } catch (error) {
+    console.error('Error processing file:', error);
+    updateFileStatus(index, 'error', error.message || 'Processing failed');
+  }
+  
+  // Process next file
+  setTimeout(() => {
+    processFilesSequentially(files, index + 1);
+  }, 500);
+}
+
+async function uploadSingleFile(file, index) {
+  const formData = new FormData();
+  formData.append('resume', file);
+  
+  const response = await fetch('/api/upload-resume', {
+    method: 'POST',
+    body: formData
+  });
+  
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Upload failed');
+  }
+  
+  const result = await response.json();
+  return result;
+}
+
+// UI update functions
+function updateProgress(percentage, text) {
+  const progressFill = document.getElementById('progressFill');
+  const progressText = document.getElementById('progressText');
+  
+  if (progressFill) {
+    progressFill.style.width = `${percentage}%`;
+  }
+  
+  if (progressText) {
+    progressText.textContent = text;
+  }
+}
+
+function updateFileStatus(index, status, message) {
+  const fileItem = document.querySelector(`[data-file-index="${index}"]`);
+  if (fileItem) {
+    const statusElement = fileItem.querySelector('.file-status');
+    if (statusElement) {
+      statusElement.className = `file-status ${status}`;
+      statusElement.textContent = message;
+    }
+  }
+}
+
+function showProgress() {
+  const progress = document.getElementById('uploadProgress');
+  if (progress) {
+    progress.style.display = 'block';
+  }
+}
+
+function hideProgress() {
+  const progress = document.getElementById('uploadProgress');
+  if (progress) {
+    progress.style.display = 'none';
+  }
+}
+
+function showResults() {
+  const results = document.getElementById('uploadResults');
+  if (results) {
+    results.style.display = 'block';
+  }
+}
+
+function hideResults() {
+  const results = document.getElementById('uploadResults');
+  if (results) {
+    results.style.display = 'none';
+  }
+}
+
+function showProcessButton() {
+  const processBtn = document.getElementById('processBtn');
+  if (processBtn) {
+    processBtn.style.display = 'block';
+  }
+}
+
+function hideProcessButton() {
+  const processBtn = document.getElementById('processBtn');
+  if (processBtn) {
+    processBtn.style.display = 'none';
+  }
+}
+
+function updateUploadZone() {
+  const uploadZone = document.getElementById('uploadZone');
+  if (uploadZone) {
+    uploadZone.classList.remove('dragover');
+  }
+}
+
+function clearResults() {
+  const resultsContent = document.getElementById('resultsContent');
+  if (resultsContent) {
+    resultsContent.innerHTML = '';
+  }
+  hideResults();
+}
+
+function openBulkUpload() {
+  const fileInput = document.getElementById('resumeFileInput');
+  if (fileInput) {
+    fileInput.multiple = true;
+    fileInput.click();
+  }
+}
+
+// Enhanced notification system
+function showNotification(message, type = 'info') {
+  const notification = document.createElement('div');
+  notification.className = `notification notification-${type}`;
+  notification.innerHTML = `
+    <div class="notification-content">
+      <i class="fas fa-${getNotificationIcon(type)}"></i>
+      <span>${message}</span>
+    </div>
+    <button class="notification-close" onclick="this.parentElement.remove()">
+      <i class="fas fa-times"></i>
+    </button>
+  `;
+  
+  // Add to page
+  document.body.appendChild(notification);
+  
+  // Auto-remove after 5 seconds
+  setTimeout(() => {
+    if (notification.parentElement) {
+      notification.remove();
+    }
+  }, 5000);
+}
+
+function getNotificationIcon(type) {
+  switch (type) {
+    case 'success': return 'check-circle';
+    case 'error': return 'exclamation-circle';
+    case 'warning': return 'exclamation-triangle';
+    default: return 'info-circle';
+  }
+}
+
+// Initialize resume upload when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing initialization code ...
+  
+  // Initialize resume upload functionality
+  initializeResumeUpload();
+  
+  // Close modal when clicking outside
+  const modal = document.getElementById('resumeUploadModal');
+  if (modal) {
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) {
+        closeResumeModal();
+      }
+    });
+  }
+  
+  // Close modal with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeResumeModal();
+    }
+  });
 });
+
+// Global functions for onclick handlers
+window.openResumeModal = openResumeModal;
+window.closeResumeModal = closeResumeModal;
+window.processUploads = processUploads;
+window.clearResults = clearResults;
+window.openBulkUpload = openBulkUpload;
 
 // Add CSS animations and styles
 const style = document.createElement('style');
