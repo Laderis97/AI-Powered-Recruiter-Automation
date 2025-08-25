@@ -3,6 +3,7 @@
 import fs from 'fs-extra';
 import path from 'path';
 import mammoth from 'mammoth';
+import pdf from 'pdf-parse';
 import { callOpenAI } from './openai.js';
 
 export interface ParsedCandidate {
@@ -45,7 +46,8 @@ export class DocumentParser {
     try {
       switch (fileExtension) {
         case '.pdf':
-          throw new Error(`PDF files are not yet supported. Please convert to TXT, DOCX, or DOC format.`);
+          extractedText = await this.parsePDF(filePath);
+          break;
         case '.docx':
         case '.doc':
           extractedText = await this.parseWordDocument(filePath);
@@ -54,7 +56,7 @@ export class DocumentParser {
           extractedText = await this.parseTextFile(filePath);
           break;
         default:
-          throw new Error(`Unsupported file type: ${fileExtension}. Supported formats: TXT, DOCX, DOC`);
+          throw new Error(`Unsupported file type: ${fileExtension}. Supported formats: PDF, TXT, DOCX, DOC`);
       }
 
       // Use AI to extract structured candidate information
@@ -77,8 +79,9 @@ export class DocumentParser {
 
   private async parsePDF(filePath: string): Promise<string> {
     try {
-      // For now, throw an error for PDFs to trigger fallback or better error handling
-      throw new Error("PDF parsing is currently being implemented. Please convert to text format for now.");
+      const dataBuffer = await fs.readFile(filePath);
+      const data = await pdf(dataBuffer);
+      return data.text;
     } catch (error) {
       throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
@@ -105,28 +108,35 @@ export class DocumentParser {
     // Try AI extraction first
     try {
       const prompt = `
-You are an AI recruiter assistant. Extract candidate information from the following resume/document text.
+You are an AI recruiter assistant. Extract comprehensive candidate information from the following resume/document text.
 
 Extract and return as JSON with these fields:
-- name (full name)
-- email (if found)
-- phone (if found)
-- title (current job title)
-- currentCompany (current employer)
-- location (city, state, or country)
-- experience (years of experience as string, e.g., "5 years")
-- skills (array of technical and soft skills)
-- education (array of degrees/certifications)
-- summary (brief professional summary)
+- name (full name - extract from header or contact section)
+- email (email address if found)
+- phone (phone number if found)
+- title (current job title or most recent position)
+- currentCompany (current employer or most recent company)
+- location (city, state, or country - prefer current location)
+- experience (total years of experience as string, e.g., "5 years" - calculate from work history)
+- skills (array of technical skills, programming languages, frameworks, tools, and soft skills)
+- education (array of degrees, certifications, and educational institutions)
+- summary (brief professional summary or objective statement)
 - linkedin (LinkedIn URL if found)
 - github (GitHub URL if found)
-- portfolio (portfolio URL if found)
+- portfolio (portfolio or personal website URL if found)
 - rawText (the original extracted text)
+
+Important extraction guidelines:
+1. For skills: Include programming languages, frameworks, databases, cloud platforms, tools, methodologies
+2. For experience: Calculate total years from work history, not just current role
+3. For education: Include degree type, field of study, and institution
+4. For location: Prefer current/most recent location
+5. For title: Use current or most recent job title
 
 Document text:
 ${text}
 
-Return only valid JSON. If a field is not found, use null or empty string as appropriate:
+Return only valid JSON. If a field is not found, use null or empty string as appropriate. Ensure all arrays are properly formatted:
 `;
 
       const result = await callOpenAI(prompt);
@@ -168,11 +178,15 @@ Return only valid JSON. If a field is not found, use null or empty string as app
   }
 
   private extractBasicInfo(text: string): ParsedCandidate {
-    // Basic regex-based extraction as fallback
+    // Enhanced regex-based extraction as fallback
     const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     
-    // Extract name (usually first line)
-    const name = lines[0] || 'Unknown';
+    // Extract name (usually first line or after "Name:" pattern)
+    let name = lines[0] || 'Unknown';
+    const nameMatch = text.match(/(?:name|full name)[:\s]+([a-zA-Z\s]+)/i);
+    if (nameMatch) {
+      name = nameMatch[1].trim();
+    }
     
     // Extract email
     const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
@@ -190,30 +204,80 @@ Return only valid JSON. If a field is not found, use null or empty string as app
     const githubMatch = text.match(/github\.com\/[a-zA-Z0-9-]+/);
     const github = githubMatch ? `https://${githubMatch[0]}` : undefined;
     
-    // Extract skills (look for common skill keywords)
+    // Extract portfolio/website
+    const portfolioMatch = text.match(/(?:portfolio|website|personal site)[:\s]+(https?:\/\/[^\s]+)/i);
+    const portfolio = portfolioMatch ? portfolioMatch[1] : undefined;
+    
+    // Extract title (look for common patterns)
+    let title = undefined;
+    const titleMatch = text.match(/(?:title|position|role)[:\s]+([^,\n]+)/i);
+    if (titleMatch) {
+      title = titleMatch[1].trim();
+    } else {
+      // Look for common job titles in the text
+      const commonTitles = [
+        'Software Engineer', 'Developer', 'Programmer', 'Full Stack', 'Frontend', 'Backend',
+        'DevOps', 'Data Scientist', 'Product Manager', 'Designer', 'Architect', 'Lead',
+        'Senior', 'Junior', 'Principal', 'Manager', 'Director', 'VP', 'CTO', 'CEO'
+      ];
+      for (const jobTitle of commonTitles) {
+        if (text.toLowerCase().includes(jobTitle.toLowerCase())) {
+          title = jobTitle;
+          break;
+        }
+      }
+    }
+    
+    // Extract location
+    let location = undefined;
+    const locationMatch = text.match(/(?:location|address|city)[:\s]+([^,\n]+)/i);
+    if (locationMatch) {
+      location = locationMatch[1].trim();
+    }
+    
+    // Extract skills (enhanced list)
     const skillKeywords = [
-      'JavaScript', 'TypeScript', 'Python', 'Java', 'React', 'Vue', 'Node.js', 'Express',
-      'MongoDB', 'PostgreSQL', 'MySQL', 'AWS', 'Docker', 'Kubernetes', 'Git', 'HTML', 'CSS',
-      'Angular', 'Vue.js', 'PHP', 'C#', '.NET', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin'
+      // Programming Languages
+      'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Scala',
+      // Web Technologies
+      'React', 'Vue', 'Angular', 'Node.js', 'Express', 'Next.js', 'Nuxt.js', 'jQuery', 'HTML', 'CSS', 'Sass', 'Less',
+      // Databases
+      'MongoDB', 'PostgreSQL', 'MySQL', 'SQLite', 'Redis', 'Elasticsearch', 'DynamoDB', 'Cassandra',
+      // Cloud & DevOps
+      'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins', 'GitLab', 'GitHub Actions',
+      // Frameworks & Libraries
+      'Django', 'Flask', 'Spring', 'Laravel', 'Symfony', 'ASP.NET', 'FastAPI', 'GraphQL', 'REST',
+      // Tools & Methodologies
+      'Git', 'SVN', 'Jira', 'Confluence', 'Agile', 'Scrum', 'Kanban', 'CI/CD', 'TDD', 'BDD',
+      // Data & AI
+      'Machine Learning', 'Data Science', 'TensorFlow', 'PyTorch', 'Pandas', 'NumPy', 'Scikit-learn',
+      // Soft Skills
+      'Leadership', 'Communication', 'Teamwork', 'Problem Solving', 'Project Management', 'Analytical'
     ];
     const skills = skillKeywords.filter(skill => 
       text.toLowerCase().includes(skill.toLowerCase())
+    );
+    
+    // Extract education
+    const educationKeywords = ['Bachelor', 'Master', 'PhD', 'MBA', 'BSc', 'MSc', 'BA', 'MA', 'University', 'College'];
+    const education = educationKeywords.filter(edu => 
+      text.toLowerCase().includes(edu.toLowerCase())
     );
     
     return {
       name,
       email,
       phone,
-      title: lines[1] || undefined,
+      title,
       currentCompany: undefined,
-      location: undefined,
+      location,
       experience: 'Unknown',
       skills,
-      education: [],
+      education,
       summary: undefined,
       linkedin,
       github,
-      portfolio: undefined,
+      portfolio,
       rawText: text
     };
   }

@@ -777,6 +777,7 @@ class ModernUI {
 // Global variables for resume upload
 let selectedFiles = [];
 let uploadQueue = [];
+let parsedResults = [];
 
 // Function to open the resume upload modal
 function openResumeUploadModal() {
@@ -802,6 +803,7 @@ function closeResumeUploadModal() {
 function resetUploadForm() {
   selectedFiles = [];
   uploadQueue = [];
+  parsedResults = [];
   const fileList = document.getElementById('fileList');
   const progressBar = document.querySelector('.progress-fill');
   const progressText = document.querySelector('.progress-text');
@@ -942,6 +944,7 @@ async function processFilesSequentially(files, index) {
     updateProgress(100, 'Upload complete!');
     setTimeout(() => {
       hideProgress();
+      displayParsedResults();
       showResults();
       showNotification(`${files.length} resume(s) processed successfully!`, 'success');
     }, 1000);
@@ -953,8 +956,9 @@ async function processFilesSequentially(files, index) {
   updateProgress(progress, `Processing ${file.name}...`);
   
   try {
-    await uploadSingleFile(file, index);
+    const result = await uploadSingleFile(file, index);
     updateFileStatus(index, 'success', 'Processed successfully');
+    parsedResults.push(result);
   } catch (error) {
     console.error('Error processing file:', error);
     updateFileStatus(index, 'error', error.message || 'Processing failed');
@@ -1064,6 +1068,48 @@ function clearResults() {
     resultsContent.innerHTML = '';
   }
   hideResults();
+}
+
+function displayParsedResults() {
+  const resultsContent = document.getElementById('resultsContent');
+  if (!resultsContent || parsedResults.length === 0) return;
+  
+  let resultsHTML = '<h4>Parsed Candidates</h4>';
+  
+  parsedResults.forEach((candidate, index) => {
+    const skillsList = candidate.skills && candidate.skills.length > 0 
+      ? candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join(' ')
+      : '<em>No skills detected</em>';
+    
+    const educationList = candidate.education && candidate.education.length > 0
+      ? candidate.education.map(edu => `<span class="skill-tag">${edu}</span>`).join(' ')
+      : '<em>No education detected</em>';
+    
+    resultsHTML += `
+      <div class="result-item success">
+        <div class="result-icon">✓</div>
+        <div class="result-content">
+          <div class="result-title">${candidate.name || 'Unknown Name'}</div>
+          <div class="result-message">
+            <strong>Title:</strong> ${candidate.title || 'Not specified'}<br>
+            <strong>Company:</strong> ${candidate.currentCompany || 'Not specified'}<br>
+            <strong>Location:</strong> ${candidate.location || 'Not specified'}<br>
+            <strong>Experience:</strong> ${candidate.experience || 'Not specified'}<br>
+            <strong>Email:</strong> ${candidate.email || 'Not found'}<br>
+            <strong>Phone:</strong> ${candidate.phone || 'Not found'}<br>
+            <strong>Skills:</strong> ${skillsList}<br>
+            <strong>Education:</strong> ${educationList}<br>
+            ${candidate.linkedin ? `<strong>LinkedIn:</strong> <a href="${candidate.linkedin}" target="_blank">${candidate.linkedin}</a><br>` : ''}
+            ${candidate.github ? `<strong>GitHub:</strong> <a href="${candidate.github}" target="_blank">${candidate.github}</a><br>` : ''}
+            ${candidate.portfolio ? `<strong>Portfolio:</strong> <a href="${candidate.portfolio}" target="_blank">${candidate.portfolio}</a><br>` : ''}
+            ${candidate.summary ? `<strong>Summary:</strong> ${candidate.summary}<br>` : ''}
+          </div>
+        </div>
+      </div>
+    `;
+  });
+  
+  resultsContent.innerHTML = resultsHTML;
 }
 
 function openBulkUpload() {
