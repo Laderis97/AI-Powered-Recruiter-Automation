@@ -5,578 +5,373 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="AI-Powered Recruiter Dashboard with Modern Design Trends">
-  
+
   <!-- Modern Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <!-- Modern CSS -->
   <link rel="stylesheet" href="/css/modern-design.css">
   <link rel="stylesheet" href="/css/modern-dashboard.css">
-  
+
   <!-- Modern JavaScript -->
   <script src="/js/modern-ui.js" defer></script>
 </head>
 <body>
-  <!-- Navigation Header -->
+  <!-- Modern Navigation Header -->
   <header class="header-modern">
     <nav class="nav-modern">
       <div class="container">
         <div class="nav-content">
-          <!-- Logo -->
           <div class="nav-logo">
-            <div class="logo-icon" data-morph>🤖</div>
-            <h1 class="logo-text">AI Recruiter</h1>
+            <div class="logo-icon">🤖</div>
+            <div class="logo-text">AI Recruiter</div>
           </div>
-
-          <!-- Navigation Links -->
+          
           <div class="nav-links">
-            <a href="#dashboard" class="nav-link active" data-track="nav-dashboard">Dashboard</a>
-            <a href="#candidates" class="nav-link" data-track="nav-candidates">Candidates</a>
-            <a href="#jobs" class="nav-link" data-track="nav-jobs">Jobs</a>
-            <a href="#analytics" class="nav-link" data-track="nav-analytics">Analytics</a>
-            <a href="#ai-tools" class="nav-link" data-track="nav-ai-tools">AI Tools</a>
+            <a href="#dashboard" class="nav-link">Dashboard</a>
+            <a href="#ai-tools" class="nav-link">AI Tools</a>
+            <a href="#candidates" class="nav-link">Candidates</a>
+            <a href="#analytics" class="nav-link">Analytics</a>
           </div>
-
-          <!-- Header Controls -->
+          
           <div class="nav-controls">
-            <!-- Search -->
             <div class="search-container">
-              <input type="text" class="search-input" placeholder="Search..." data-track="search">
-              <button class="search-btn" aria-label="Search">
-                <span>🔍</span>
+              <input type="text" class="search-input" placeholder="Search candidates, jobs...">
+              <button class="search-btn">
+                <i class="fas fa-search"></i>
               </button>
             </div>
-
-            <!-- Notifications -->
-            <button class="btn-icon notification-btn" aria-label="Notifications" data-track="notifications">
-              <span>🔔</span>
+            
+            <button class="btn-icon theme-toggle" title="Toggle theme">
+              <i class="fas fa-moon"></i>
+            </button>
+            
+            <button class="btn-icon" title="Notifications">
+              <i class="fas fa-bell"></i>
               <span class="notification-badge">3</span>
             </button>
-
-            <!-- Theme Toggle -->
-            <button class="btn-icon theme-toggle" aria-label="Toggle theme" data-track="theme-toggle">
-              🌙
-            </button>
-
-            <!-- User Menu -->
-            <div class="user-menu">
-              <button class="user-avatar" data-track="user-menu">
-                <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face" alt="User Avatar">
-              </button>
-            </div>
+            
+            <div class="user-avatar">JD</div>
           </div>
         </div>
       </div>
     </nav>
   </header>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <!-- Hero Section -->
-    <section class="hero-section" data-parallax="0.3">
-      <div class="container">
-        <div class="hero-content">
-          <h1 class="text-display hero-title">
-            AI-Powered
-            <span class="gradient-text">Recruitment</span>
-            <br>Made Simple
-          </h1>
-          <p class="text-lead hero-subtitle">
-            Streamline your hiring process with intelligent automation, 
-            data-driven insights, and personalized candidate matching.
-          </p>
-          <div class="hero-actions">
-            <button class="btn btn-primary btn-lg" data-track="hero-get-started">
-              Get Started
-            </button>
-            <button class="btn btn-outline btn-lg" data-track="hero-demo">
-              Watch Demo
-            </button>
+  <!-- Hero Section with Parallax -->
+  <section class="hero-section">
+    <div class="container">
+      <div class="hero-content">
+        <h1 class="hero-title">
+          AI-Powered <span class="gradient-text">Recruitment</span><br>
+          Made Simple
+        </h1>
+        <p class="hero-subtitle">
+          Streamline your hiring process with intelligent candidate matching, 
+          skills analysis, and automated insights powered by advanced AI.
+        </p>
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" data-loading="true">
+            <i class="fas fa-rocket"></i>
+            Get Started
+          </button>
+          <button class="btn btn-secondary btn-lg">
+            <i class="fas fa-play"></i>
+            Watch Demo
+          </button>
+        </div>
+      </div>
+      
+      <div class="hero-visual">
+        <div class="floating-card">
+          <div class="card-icon">📊</div>
+          <div>Smart Analytics</div>
+        </div>
+        <div class="floating-card">
+          <div class="card-icon">🎯</div>
+          <div>AI Matching</div>
+        </div>
+        <div class="floating-card">
+          <div class="card-icon">⚡</div>
+          <div>Fast Results</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dashboard Overview -->
+  <section id="dashboard" class="dashboard-overview">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Dashboard Overview</h2>
+        <p class="section-subtitle">
+          Real-time insights into your recruitment pipeline and performance metrics
+        </p>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" data-target="156">0</div>
+          <div class="stat-label">Active Candidates</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="23">0</div>
+          <div class="stat-label">Open Positions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="89">0</div>
+          <div class="stat-label">Interviews Scheduled</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="12">0</div>
+          <div class="stat-label">Hires This Month</div>
+        </div>
+      </div>
+      
+      <div class="dashboard-cards">
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Activity</h3>
+            <div class="card-icon">📈</div>
+          </div>
+          <ul class="activity-list">
+            <li class="activity-item">
+              <div class="activity-icon">👤</div>
+              <div class="activity-content">
+                <div class="activity-text">New candidate application received</div>
+                <div class="activity-time">2 minutes ago</div>
+              </div>
+            </li>
+            <li class="activity-item">
+              <div class="activity-icon">📧</div>
+              <div class="activity-content">
+                <div class="activity-text">Interview scheduled for tomorrow</div>
+                <div class="activity-time">15 minutes ago</div>
+              </div>
+            </li>
+            <li class="activity-item">
+              <div class="activity-icon">✅</div>
+              <div class="activity-content">
+                <div class="activity-text">Candidate hired for Frontend role</div>
+                <div class="activity-time">1 hour ago</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+        
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3 class="card-title">AI Insights</h3>
+            <div class="card-icon">🧠</div>
+          </div>
+          <div class="insights-content">
+            <p class="insight-text">
+              <strong>Trend Alert:</strong> Data Science candidates are in high demand. 
+              Consider adjusting salary ranges for competitive positioning.
+            </p>
+            <div class="insight-metric">
+              <span class="metric-label">Market Demand:</span>
+              <span class="metric-value">+23% this month</span>
+            </div>
           </div>
         </div>
         
-        <!-- Hero Visual -->
-        <div class="hero-visual">
-          <div class="floating-card card-glass" data-morph>
-            <div class="card-icon">📊</div>
-            <h3>Smart Analytics</h3>
-            <p>AI-driven insights</p>
-          </div>
-          <div class="floating-card card-glass" data-morph>
-            <div class="card-icon">🎯</div>
-            <h3>Perfect Matches</h3>
-            <p>AI-powered matching</p>
-          </div>
-          <div class="floating-card card-glass" data-morph>
+        <div class="dashboard-card">
+          <div class="card-header">
+            <h3 class="card-title">Quick Actions</h3>
             <div class="card-icon">⚡</div>
-            <h3>Fast Results</h3>
-            <p>Automated workflows</p>
           </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Dashboard Overview -->
-    <section class="dashboard-section" id="dashboard">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Dashboard Overview</h2>
-          <p class="section-subtitle">Real-time insights and key metrics for your recruitment process</p>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid grid grid-cols-4 gap-8 mb-16">
-          <div class="stat-card card card-elevated" data-track="stat-active-candidates">
-            <div class="stat-icon">👥</div>
-            <div class="stat-content">
-              <h3 class="stat-number">2,847</h3>
-              <p class="stat-label">Active Candidates</p>
-              <div class="stat-trend positive">
-                <span>↗</span>
-                <span>+12%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card card card-elevated" data-track="stat-open-positions">
-            <div class="stat-icon">💼</div>
-            <div class="stat-content">
-              <h3 class="stat-number">156</h3>
-              <p class="stat-label">Open Positions</p>
-              <div class="stat-trend positive">
-                <span>↗</span>
-                <span>+8%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card card card-elevated" data-track="stat-hires-month">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-              <h3 class="stat-number">89</h3>
-              <p class="stat-label">Hires This Month</p>
-              <div class="stat-trend positive">
-                <span>↗</span>
-                <span>+23%</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="stat-card card card-elevated" data-track="stat-ai-score">
-            <div class="stat-icon">🤖</div>
-            <div class="stat-content">
-              <h3 class="stat-number">94%</h3>
-              <p class="stat-label">AI Match Score</p>
-              <div class="stat-trend positive">
-                <span>↗</span>
-                <span>+5%</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Main Dashboard Grid -->
-        <div class="dashboard-grid grid grid-cols-3 gap-8">
-          <!-- Recent Activity -->
-          <div class="dashboard-card card card-elevated">
-            <div class="card-header">
-              <h3 class="card-title">Recent Activity</h3>
-              <button class="btn btn-ghost btn-sm">View All</button>
-            </div>
-            <div class="activity-list stagger-list">
-              <div class="activity-item stagger-item" data-track="activity-item">
-                <div class="activity-icon">👤</div>
-                <div class="activity-content">
-                  <p class="activity-text">New candidate applied for Senior Developer</p>
-                  <span class="activity-time">2 minutes ago</span>
-                </div>
-              </div>
-              <div class="activity-item stagger-item" data-track="activity-item">
-                <div class="activity-icon">📧</div>
-                <div class="activity-content">
-                  <p class="activity-text">Interview scheduled with Sarah Johnson</p>
-                  <span class="activity-time">15 minutes ago</span>
-                </div>
-              </div>
-              <div class="activity-item stagger-item" data-track="activity-item">
-                <div class="activity-icon">✅</div>
-                <div class="activity-content">
-                  <p class="activity-text">Offer accepted by Mike Chen</p>
-                  <span class="activity-time">1 hour ago</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- AI Insights -->
-          <div class="dashboard-card card card-elevated">
-            <div class="card-header">
-              <h3 class="card-title">AI Insights</h3>
-              <button class="btn btn-ghost btn-sm">Learn More</button>
-            </div>
-            <div class="insights-list">
-              <div class="insight-item" data-track="insight-item">
-                <div class="insight-icon">💡</div>
-                <div class="insight-content">
-                  <h4 class="insight-title">Market Trend</h4>
-                  <p class="insight-text">Data science roles are in high demand. Consider expanding your search criteria.</p>
-                </div>
-              </div>
-              <div class="insight-item" data-track="insight-item">
-                <div class="insight-icon">🎯</div>
-                <div class="insight-content">
-                  <h4 class="insight-title">Optimization</h4>
-                  <p class="insight-text">Your job descriptions could be improved for better candidate matching.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Quick Actions -->
-          <div class="dashboard-card card card-elevated">
-            <div class="card-header">
-              <h3 class="card-title">Quick Actions</h3>
-            </div>
-            <div class="quick-actions">
-              <button class="btn btn-primary w-full mb-4" data-track="quick-post-job">
-                📝 Post New Job
-              </button>
-              <button class="btn btn-secondary w-full mb-4" data-track="quick-add-candidate">
-                👤 Add Candidate
-              </button>
-              <button class="btn btn-outline w-full mb-4" data-track="quick-ai-analysis">
-                🤖 AI Analysis
-              </button>
-              <button class="btn btn-ghost w-full" data-track="quick-reports">
-                📊 Generate Reports
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI Tools Section -->
-    <section class="ai-tools-section" id="ai-tools">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">AI-Powered Tools</h2>
-          <p class="section-subtitle">Leverage artificial intelligence to streamline your recruitment process</p>
-        </div>
-
-        <div class="ai-tools-grid grid grid-cols-2 gap-12">
-          <!-- Skills Gap Analysis -->
-          <div class="ai-tool-card card card-glass" data-track="ai-tool-skills-gap">
-            <div class="tool-header">
-              <div class="tool-icon">🔍</div>
-              <h3 class="tool-title">Skills Gap Analysis</h3>
-            </div>
-            <p class="tool-description">
-              Automatically analyze candidate skills against job requirements to identify gaps and opportunities.
-            </p>
-            <div class="tool-features">
-              <span class="feature-tag">AI-Powered</span>
-              <span class="feature-tag">Real-time</span>
-              <span class="feature-tag">Insights</span>
-            </div>
-            <button class="btn btn-primary w-full mt-6" data-track="use-skills-gap">
-              Analyze Skills Gap
+          <div class="quick-actions">
+            <button class="btn btn-primary btn-sm" data-loading="true">
+              <i class="fas fa-plus"></i>
+              Add Candidate
             </button>
-          </div>
-
-          <!-- Cultural Fit Assessment -->
-          <div class="ai-tool-card card card-glass" data-track="ai-tool-cultural-fit">
-            <div class="tool-header">
-              <div class="tool-icon">🎭</div>
-              <h3 class="tool-title">Cultural Fit Assessment</h3>
-            </div>
-            <p class="tool-description">
-              Evaluate how well candidates align with your company culture using advanced AI analysis.
-            </p>
-            <div class="tool-features">
-              <span class="feature-tag">Culture Match</span>
-              <span class="feature-tag">Behavioral</span>
-              <span class="feature-tag">Predictive</span>
-            </div>
-            <button class="btn btn-primary w-full mt-6" data-track="use-cultural-fit">
-              Assess Cultural Fit
+            <button class="btn btn-secondary btn-sm">
+              <i class="fas fa-file-upload"></i>
+              Upload Resume
             </button>
-          </div>
-
-          <!-- Interview Question Generator -->
-          <div class="ai-tool-card card card-glass" data-track="ai-tool-interview-questions">
-            <div class="tool-header">
-              <div class="tool-icon">❓</div>
-              <h3 class="tool-title">Interview Questions</h3>
-            </div>
-            <p class="tool-description">
-              Generate personalized interview questions based on job requirements and candidate profile.
-            </p>
-            <div class="tool-features">
-              <span class="feature-tag">Personalized</span>
-              <span class="feature-tag">Role-specific</span>
-              <span class="feature-tag">Smart</span>
-            </div>
-            <button class="btn btn-primary w-full mt-6" data-track="use-interview-questions">
-              Generate Questions
-            </button>
-          </div>
-
-          <!-- Predictive Analytics -->
-          <div class="ai-tool-card card card-glass" data-track="ai-tool-predictive">
-            <div class="tool-header">
-              <div class="tool-icon">📈</div>
-              <h3 class="tool-title">Predictive Analytics</h3>
-            </div>
-            <p class="tool-description">
-              Predict candidate success and retention using machine learning and historical data.
-            </p>
-            <div class="tool-features">
-              <span class="feature-tag">ML-Powered</span>
-              <span class="feature-tag">Predictive</span>
-              <span class="feature-tag">Data-driven</span>
-            </div>
-            <button class="btn btn-primary w-full mt-6" data-track="use-predictive">
-              View Predictions
+            <button class="btn btn-outline btn-sm">
+              <i class="fas fa-chart-line"></i>
+              View Reports
             </button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Candidates Section -->
-    <section class="candidates-section" id="candidates">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Top Candidates</h2>
-          <p class="section-subtitle">AI-ranked candidates based on your current job openings</p>
+  <!-- AI Tools Section -->
+  <section id="ai-tools" class="ai-tools">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">AI-Powered Tools</h2>
+        <p class="section-subtitle">
+          Leverage advanced AI to streamline every aspect of your recruitment process
+        </p>
+      </div>
+      
+      <div class="ai-tools-grid">
+        <div class="ai-tool-card">
+          <div class="ai-tool-icon">🎯</div>
+          <h3 class="ai-tool-title">Smart Candidate Matching</h3>
+          <p class="ai-tool-description">
+            AI-powered matching that analyzes skills, experience, and cultural fit 
+            to find the perfect candidate for each role.
+          </p>
+          <button class="ai-tool-btn" data-loading="true">
+            Try Matching
+          </button>
         </div>
+        
+        <div class="ai-tool-card">
+          <div class="ai-tool-icon">📊</div>
+          <h3 class="ai-tool-title">Skills Gap Analysis</h3>
+          <p class="ai-tool-description">
+            Comprehensive analysis of candidate skills vs. job requirements, 
+            identifying training needs and development opportunities.
+          </p>
+          <button class="ai-tool-btn" data-loading="true">
+            Analyze Skills
+          </button>
+        </div>
+        
+        <div class="ai-tool-card">
+          <div class="ai-tool-icon">💬</div>
+          <h3 class="ai-tool-title">Interview Question Generator</h3>
+          <p class="ai-tool-description">
+            Generate contextual interview questions based on job requirements 
+            and candidate background for more effective interviews.
+          </p>
+          <button class="ai-tool-btn" data-loading="true">
+            Generate Questions
+          </button>
+        </div>
+        
+        <div class="ai-tool-card">
+          <div class="ai-tool-icon">🔍</div>
+          <h3 class="ai-tool-title">Cultural Fit Assessment</h3>
+          <p class="ai-tool-description">
+            Evaluate how well candidates align with your company culture 
+            and values using advanced behavioral analysis.
+          </p>
+          <button class="ai-tool-btn" data-loading="true">
+            Assess Fit
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        <div class="candidates-grid grid grid-cols-3 gap-8">
-          <!-- Candidate Card 1 -->
-          <div class="candidate-card card card-elevated" data-track="candidate-card">
-            <div class="candidate-header">
-              <div class="candidate-avatar">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face" alt="Candidate Avatar">
-              </div>
-              <div class="candidate-info">
-                <h3 class="candidate-name">Alex Rodriguez</h3>
-                <p class="candidate-title">Senior Full Stack Developer</p>
-                <div class="candidate-score">
-                  <span class="score-label">AI Score:</span>
-                  <span class="score-value">94%</span>
-                </div>
-              </div>
-            </div>
-            <div class="candidate-skills">
-              <span class="skill-tag">React</span>
-              <span class="skill-tag">Node.js</span>
-              <span class="skill-tag">Python</span>
-              <span class="skill-tag">AWS</span>
-            </div>
-            <div class="candidate-actions">
-              <button class="btn btn-primary btn-sm" data-track="view-candidate">View Profile</button>
-              <button class="btn btn-outline btn-sm" data-track="contact-candidate">Contact</button>
+  <!-- Candidates Section -->
+  <section id="candidates" class="candidates">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Top Candidates</h2>
+        <p class="section-subtitle">
+          AI-ranked candidates based on skills, experience, and cultural fit
+        </p>
+      </div>
+      
+      <div class="candidates-grid">
+        <div class="candidate-card">
+          <div class="candidate-avatar">SL</div>
+          <h3 class="candidate-name">Sarah Lee</h3>
+          <p class="candidate-title">Senior Frontend Developer</p>
+          <div class="candidate-skills">
+            <span class="skill-tag">React</span>
+            <span class="skill-tag">TypeScript</span>
+            <span class="skill-tag">Node.js</span>
+          </div>
+        </div>
+        
+        <div class="candidate-card">
+          <div class="candidate-avatar">MJ</div>
+          <h3 class="candidate-name">Michael Johnson</h3>
+          <p class="candidate-title">Data Scientist</p>
+          <div class="candidate-skills">
+            <span class="skill-tag">Python</span>
+            <span class="skill-tag">Machine Learning</span>
+            <span class="skill-tag">SQL</span>
+          </div>
+        </div>
+        
+        <div class="candidate-card">
+          <div class="candidate-avatar">EC</div>
+          <h3 class="candidate-name">Emily Chen</h3>
+          <p class="candidate-title">Product Manager</p>
+          <div class="candidate-skills">
+            <span class="skill-tag">Strategy</span>
+            <span class="skill-tag">Analytics</span>
+            <span class="skill-tag">Leadership</span>
+          </div>
+        </div>
+        
+        <div class="candidate-card">
+          <div class="candidate-avatar">RK</div>
+          <h3 class="candidate-name">Robert Kim</h3>
+          <p class="candidate-title">DevOps Engineer</p>
+          <div class="candidate-skills">
+            <span class="skill-tag">AWS</span>
+            <span class="skill-tag">Docker</span>
+            <span class="skill-tag">Kubernetes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Analytics Section -->
+  <section id="analytics" class="analytics">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Recruitment Analytics</h2>
+        <p class="section-subtitle">
+          Data-driven insights to optimize your hiring process and improve outcomes
+        </p>
+      </div>
+      
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <div class="analytics-header">
+            <h3 class="analytics-title">Hiring Funnel</h3>
+          </div>
+          <div class="analytics-chart">
+            <div class="chart-placeholder">
+              <i class="fas fa-chart-pie fa-3x"></i>
+              <p>Hiring funnel visualization</p>
             </div>
           </div>
-
-          <!-- Candidate Card 2 -->
-          <div class="candidate-card card card-elevated" data-track="candidate-card">
-            <div class="candidate-header">
-              <div class="candidate-avatar">
-                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=80&h=80&fit=crop&crop=face" alt="Candidate Avatar">
-              </div>
-              <div class="candidate-info">
-                <h3 class="candidate-name">Sarah Chen</h3>
-                <p class="candidate-title">Product Manager</p>
-                <div class="candidate-score">
-                  <span class="score-label">AI Score:</span>
-                  <span class="score-value">91%</span>
-                </div>
-              </div>
-            </div>
-            <div class="candidate-skills">
-              <span class="skill-tag">Product Strategy</span>
-              <span class="skill-tag">Agile</span>
-              <span class="skill-tag">Data Analysis</span>
-              <span class="skill-tag">Leadership</span>
-            </div>
-            <div class="candidate-actions">
-              <button class="btn btn-primary btn-sm" data-track="view-candidate">View Profile</button>
-              <button class="btn btn-outline btn-sm" data-track="contact-candidate">Contact</button>
-            </div>
+        </div>
+        
+        <div class="analytics-card">
+          <div class="analytics-header">
+            <h3 class="analytics-title">Time to Hire</h3>
           </div>
-
-          <!-- Candidate Card 3 -->
-          <div class="candidate-card card card-elevated" data-track="candidate-card">
-            <div class="candidate-header">
-              <div class="candidate-avatar">
-                <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face" alt="Candidate Avatar">
-              </div>
-              <div class="candidate-info">
-                <h3 class="candidate-name">Michael Kim</h3>
-                <p class="candidate-title">Data Scientist</p>
-                <div class="candidate-score">
-                  <span class="score-label">AI Score:</span>
-                  <span class="score-value">89%</span>
-                </div>
-              </div>
-            </div>
-            <div class="candidate-skills">
-              <span class="skill-tag">Machine Learning</span>
-              <span class="skill-tag">Python</span>
-              <span class="skill-tag">SQL</span>
-              <span class="skill-tag">Statistics</span>
-            </div>
-            <div class="candidate-actions">
-              <button class="btn btn-primary btn-sm" data-track="view-candidate">View Profile</button>
-              <button class="btn btn-outline btn-sm" data-track="contact-candidate">Contact</button>
+          <div class="analytics-chart">
+            <div class="chart-placeholder">
+              <i class="fas fa-clock fa-3x"></i>
+              <p>Time to hire metrics</p>
             </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- Analytics Section -->
-    <section class="analytics-section" id="analytics">
-      <div class="container">
-        <div class="section-header">
-          <h2 class="section-title">Analytics & Insights</h2>
-          <p class="section-subtitle">Data-driven insights to optimize your recruitment strategy</p>
-        </div>
-
-        <div class="analytics-grid grid grid-cols-2 gap-12">
-          <!-- Hiring Funnel -->
-          <div class="analytics-card card card-elevated">
-            <div class="card-header">
-              <h3 class="card-title">Hiring Funnel</h3>
-              <button class="btn btn-ghost btn-sm">View Details</button>
-            </div>
-            <div class="funnel-chart">
-              <div class="funnel-stage">
-                <span class="stage-label">Applications</span>
-                <span class="stage-value">2,847</span>
-                <div class="stage-bar" style="width: 100%"></div>
-              </div>
-              <div class="funnel-stage">
-                <span class="stage-label">Screening</span>
-                <span class="stage-value">1,234</span>
-                <div class="stage-bar" style="width: 43%"></div>
-              </div>
-              <div class="funnel-stage">
-                <span class="stage-label">Interviews</span>
-                <span class="stage-value">456</span>
-                <div class="stage-bar" style="width: 16%"></div>
-              </div>
-              <div class="funnel-stage">
-                <span class="stage-label">Offers</span>
-                <span class="stage-value">89</span>
-                <div class="stage-bar" style="width: 3%"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Time to Hire -->
-          <div class="analytics-card card card-elevated">
-            <div class="card-header">
-              <h3 class="card-title">Time to Hire</h3>
-              <button class="btn btn-ghost btn-sm">View Details</button>
-            </div>
-            <div class="time-chart">
-              <div class="time-metric">
-                <span class="metric-label">Average</span>
-                <span class="metric-value">18 days</span>
-              </div>
-              <div class="time-metric">
-                <span class="metric-label">Fastest</span>
-                <span class="metric-value">7 days</span>
-              </div>
-              <div class="time-metric">
-                <span class="metric-label">Industry Avg</span>
-                <span class="metric-value">24 days</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Footer -->
+  <!-- Modern Footer -->
   <footer class="footer-modern">
     <div class="container">
       <div class="footer-content">
-        <div class="footer-section">
-          <h3 class="footer-title">AI Recruiter</h3>
-          <p class="footer-description">
-            Transforming recruitment with artificial intelligence and modern design.
-          </p>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-subtitle">Product</h4>
-          <ul class="footer-links">
-            <li><a href="#features">Features</a></li>
-            <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#integrations">Integrations</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-subtitle">Company</h4>
-          <ul class="footer-links">
-            <li><a href="#about">About</a></li>
-            <li><a href="#careers">Careers</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </div>
-        <div class="footer-section">
-          <h4 class="footer-subtitle">Support</h4>
-          <ul class="footer-links">
-            <li><a href="#help">Help Center</a></li>
-            <li><a href="#docs">Documentation</a></li>
-            <li><a href="#status">Status</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="footer-bottom">
-        <p>&copy; 2025 AI Recruiter. All rights reserved.</p>
+        <p class="footer-text">
+          Powered by advanced AI technology to revolutionize your recruitment process. 
+          Make data-driven hiring decisions with confidence.
+        </p>
       </div>
     </div>
   </footer>
-
-  <!-- Modern UI Scripts -->
-  <script>
-    // Initialize modern UI features
-    document.addEventListener('DOMContentLoaded', () => {
-      // Add data attributes for tracking
-      document.querySelectorAll('[data-track]').forEach(element => {
-        element.addEventListener('click', (e) => {
-          const trackData = element.dataset.track;
-          console.log('Tracked interaction:', trackData);
-          // Here you would send analytics data to your backend
-        });
-      });
-
-      // Add smooth reveal animations
-      const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-      };
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('animate-fade-in');
-            observer.unobserve(entry.target);
-          }
-        });
-      }, observerOptions);
-
-      // Observe elements for animation
-      document.querySelectorAll('.card, .section-header, .ai-tool-card, .candidate-card').forEach(el => {
-        observer.observe(el);
-      });
-    });
-  </script>
 </body>
 </html>
