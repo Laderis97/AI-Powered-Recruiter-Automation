@@ -136,7 +136,23 @@ class ModernUI {
   }
 
   // === PHASE 2: STATS COUNTERS (Medium Complexity) ===
-  setupStatsCounters() {
+  async setupStatsCounters() {
+    // Fetch real analytics data first
+    try {
+      const response = await fetch('/api/analytics');
+      if (response.ok) {
+        const analytics = await response.json();
+        this.updateStatsWithRealData(analytics);
+      } else {
+        console.warn('Failed to fetch analytics, using fallback data');
+        this.updateStatsWithFallbackData();
+      }
+    } catch (error) {
+      console.warn('Error fetching analytics, using fallback data:', error);
+      this.updateStatsWithFallbackData();
+    }
+
+    // Setup intersection observer for animation
     const statsElements = document.querySelectorAll('.stat-number');
     
     const observer = new IntersectionObserver((entries) => {
@@ -151,8 +167,48 @@ class ModernUI {
     statsElements.forEach(stat => observer.observe(stat));
   }
 
+  updateStatsWithRealData(analytics) {
+    const statElements = document.querySelectorAll('.stat-number[data-analytics]');
+    
+    statElements.forEach(element => {
+      const analyticsKey = element.getAttribute('data-analytics');
+      let value = 0;
+      
+      switch (analyticsKey) {
+        case 'totalCandidates':
+          value = analytics.totalCandidates || 0;
+          break;
+        case 'totalJobs':
+          value = analytics.totalJobs || 0;
+          break;
+        case 'totalCampaigns':
+          value = analytics.totalCampaigns || 0;
+          break;
+        case 'responseRate':
+          // Convert percentage string to number (e.g., "85.5%" -> 85.5)
+          const rateStr = analytics.responseRate || '0%';
+          value = parseFloat(rateStr.replace('%', '')) || 0;
+          break;
+      }
+      
+      element.setAttribute('data-target', value.toString());
+    });
+  }
+
+  updateStatsWithFallbackData() {
+    // Fallback to the original numbers you provided
+    const fallbackData = {
+      totalCandidates: 156,
+      totalJobs: 23,
+      totalCampaigns: 89,
+      responseRate: 12
+    };
+    
+    this.updateStatsWithRealData(fallbackData);
+  }
+
   animateCounter(element) {
-    const target = parseInt(element.getAttribute('data-target') || element.textContent.replace(/\D/g, ''));
+    const target = parseFloat(element.getAttribute('data-target') || element.textContent.replace(/\D/g, ''));
     const duration = 2000;
     const start = 0;
     const increment = target / (duration / 16);
@@ -164,7 +220,14 @@ class ModernUI {
         current = target;
         clearInterval(timer);
       }
-      element.textContent = Math.floor(current).toLocaleString();
+      
+      // Check if this is the response rate (should show as percentage)
+      const analyticsKey = element.getAttribute('data-analytics');
+      if (analyticsKey === 'responseRate') {
+        element.textContent = current.toFixed(1) + '%';
+      } else {
+        element.textContent = Math.floor(current).toLocaleString();
+      }
     }, 16);
   }
 
