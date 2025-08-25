@@ -8,6 +8,10 @@ class ModernUI {
     this.currentTheme = 'light';
     this.searchData = [];
     this.notifications = [];
+    this.userBehavior = {};
+    this.personalizationData = {};
+    this.animationQueue = [];
+    this.dataUpdateInterval = null;
     this.init();
   }
 
@@ -22,6 +26,10 @@ class ModernUI {
     this.setupCardInteractions();
     this.setupNotificationSystem();
     this.setupLoadingStates();
+    this.setupAIPersonalization();
+    this.setupAdvancedAnimations();
+    this.setupRealTimeUpdates();
+    this.setupAdvancedSearch();
   }
 
   // === THEME TOGGLE (Lowest Complexity) ===
@@ -318,6 +326,421 @@ class ModernUI {
     }, 2000);
   }
 
+  // === PHASE 3: AI-DRIVEN PERSONALIZATION (Higher Complexity) ===
+  setupAIPersonalization() {
+    this.trackUserBehavior();
+    this.adaptContent();
+    this.setupSmartDefaults();
+  }
+
+  trackUserBehavior() {
+    // Track user interactions
+    document.addEventListener('click', (e) => {
+      const element = e.target.closest('[data-track]');
+      if (element) {
+        const trackData = element.dataset.track;
+        this.userBehavior[trackData] = (this.userBehavior[trackData] || 0) + 1;
+      }
+    });
+
+    // Track scroll behavior
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        this.userBehavior.scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+      }, 100);
+    });
+
+    // Track time spent
+    setInterval(() => {
+      this.userBehavior.timeSpent = (this.userBehavior.timeSpent || 0) + 1;
+    }, 1000);
+  }
+
+  adaptContent() {
+    // Adapt content based on user behavior
+    if (this.userBehavior.timeSpent > 60) {
+      this.showAdvancedFeatures();
+    }
+    
+    if (this.userBehavior.scrollDepth > 80) {
+      this.showExpertFeatures();
+    }
+  }
+
+  showAdvancedFeatures() {
+    const advancedElements = document.querySelectorAll('[data-advanced]');
+    advancedElements.forEach(el => {
+      el.style.display = 'block';
+      el.classList.add('fade-in');
+    });
+  }
+
+  showExpertFeatures() {
+    const expertElements = document.querySelectorAll('[data-expert]');
+    expertElements.forEach(el => {
+      el.style.display = 'block';
+      el.classList.add('fade-in');
+    });
+  }
+
+  setupSmartDefaults() {
+    // Set smart defaults based on user preferences
+    const savedPreferences = localStorage.getItem('userPreferences');
+    if (savedPreferences) {
+      const preferences = JSON.parse(savedPreferences);
+      this.applyUserPreferences(preferences);
+    }
+  }
+
+  applyUserPreferences(preferences) {
+    // Apply saved preferences
+    if (preferences.theme) {
+      this.setTheme(preferences.theme);
+    }
+    if (preferences.layout) {
+      this.setLayout(preferences.layout);
+    }
+  }
+
+  // === PHASE 3: ADVANCED ANIMATIONS (Higher Complexity) ===
+  setupAdvancedAnimations() {
+    this.setupParallax();
+    this.setupStaggerAnimations();
+    this.setupMorphingElements();
+    this.setupIntersectionObserver();
+  }
+
+  setupParallax() {
+    const parallaxElements = document.querySelectorAll('[data-parallax]');
+    
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      
+      parallaxElements.forEach(element => {
+        const speed = parseFloat(element.dataset.parallax) || 0.5;
+        const yPos = -(scrolled * speed);
+        element.style.transform = `translateY(${yPos}px)`;
+      });
+    });
+  }
+
+  setupStaggerAnimations() {
+    const staggerElements = document.querySelectorAll('[data-stagger]');
+    
+    staggerElements.forEach((element, index) => {
+      element.style.opacity = '0';
+      element.style.transform = 'translateY(30px)';
+      
+      setTimeout(() => {
+        element.style.transition = 'all 0.6s ease-out';
+        element.style.opacity = '1';
+        element.style.transform = 'translateY(0)';
+      }, index * 150);
+    });
+  }
+
+  setupMorphingElements() {
+    const morphElements = document.querySelectorAll('[data-morph]');
+    
+    morphElements.forEach(element => {
+      element.addEventListener('mouseenter', () => {
+        element.style.transform = 'scale(1.05) rotate(2deg)';
+        element.style.filter = 'brightness(1.1)';
+      });
+      
+      element.addEventListener('mouseleave', () => {
+        element.style.transform = 'scale(1) rotate(0deg)';
+        element.style.filter = 'brightness(1)';
+      });
+    });
+  }
+
+  setupIntersectionObserver() {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('animate-in');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.querySelectorAll('.card, .section-header, .ai-tool-card, .candidate-card').forEach(el => {
+      observer.observe(el);
+    });
+  }
+
+  // === PHASE 3: REAL-TIME DATA UPDATES (Higher Complexity) ===
+  setupRealTimeUpdates() {
+    this.startDataUpdates();
+    this.setupWebSocket();
+  }
+
+  startDataUpdates() {
+    // Update stats every 30 seconds
+    this.dataUpdateInterval = setInterval(() => {
+      this.updateDashboardData();
+    }, 30000);
+  }
+
+  updateDashboardData() {
+    // Simulate real-time data updates
+    this.updateStats();
+    this.updateActivityFeed();
+    this.updateNotifications();
+  }
+
+  updateStats() {
+    const statNumbers = document.querySelectorAll('.stat-number');
+    statNumbers.forEach(stat => {
+      const currentValue = parseInt(stat.textContent.replace(/\D/g, ''));
+      const variation = Math.floor(Math.random() * 5) - 2; // -2 to +2
+      const newValue = Math.max(0, currentValue + variation);
+      
+      if (newValue !== currentValue) {
+        stat.textContent = newValue;
+        stat.classList.add('updated');
+        setTimeout(() => stat.classList.remove('updated'), 1000);
+      }
+    });
+  }
+
+  updateActivityFeed() {
+    const activityList = document.querySelector('.activity-list');
+    if (activityList) {
+      const newActivity = document.createElement('li');
+      newActivity.className = 'activity-item new-activity';
+      newActivity.innerHTML = `
+        <div class="activity-icon">🆕</div>
+        <div class="activity-content">
+          <div class="activity-text">Real-time update: New data available</div>
+          <div class="activity-time">Just now</div>
+        </div>
+      `;
+      
+      activityList.insertBefore(newActivity, activityList.firstChild);
+      
+      // Remove old activities if too many
+      if (activityList.children.length > 5) {
+        activityList.removeChild(activityList.lastChild);
+      }
+      
+      // Animate new activity
+      setTimeout(() => newActivity.classList.remove('new-activity'), 2000);
+    }
+  }
+
+  updateNotifications() {
+    const notificationBadge = document.querySelector('.notification-badge');
+    if (notificationBadge) {
+      const currentCount = parseInt(notificationBadge.textContent);
+      const newCount = currentCount + Math.floor(Math.random() * 2);
+      notificationBadge.textContent = newCount;
+      
+      if (newCount > currentCount) {
+        notificationBadge.classList.add('pulse');
+        setTimeout(() => notificationBadge.classList.remove('pulse'), 1000);
+      }
+    }
+  }
+
+  setupWebSocket() {
+    // Simulate WebSocket connection for real-time updates
+    // In a real implementation, this would connect to your backend
+    console.log('WebSocket connection simulated for real-time updates');
+  }
+
+  // === PHASE 3: ADVANCED SEARCH & FILTERING (Higher Complexity) ===
+  setupAdvancedSearch() {
+    this.setupSearchSuggestions();
+    this.setupFilters();
+    this.setupSorting();
+  }
+
+  setupSearchSuggestions() {
+    const searchInput = document.querySelector('.search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value;
+        if (query.length >= 2) {
+          this.showSearchSuggestions(query);
+        } else {
+          this.hideSearchSuggestions();
+        }
+      });
+    }
+  }
+
+  showSearchSuggestions(query) {
+    this.hideSearchSuggestions();
+    
+    const suggestions = this.generateSearchSuggestions(query);
+    if (suggestions.length === 0) return;
+    
+    const searchContainer = document.querySelector('.search-container');
+    const suggestionsDiv = document.createElement('div');
+    suggestionsDiv.className = 'search-suggestions';
+    
+    suggestions.forEach(suggestion => {
+      const item = document.createElement('div');
+      item.className = 'search-suggestion-item';
+      item.innerHTML = `
+        <i class="fas fa-${suggestion.icon}"></i>
+        <span>${suggestion.text}</span>
+        <span class="suggestion-type">${suggestion.type}</span>
+      `;
+      
+      item.addEventListener('click', () => {
+        document.querySelector('.search-input').value = suggestion.text;
+        this.performSearch(suggestion.text);
+        this.hideSearchSuggestions();
+      });
+      
+      suggestionsDiv.appendChild(item);
+    });
+    
+    searchContainer.appendChild(suggestionsDiv);
+  }
+
+  hideSearchSuggestions() {
+    const existing = document.querySelector('.search-suggestions');
+    if (existing) {
+      existing.remove();
+    }
+  }
+
+  generateSearchSuggestions(query) {
+    const suggestions = [
+      { text: 'Frontend Developer', type: 'Job Title', icon: 'code' },
+      { text: 'Python Engineer', type: 'Skill', icon: 'python' },
+      { text: 'Product Manager', type: 'Role', icon: 'user-tie' },
+      { text: 'Machine Learning', type: 'Skill', icon: 'brain' },
+      { text: 'React Developer', type: 'Skill', icon: 'react' }
+    ];
+    
+    return suggestions.filter(suggestion => 
+      suggestion.text.toLowerCase().includes(query.toLowerCase())
+    );
+  }
+
+  setupFilters() {
+    // Add filter buttons to dashboard
+    const filterContainer = document.createElement('div');
+    filterContainer.className = 'filter-container';
+    filterContainer.innerHTML = `
+      <div class="filter-buttons">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="candidates">Candidates</button>
+        <button class="filter-btn" data-filter="jobs">Jobs</button>
+        <button class="filter-btn" data-filter="analytics">Analytics</button>
+      </div>
+    `;
+    
+    const dashboardSection = document.querySelector('#dashboard');
+    if (dashboardSection) {
+      dashboardSection.insertBefore(filterContainer, dashboardSection.firstChild);
+    }
+    
+    // Add filter functionality
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    filterBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        this.applyFilter(btn.dataset.filter);
+        
+        // Update active state
+        filterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+  }
+
+  applyFilter(filter) {
+    const sections = document.querySelectorAll('section');
+    
+    sections.forEach(section => {
+      if (filter === 'all' || section.id === filter) {
+        section.style.display = 'block';
+        section.classList.add('fade-in');
+      } else {
+        section.style.display = 'none';
+      }
+    });
+  }
+
+  setupSorting() {
+    // Add sorting functionality to candidate cards
+    const sortContainer = document.createElement('div');
+    sortContainer.className = 'sort-container';
+    sortContainer.innerHTML = `
+      <select class="sort-select">
+        <option value="name">Sort by Name</option>
+        <option value="skills">Sort by Skills</option>
+        <option value="match">Sort by Match %</option>
+      </select>
+    `;
+    
+    const candidatesSection = document.querySelector('#candidates');
+    if (candidatesSection) {
+      const sectionHeader = candidatesSection.querySelector('.section-header');
+      sectionHeader.appendChild(sortContainer);
+    }
+    
+    // Add sort functionality
+    const sortSelect = document.querySelector('.sort-select');
+    if (sortSelect) {
+      sortSelect.addEventListener('change', (e) => {
+        this.sortCandidates(e.target.value);
+      });
+    }
+  }
+
+  sortCandidates(sortBy) {
+    const candidatesGrid = document.querySelector('.candidates-grid');
+    const candidates = Array.from(candidatesGrid.children);
+    
+    candidates.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.querySelector('.candidate-name').textContent;
+          bValue = b.querySelector('.candidate-name').textContent;
+          return aValue.localeCompare(bValue);
+        case 'skills':
+          aValue = a.querySelectorAll('.skill-tag').length;
+          bValue = b.querySelectorAll('.skill-tag').length;
+          return bValue - aValue;
+        case 'match':
+          aValue = Math.random() * 100; // Simulate match percentage
+          bValue = Math.random() * 100;
+          return bValue - aValue;
+        default:
+          return 0;
+      }
+    });
+    
+    // Reorder candidates
+    candidates.forEach(candidate => {
+      candidatesGrid.appendChild(candidate);
+    });
+    
+    // Animate reordering
+    candidates.forEach((candidate, index) => {
+      setTimeout(() => {
+        candidate.classList.add('reorder-animation');
+        setTimeout(() => candidate.classList.remove('reorder-animation'), 500);
+      }, index * 100);
+    });
+  }
+
   // === UTILITY METHODS ===
   loadUserPreferences() {
     const savedTheme = localStorage.getItem('theme');
@@ -330,6 +753,23 @@ class ModernUI {
   saveUserPreferences() {
     localStorage.setItem('theme', this.currentTheme);
   }
+
+  setTheme(theme) {
+    this.currentTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    this.saveUserPreferences();
+  }
+
+  setLayout(layout) {
+    document.body.setAttribute('data-layout', layout);
+  }
+
+  // Cleanup method
+  destroy() {
+    if (this.dataUpdateInterval) {
+      clearInterval(this.dataUpdateInterval);
+    }
+  }
 }
 
 // Initialize when DOM is loaded
@@ -337,13 +777,33 @@ document.addEventListener('DOMContentLoaded', () => {
   window.modernUI = new ModernUI();
 });
 
-// Add CSS animations
+// Add CSS animations and styles
 const style = document.createElement('style');
 style.textContent = `
   @keyframes ripple {
     to {
       transform: scale(4);
       opacity: 0;
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.1);
     }
   }
   
@@ -371,6 +831,111 @@ style.textContent = `
   
   .notification-close:hover {
     background: var(--color-background-hover);
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.6s ease-out forwards;
+  }
+  
+  .new-activity {
+    background: var(--color-primary-50);
+    border-left: 4px solid var(--color-primary-500);
+  }
+  
+  .updated {
+    animation: pulse 0.5s ease-in-out;
+  }
+  
+  .pulse {
+    animation: pulse 1s ease-in-out;
+  }
+  
+  .reorder-animation {
+    animation: fadeIn 0.5s ease-out;
+  }
+  
+  .filter-container {
+    margin-bottom: var(--space-6);
+    text-align: center;
+  }
+  
+  .filter-buttons {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  .filter-btn {
+    padding: var(--space-2) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .filter-btn:hover,
+  .filter-btn.active {
+    background: var(--color-primary-500);
+    color: white;
+    border-color: var(--color-primary-500);
+  }
+  
+  .sort-container {
+    margin-top: var(--space-4);
+  }
+  
+  .sort-select {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-background);
+    color: var(--color-text-primary);
+    font-size: var(--font-size-sm);
+  }
+  
+  .search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: 1000;
+    margin-top: var(--space-2);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  .search-suggestion-item {
+    padding: var(--space-3) var(--space-4);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border-bottom: 1px solid var(--color-border-subtle);
+    transition: background-color 0.2s;
+  }
+  
+  .search-suggestion-item:last-child {
+    border-bottom: none;
+  }
+  
+  .search-suggestion-item:hover {
+    background: var(--color-primary-50);
+  }
+  
+  .suggestion-type {
+    margin-left: auto;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-secondary);
+    background: var(--color-background-subtle);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
   }
 `;
 document.head.appendChild(style);
