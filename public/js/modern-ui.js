@@ -778,6 +778,41 @@ class ModernUI {
 let selectedFiles = [];
 let uploadQueue = [];
 
+// Function to open the resume upload modal
+function openResumeUploadModal() {
+  const modal = document.getElementById('resumeUploadModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+// Function to close the resume upload modal
+function closeResumeUploadModal() {
+  const modal = document.getElementById('resumeUploadModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+    // Reset the form
+    resetUploadForm();
+  }
+}
+
+// Function to reset the upload form
+function resetUploadForm() {
+  selectedFiles = [];
+  uploadQueue = [];
+  const fileList = document.getElementById('fileList');
+  const progressBar = document.querySelector('.progress-fill');
+  const progressText = document.querySelector('.progress-text');
+  const resultsContent = document.getElementById('resultsContent');
+  
+  if (fileList) fileList.innerHTML = '';
+  if (progressBar) progressBar.style.width = '0%';
+  if (progressText) progressText.textContent = 'Ready to upload';
+  if (resultsContent) resultsContent.innerHTML = '';
+}
+
 // Initialize resume upload functionality
 function initializeResumeUpload() {
   const uploadZone = document.getElementById('uploadZone');
@@ -795,39 +830,11 @@ function initializeResumeUpload() {
     fileInput.addEventListener('change', handleFileSelect);
   }
   
-  // Add click handlers for upload buttons
+  // Add event listener for the "Upload Resume" button
   const uploadResumeBtn = document.querySelector('[data-track="quick-upload-resume"]');
   if (uploadResumeBtn) {
-    uploadResumeBtn.addEventListener('click', openResumeModal);
+    uploadResumeBtn.addEventListener('click', openResumeUploadModal);
   }
-}
-
-// Modal functions
-function openResumeModal() {
-  const modal = document.getElementById('resumeUploadModal');
-  if (modal) {
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    resetUploadState();
-  }
-}
-
-function closeResumeModal() {
-  const modal = document.getElementById('resumeUploadModal');
-  if (modal) {
-    modal.style.display = 'none';
-    document.body.style.overflow = 'auto';
-    resetUploadState();
-  }
-}
-
-function resetUploadState() {
-  selectedFiles = [];
-  uploadQueue = [];
-  hideProgress();
-  hideResults();
-  hideProcessButton();
-  updateUploadZone();
 }
 
 // Drag and drop handlers
@@ -1113,7 +1120,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (modal) {
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
-        closeResumeModal();
+        closeResumeUploadModal();
       }
     });
   }
@@ -1121,7 +1128,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Close modal with Escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
-      closeResumeModal();
+      closeResumeUploadModal();
     }
   });
 });
