@@ -1827,12 +1827,23 @@ function renderCandidates() {
     return;
   }
   
-  // Hide loading and empty states
-  if (loadingState) loadingState.style.display = 'none';
-  if (emptyState) emptyState.style.display = 'none';
+     // Hide loading and empty states
+   if (loadingState) {
+     loadingState.style.display = 'none';
+     console.log('Hidden loading state');
+   }
+   if (emptyState) {
+     emptyState.style.display = 'none';
+     console.log('Hidden empty state');
+   }
   
-  // Clear existing content
-  candidatesGrid.innerHTML = '';
+     // Clear existing content
+   candidatesGrid.innerHTML = '';
+   console.log('Cleared candidates grid');
+   
+   // Ensure candidates grid is visible
+   candidatesGrid.style.display = 'grid';
+   console.log('Set candidates grid display to grid');
   
   console.log('candidatesData length:', candidatesData.length);
   
