@@ -947,6 +947,8 @@ async function processFilesSequentially(files, index) {
       displayParsedResults();
       showResults();
       showNotification(`${files.length} resume(s) processed successfully!`, 'success');
+      // Refresh candidates list to show newly uploaded candidates
+      loadCandidates();
     }, 1000);
     return;
   }
@@ -1156,13 +1158,17 @@ function getNotificationIcon(type) {
 
 // Initialize resume upload when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-  // ... existing initialization code ...
+  // Initialize ModernUI
+  const modernUI = new ModernUI();
   
   // Initialize resume upload functionality
   initializeResumeUpload();
   
   // Initialize job management functionality
   initializeJobManagement();
+  
+  // Initialize candidate management functionality
+  initializeCandidateManagement();
   
   // Close modal when clicking outside
   const modal = document.getElementById('resumeUploadModal');
@@ -1197,6 +1203,11 @@ window.publishJob = publishJob;
 window.editJob = editJob;
 window.viewApplications = viewApplications;
 window.showJobOptions = showJobOptions;
+
+// Candidate management global functions
+window.viewCandidateDetails = viewCandidateDetails;
+window.contactCandidate = contactCandidate;
+window.archiveCandidate = archiveCandidate;
 
 // Add CSS animations and styles
 const style = document.createElement('style');
@@ -1678,4 +1689,224 @@ function initializeJobManagement() {
 
   // Load initial jobs
   loadJobs();
+}
+
+// ===== CANDIDATE MANAGEMENT FUNCTIONALITY =====
+
+// Global variables for candidate management
+let candidatesData = [];
+
+// Function to load candidates from the server
+async function loadCandidates() {
+  try {
+    showCandidatesLoading();
+    
+    const response = await fetch('/api/candidates');
+    if (response.ok) {
+      const data = await response.json();
+      candidatesData = data || [];
+      renderCandidates();
+    } else {
+      console.error('Failed to load candidates');
+      showCandidatesEmpty();
+    }
+  } catch (error) {
+    console.error('Error loading candidates:', error);
+    showCandidatesEmpty();
+  }
+}
+
+// Function to render candidates in the grid
+function renderCandidates() {
+  const candidatesGrid = document.getElementById('candidatesGrid');
+  const loadingState = document.getElementById('candidatesLoading');
+  const emptyState = document.getElementById('candidatesEmpty');
+  
+  if (!candidatesGrid) return;
+  
+  // Hide loading and empty states
+  if (loadingState) loadingState.style.display = 'none';
+  if (emptyState) emptyState.style.display = 'none';
+  
+  // Clear existing content
+  candidatesGrid.innerHTML = '';
+  
+  if (candidatesData.length === 0) {
+    showCandidatesEmpty();
+    return;
+  }
+  
+  candidatesData.forEach(candidate => {
+    const candidateCard = createCandidateCard(candidate);
+    candidatesGrid.appendChild(candidateCard);
+  });
+}
+
+// Function to create a candidate card element
+function createCandidateCard(candidate) {
+  const card = document.createElement('div');
+  card.className = 'candidate-card';
+  card.setAttribute('data-stagger', '');
+  card.setAttribute('data-track', 'candidate-card');
+  card.setAttribute('data-candidate-id', candidate.id);
+  
+  // Generate initials for avatar
+  const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
+  
+  // Display skills (limit to 3)
+  const skills = candidate.skills && candidate.skills.length > 0 
+    ? candidate.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('')
+    : '<em>No skills detected</em>';
+  
+  card.innerHTML = `
+    <div class="candidate-avatar" data-morph>${initials}</div>
+    <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
+    <p class="candidate-title">${candidate.title || 'No title specified'}</p>
+    <div class="candidate-skills">
+      ${skills}
+    </div>
+    <div class="candidate-meta">
+      <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
+      <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
+    </div>
+    <div class="candidate-actions">
+      <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id}')">
+        <i class="fas fa-eye"></i>
+      </button>
+      <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id}')">
+        <i class="fas fa-envelope"></i>
+      </button>
+      <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id}')">
+        <i class="fas fa-archive"></i>
+      </button>
+    </div>
+  `;
+  
+  return card;
+}
+
+// Function to show loading state
+function showCandidatesLoading() {
+  const loadingState = document.getElementById('candidatesLoading');
+  const emptyState = document.getElementById('candidatesEmpty');
+  const candidatesGrid = document.getElementById('candidatesGrid');
+  
+  if (loadingState) loadingState.style.display = 'block';
+  if (emptyState) emptyState.style.display = 'none';
+  if (candidatesGrid) candidatesGrid.innerHTML = '';
+}
+
+// Function to show empty state
+function showCandidatesEmpty() {
+  const loadingState = document.getElementById('candidatesLoading');
+  const emptyState = document.getElementById('candidatesEmpty');
+  const candidatesGrid = document.getElementById('candidatesGrid');
+  
+  if (loadingState) loadingState.style.display = 'none';
+  if (emptyState) emptyState.style.display = 'block';
+  if (candidatesGrid) candidatesGrid.innerHTML = '';
+}
+
+// Function to view candidate details
+function viewCandidateDetails(candidateId) {
+  const candidate = candidatesData.find(c => c.id === candidateId);
+  if (!candidate) return;
+  
+  showNotification(`Viewing details for ${candidate.name}`, 'info');
+  // TODO: Implement detailed candidate view modal
+}
+
+// Function to contact candidate
+function contactCandidate(candidateId) {
+  const candidate = candidatesData.find(c => c.id === candidateId);
+  if (!candidate) return;
+  
+  showNotification(`Opening contact form for ${candidate.name}`, 'info');
+  // TODO: Implement contact form
+}
+
+// Function to archive candidate
+function archiveCandidate(candidateId) {
+  const candidate = candidatesData.find(c => c.id === candidateId);
+  if (!candidate) return;
+  
+  if (confirm(`Are you sure you want to archive ${candidate.name}?`)) {
+    showNotification(`Archiving ${candidate.name}...`, 'info');
+    // TODO: Implement archive functionality
+  }
+}
+
+// Function to filter candidates
+function filterCandidates() {
+  const statusFilter = document.querySelector('[data-track="candidate-status-filter"]').value;
+  const sortFilter = document.querySelector('[data-track="candidate-sort"]').value;
+  
+  let filteredCandidates = [...candidatesData];
+  
+  // Apply status filter
+  if (statusFilter === 'active') {
+    filteredCandidates = filteredCandidates.filter(candidate => !candidate.isArchived);
+  } else if (statusFilter === 'archived') {
+    filteredCandidates = filteredCandidates.filter(candidate => candidate.isArchived);
+  }
+  
+  // Apply sorting
+  filteredCandidates.sort((a, b) => {
+    switch (sortFilter) {
+      case 'name':
+        return (a.name || '').localeCompare(b.name || '');
+      case 'date':
+        return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+      case 'skills':
+        return (b.skills?.length || 0) - (a.skills?.length || 0);
+      default:
+        return 0;
+    }
+  });
+  
+  renderFilteredCandidates(filteredCandidates);
+}
+
+// Function to render filtered candidates
+function renderFilteredCandidates(filteredCandidates) {
+  const candidatesGrid = document.getElementById('candidatesGrid');
+  if (!candidatesGrid) return;
+  
+  candidatesGrid.innerHTML = '';
+  
+  if (filteredCandidates.length === 0) {
+    candidatesGrid.innerHTML = `
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <div style="font-size: 2rem; margin-bottom: var(--space-4);">🔍</div>
+        <h3 style="margin-bottom: var(--space-2); color: var(--color-text-primary);">No Candidates Found</h3>
+        <p style="color: var(--color-text-secondary);">
+          Try adjusting your filters or upload more resumes.
+        </p>
+      </div>
+    `;
+    return;
+  }
+  
+  filteredCandidates.forEach(candidate => {
+    const candidateCard = createCandidateCard(candidate);
+    candidatesGrid.appendChild(candidateCard);
+  });
+}
+
+// Initialize candidate management functionality
+function initializeCandidateManagement() {
+  // Add event listeners for candidate filters
+  const statusFilter = document.querySelector('[data-track="candidate-status-filter"]');
+  const sortFilter = document.querySelector('[data-track="candidate-sort"]');
+  
+  if (statusFilter) {
+    statusFilter.addEventListener('change', filterCandidates);
+  }
+  
+  if (sortFilter) {
+    sortFilter.addEventListener('change', filterCandidates);
+  }
+
+  // Load initial candidates
+  loadCandidates();
 }

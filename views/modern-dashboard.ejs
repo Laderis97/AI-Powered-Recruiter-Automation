@@ -415,56 +415,54 @@
   <section id="candidates" class="candidates">
     <div class="container">
       <div class="section-header" data-stagger>
-        <h2 class="section-title">Top Candidates</h2>
+        <h2 class="section-title">Uploaded Candidates</h2>
         <p class="section-subtitle">
-          AI-ranked candidates based on skills, experience, and cultural fit
+          AI-parsed candidates from uploaded resumes
         </p>
       </div>
       
-      <div class="candidates-grid">
-        <div class="candidate-card" data-stagger data-track="candidate-card">
-          <div class="candidate-avatar" data-morph>SL</div>
-          <h3 class="candidate-name">Sarah Lee</h3>
-          <p class="candidate-title">Senior Frontend Developer</p>
-          <div class="candidate-skills">
-            <span class="skill-tag">React</span>
-            <span class="skill-tag">TypeScript</span>
-            <span class="skill-tag">Node.js</span>
-          </div>
+      <!-- Candidates Actions -->
+      <div class="candidates-actions">
+        <div class="candidates-filters">
+          <select class="filter-select" data-track="candidate-status-filter">
+            <option value="all">All Candidates</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+          <select class="filter-select" data-track="candidate-sort">
+            <option value="name">Sort by Name</option>
+            <option value="date">Sort by Date</option>
+            <option value="skills">Sort by Skills</option>
+          </select>
         </div>
-        
-        <div class="candidate-card" data-stagger data-track="candidate-card">
-          <div class="candidate-avatar" data-morph>MJ</div>
-          <h3 class="candidate-name">Michael Johnson</h3>
-          <p class="candidate-title">Data Scientist</p>
-          <div class="candidate-skills">
-            <span class="skill-tag">Python</span>
-            <span class="skill-tag">Machine Learning</span>
-            <span class="skill-tag">SQL</span>
-          </div>
-        </div>
-        
-        <div class="candidate-card" data-stagger data-track="candidate-card">
-          <div class="candidate-avatar" data-morph>EC</div>
-          <h3 class="candidate-name">Emily Chen</h3>
-          <p class="candidate-title">Product Manager</p>
-          <div class="candidate-skills">
-            <span class="skill-tag">Strategy</span>
-            <span class="skill-tag">Analytics</span>
-            <span class="skill-tag">Leadership</span>
-          </div>
-        </div>
-        
-        <div class="candidate-card" data-stagger data-track="candidate-card">
-          <div class="candidate-avatar" data-morph>RK</div>
-          <h3 class="candidate-name">Robert Kim</h3>
-          <p class="candidate-title">DevOps Engineer</p>
-          <div class="candidate-skills">
-            <span class="skill-tag">AWS</span>
-            <span class="skill-tag">Docker</span>
-            <span class="skill-tag">Kubernetes</span>
-          </div>
-        </div>
+        <button class="btn btn-primary" onclick="openResumeUploadModal()">
+          <i class="fas fa-plus"></i>
+          Upload More Resumes
+        </button>
+      </div>
+      
+      <!-- Loading State -->
+      <div id="candidatesLoading" class="loading-state" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Loading candidates...</p>
+      </div>
+      
+      <!-- Empty State -->
+      <div id="candidatesEmpty" class="empty-state" style="display: none;">
+        <div style="font-size: 3rem; margin-bottom: var(--space-4);">📄</div>
+        <h3 style="margin-bottom: var(--space-2); color: var(--color-text-primary);">No Candidates Yet</h3>
+        <p style="color: var(--color-text-secondary); margin-bottom: var(--space-4);">
+          Upload resumes to start building your candidate database.
+        </p>
+        <button class="btn btn-primary" onclick="openResumeUploadModal()">
+          <i class="fas fa-upload"></i>
+          Upload First Resume
+        </button>
+      </div>
+      
+      <!-- Candidates Grid -->
+      <div id="candidatesGrid" class="candidates-grid">
+        <!-- Dynamic content will be loaded here -->
       </div>
     </div>
   </section>
