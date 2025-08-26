@@ -1242,33 +1242,36 @@ p {
   background: rgba(239, 68, 68, 0.3);
 }
 
+/* Monthly Hires Trend Chart */
 .monthly-chart {
-  padding: var(--space-6);
+  margin: var(--space-6) 0;
+  padding: var(--space-4);
   background: var(--color-surface);
-  border-radius: var(--radius-2xl);
+  border-radius: var(--radius-xl);
   border: 1px solid var(--color-border);
-  overflow: hidden;
-  width: 100%;
-  max-width: 100%;
 }
 
 .monthly-chart h4 {
-  margin-bottom: var(--space-6);
-  color: var(--color-text-primary);
-  font-weight: var(--font-weight-semibold);
   text-align: center;
+  margin-bottom: var(--space-4);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
 }
 
 .chart-bars {
   display: flex;
   align-items: end;
   justify-content: space-around;
-  gap: var(--space-1);
-  height: 200px;
-  padding: var(--space-4) var(--space-1);
+  gap: var(--space-2);
+  height: 250px;
+  padding: var(--space-4) var(--space-2);
   width: 100%;
-  overflow: hidden;
+  overflow: visible;
   max-width: 100%;
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .chart-bar {
@@ -1277,9 +1280,10 @@ p {
   align-items: center;
   gap: var(--space-2);
   flex: 1;
-  min-width: 0;
-  max-width: 40px;
-  overflow: hidden;
+  min-width: 30px;
+  max-width: 50px;
+  overflow: visible;
+  position: relative;
 }
 
 .bar-fill {
@@ -1288,8 +1292,10 @@ p {
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   transition: height var(--duration-1000) var(--ease-out);
   position: relative;
-  min-height: 4px;
+  min-height: 8px;
   max-width: 100%;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--color-primary-300);
 }
 
 .bar-fill::after {
@@ -1299,7 +1305,7 @@ p {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.3), transparent);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
@@ -1309,9 +1315,10 @@ p {
   color: var(--color-text-secondary);
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   max-width: 100%;
+  margin-top: var(--space-2);
 }
 
 .bar-value {
@@ -1320,9 +1327,14 @@ p {
   color: var(--color-primary-600);
   text-align: center;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow: visible;
+  text-overflow: clip;
   max-width: 100%;
+  background: var(--color-surface);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Metrics Summary */

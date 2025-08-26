@@ -2613,6 +2613,21 @@ function renderTimeToHireChart(data) {
   console.log('📝 Generated chart HTML length:', chartHTML.length);
   chartContainer.innerHTML = chartHTML;
   console.log('✅ Chart rendered successfully');
+  
+  // Additional debugging to check DOM elements
+  setTimeout(() => {
+    const chartBars = chartContainer.querySelectorAll('.chart-bar');
+    const barFills = chartContainer.querySelectorAll('.bar-fill');
+    console.log('🔍 DOM Check - Chart bars found:', chartBars.length);
+    console.log('🔍 DOM Check - Bar fills found:', barFills.length);
+    
+    if (chartBars.length > 0) {
+      console.log('🔍 First chart bar element:', chartBars[0]);
+      console.log('🔍 First bar fill element:', barFills[0]);
+      console.log('🔍 First bar fill computed height:', window.getComputedStyle(barFills[0]).height);
+      console.log('🔍 First bar fill computed width:', window.getComputedStyle(barFills[0]).width);
+    }
+  }, 100);
 }
 
 // Show analytics error
