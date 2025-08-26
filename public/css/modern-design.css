@@ -1242,6 +1242,8 @@ p {
   background: var(--color-surface);
   border-radius: var(--radius-2xl);
   border: 1px solid var(--color-border);
+  overflow: hidden;
+  width: 100%;
 }
 
 .monthly-chart h4 {
@@ -1255,9 +1257,11 @@ p {
   display: flex;
   align-items: end;
   justify-content: space-around;
-  gap: var(--space-4);
+  gap: var(--space-2);
   height: 200px;
-  padding: var(--space-4) 0;
+  padding: var(--space-4) var(--space-2);
+  width: 100%;
+  overflow: hidden;
 }
 
 .chart-bar {
@@ -1266,7 +1270,8 @@ p {
   align-items: center;
   gap: var(--space-2);
   flex: 1;
-  max-width: 60px;
+  min-width: 0;
+  max-width: 50px;
 }
 
 .bar-fill {
@@ -1337,11 +1342,21 @@ p {
   
   .chart-bars {
     height: 150px;
-    gap: var(--space-2);
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-1);
   }
   
   .chart-bar {
-    max-width: 40px;
+    max-width: 35px;
+    min-width: 0;
+  }
+  
+  .bar-label {
+    font-size: var(--font-size-xs);
+  }
+  
+  .bar-value {
+    font-size: var(--font-size-sm);
   }
   
   .ai-results-modal {
