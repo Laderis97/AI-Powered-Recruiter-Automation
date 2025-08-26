@@ -438,6 +438,38 @@ app.get('/api/analytics', async (req, res) => {
   }
 });
 
+// Hiring funnel analytics endpoint
+app.get('/api/analytics/hiring-funnel', async (req, res) => {
+  try {
+    const hiringFunnel = await databaseService.getHiringFunnel();
+    res.json({ success: true, data: hiringFunnel });
+  } catch (error) {
+    console.error('Error fetching hiring funnel:', error);
+    res.status(500).json({ error: 'Failed to fetch hiring funnel data' });
+  }
+});
+
+// Time to hire analytics endpoint
+app.get('/api/analytics/time-to-hire', async (req, res) => {
+  try {
+    const analytics = await databaseService.getAnalytics();
+    const timeToHire = analytics.timeToHire;
+    const monthlyHires = await databaseService.getMonthlyHires();
+    
+    res.json({ 
+      success: true, 
+      data: {
+        averageTimeToHire: timeToHire,
+        monthlyHires: monthlyHires,
+        trend: 'improving' // This could be calculated based on historical data
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching time to hire:', error);
+    res.status(500).json({ error: 'Failed to fetch time to hire data' });
+  }
+});
+
 // Campaign export endpoint temporarily disabled
 /*
 app.get('/api/campaigns/export', async (req, res) => {

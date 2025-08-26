@@ -2420,10 +2420,190 @@ function exportAIResults(toolType, data) {
   showNotification('Results exported successfully!', 'success');
 }
 
-// Add AI tools initialization to DOMContentLoaded
+// ===== ANALYTICS FUNCTIONALITY =====
+
+// Initialize analytics charts
+function initializeAnalytics() {
+  console.log('📊 Initializing Analytics...');
+  
+  // Load hiring funnel chart
+  loadHiringFunnel();
+  
+  // Load time to hire chart
+  loadTimeToHire();
+  
+  console.log('✅ Analytics initialized');
+}
+
+// Load hiring funnel data and render chart
+async function loadHiringFunnel() {
+  try {
+    const response = await fetch('/api/analytics/hiring-funnel');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        renderHiringFunnelChart(result.data);
+      } else {
+        showAnalyticsError('hiringFunnelChart', 'Failed to load hiring funnel data');
+      }
+    } else {
+      showAnalyticsError('hiringFunnelChart', 'Failed to fetch hiring funnel data');
+    }
+  } catch (error) {
+    console.error('Error loading hiring funnel:', error);
+    showAnalyticsError('hiringFunnelChart', 'Error loading hiring funnel data');
+  }
+}
+
+// Render hiring funnel chart
+function renderHiringFunnelChart(data) {
+  const chartContainer = document.getElementById('hiringFunnelChart');
+  if (!chartContainer) return;
+  
+  // Calculate total for percentages
+  const total = data.reduce((sum, item) => sum + item.count, 0);
+  
+  // Create funnel chart HTML
+  const chartHTML = `
+    <div class="funnel-chart">
+      ${data.map((item, index) => {
+        const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
+        const width = Math.max(20, 100 - (index * 15)); // Decreasing width for funnel effect
+        
+        return `
+          <div class="funnel-stage" style="width: ${width}%">
+            <div class="funnel-bar">
+              <div class="funnel-fill" style="width: 100%; background: var(--color-primary-${Math.max(100, 500 - index * 100)})"></div>
+            </div>
+            <div class="funnel-label">
+              <span class="stage-name">${item.stage}</span>
+              <span class="stage-count">${item.count}</span>
+              <span class="stage-percentage">${percentage}%</span>
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  
+  chartContainer.innerHTML = chartHTML;
+}
+
+// Load time to hire data and render chart
+async function loadTimeToHire() {
+  try {
+    const response = await fetch('/api/analytics/time-to-hire');
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        renderTimeToHireChart(result.data);
+      } else {
+        showAnalyticsError('timeToHireChart', 'Failed to load time to hire data');
+      }
+    } else {
+      showAnalyticsError('timeToHireChart', 'Failed to fetch time to hire data');
+    }
+  } catch (error) {
+    console.error('Error loading time to hire:', error);
+    showAnalyticsError('timeToHireChart', 'Error loading time to hire data');
+  }
+}
+
+// Render time to hire chart
+function renderTimeToHireChart(data) {
+  const chartContainer = document.getElementById('timeToHireChart');
+  if (!chartContainer) return;
+  
+  // Create time to hire chart HTML
+  const chartHTML = `
+    <div class="time-to-hire-chart">
+      <div class="metric-card">
+        <div class="metric-value">${data.averageTimeToHire}</div>
+        <div class="metric-label">Average Days to Hire</div>
+        <div class="metric-trend ${data.trend}">
+          <i class="fas fa-${data.trend === 'improving' ? 'arrow-down' : 'arrow-up'}"></i>
+          ${data.trend === 'improving' ? 'Improving' : 'Needs Attention'}
+        </div>
+      </div>
+      
+      <div class="monthly-chart">
+        <h4>Monthly Hires Trend</h4>
+        <div class="chart-bars">
+          ${data.monthlyHires.map(item => {
+            const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
+            const height = maxHires > 0 ? (item.count / maxHires) * 100 : 0;
+            
+            return `
+              <div class="chart-bar">
+                <div class="bar-fill" style="height: ${height}%"></div>
+                <div class="bar-label">${item.month}</div>
+                <div class="bar-value">${item.count}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  chartContainer.innerHTML = chartHTML;
+}
+
+// Show analytics error
+function showAnalyticsError(chartId, message) {
+  const chartContainer = document.getElementById(chartId);
+  if (chartContainer) {
+    chartContainer.innerHTML = `
+      <div class="chart-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>${message}</p>
+        <button class="btn btn-sm" onclick="refresh${chartId.charAt(0).toUpperCase() + chartId.slice(1)}()">
+          <i class="fas fa-sync-alt"></i>
+          Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Refresh functions for analytics
+function refreshHiringFunnel() {
+  const chartContainer = document.getElementById('hiringFunnelChart');
+  if (chartContainer) {
+    chartContainer.innerHTML = `
+      <div class="chart-loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Refreshing hiring funnel data...</p>
+      </div>
+    `;
+  }
+  loadHiringFunnel();
+}
+
+function refreshTimeToHire() {
+  const chartContainer = document.getElementById('timeToHireChart');
+  if (chartContainer) {
+    chartContainer.innerHTML = `
+      <div class="chart-loading">
+        <i class="fas fa-spinner fa-spin"></i>
+        <p>Refreshing time to hire data...</p>
+      </div>
+    `;
+  }
+  loadTimeToHire();
+}
+
+// Global functions for analytics
+window.refreshHiringFunnel = refreshHiringFunnel;
+window.refreshTimeToHire = refreshTimeToHire;
+
+// Add analytics initialization to DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
   // ... existing initialization code ...
   
   // Initialize AI tools
   initializeAITools();
+  
+  // Initialize analytics
+  initializeAnalytics();
 });

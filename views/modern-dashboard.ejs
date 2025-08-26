@@ -481,11 +481,18 @@
         <div class="analytics-card" data-stagger>
           <div class="analytics-header">
             <h3 class="analytics-title">Hiring Funnel</h3>
+            <div class="analytics-actions">
+              <button class="btn-icon" onclick="refreshHiringFunnel()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
           </div>
           <div class="analytics-chart">
-            <div class="chart-placeholder">
-              <i class="fas fa-chart-pie fa-3x"></i>
-              <p>Hiring funnel visualization</p>
+            <div id="hiringFunnelChart" class="chart-container">
+              <div class="chart-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading hiring funnel data...</p>
+              </div>
             </div>
           </div>
         </div>
@@ -493,11 +500,18 @@
         <div class="analytics-card" data-stagger>
           <div class="analytics-header">
             <h3 class="analytics-title">Time to Hire</h3>
+            <div class="analytics-actions">
+              <button class="btn-icon" onclick="refreshTimeToHire()" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+              </button>
+            </div>
           </div>
           <div class="analytics-chart">
-            <div class="chart-placeholder">
-              <i class="fas fa-clock fa-3x"></i>
-              <p>Time to hire metrics</p>
+            <div id="timeToHireChart" class="chart-container">
+              <div class="chart-loading">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading time to hire data...</p>
+              </div>
             </div>
           </div>
         </div>
