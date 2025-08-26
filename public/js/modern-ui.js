@@ -2504,28 +2504,44 @@ function renderHiringFunnelChart(data) {
 
 // Load time to hire data and render chart
 async function loadTimeToHire() {
+  console.log('🔄 loadTimeToHire: Starting to fetch data...');
   try {
     const response = await fetch('/api/analytics/time-to-hire');
+    console.log('📡 loadTimeToHire: Response status:', response.status);
+    
     if (response.ok) {
       const result = await response.json();
+      console.log('📊 loadTimeToHire: API response:', result);
+      
       if (result.success) {
+        console.log('✅ loadTimeToHire: Data loaded successfully, calling renderTimeToHireChart');
         renderTimeToHireChart(result.data);
       } else {
+        console.error('❌ loadTimeToHire: API returned success: false');
         showAnalyticsError('timeToHireChart', 'Failed to load time to hire data');
       }
     } else {
+      console.error('❌ loadTimeToHire: HTTP error:', response.status);
       showAnalyticsError('timeToHireChart', 'Failed to fetch time to hire data');
     }
   } catch (error) {
-    console.error('Error loading time to hire:', error);
+    console.error('❌ loadTimeToHire: Error:', error);
     showAnalyticsError('timeToHireChart', 'Error loading time to hire data');
   }
 }
 
 // Render time to hire chart
 function renderTimeToHireChart(data) {
+  console.log('🔍 renderTimeToHireChart called with data:', data);
+  
   const chartContainer = document.getElementById('timeToHireChart');
-  if (!chartContainer) return;
+  if (!chartContainer) {
+    console.error('❌ timeToHireChart container not found');
+    return;
+  }
+  
+  console.log('📊 Chart container found, rendering chart...');
+  console.log('📈 Monthly hires data:', data.monthlyHires);
   
   // Create time to hire chart HTML
   const chartHTML = `
@@ -2545,6 +2561,7 @@ function renderTimeToHireChart(data) {
           ${data.monthlyHires.map(item => {
             const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
             const height = maxHires > 0 ? (item.count / maxHires) * 100 : 0;
+            console.log(`📊 Bar ${item.month}: count=${item.count}, height=${height}%`);
             
             return `
               <div class="chart-bar">
@@ -2593,7 +2610,9 @@ function renderTimeToHireChart(data) {
     </div>
   `;
   
+  console.log('📝 Generated chart HTML length:', chartHTML.length);
   chartContainer.innerHTML = chartHTML;
+  console.log('✅ Chart rendered successfully');
 }
 
 // Show analytics error
