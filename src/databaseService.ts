@@ -334,46 +334,55 @@ const dummyJobs: Job[] = [
 // ===== DUMMY ANALYTICS DATA =====
 
 const dummyAnalytics: Analytics = {
-  totalCandidates: 156,
-  totalJobs: 23,
-  totalCampaigns: 89,
-  responseRate: '85.5%',
-  timeToHire: 28,
-  costPerHire: 4500,
-  qualityOfHire: 4.2,
+  totalCandidates: 247,
+  totalJobs: 34,
+  totalCampaigns: 156,
+  responseRate: '78.3%',
+  timeToHire: 32,
+  costPerHire: 5200,
+  qualityOfHire: 4.1,
   candidateSources: [
-    { source: 'LinkedIn', count: 45 },
-    { source: 'Indeed', count: 32 },
-    { source: 'Referrals', count: 28 },
-    { source: 'Company Website', count: 25 },
-    { source: 'Glassdoor', count: 18 },
-    { source: 'Other', count: 8 }
+    { source: 'LinkedIn', count: 89 },
+    { source: 'Indeed', count: 67 },
+    { source: 'Referrals', count: 45 },
+    { source: 'Company Website', count: 38 },
+    { source: 'Glassdoor', count: 28 },
+    { source: 'AngelList', count: 15 },
+    { source: 'Other', count: 15 }
   ],
   topSkills: [
-    { skill: 'JavaScript', count: 67 },
-    { skill: 'Python', count: 54 },
-    { skill: 'React', count: 48 },
-    { skill: 'AWS', count: 42 },
-    { skill: 'SQL', count: 38 },
-    { skill: 'Node.js', count: 35 },
-    { skill: 'Docker', count: 31 },
-    { skill: 'TypeScript', count: 28 }
+    { skill: 'JavaScript', count: 89 },
+    { skill: 'Python', count: 76 },
+    { skill: 'React', count: 67 },
+    { skill: 'AWS', count: 58 },
+    { skill: 'SQL', count: 52 },
+    { skill: 'Node.js', count: 48 },
+    { skill: 'Docker', count: 42 },
+    { skill: 'TypeScript', count: 38 },
+    { skill: 'Kubernetes', count: 31 },
+    { skill: 'GraphQL', count: 28 }
   ],
   hiringFunnel: [
-    { stage: 'Applications', count: 156 },
-    { stage: 'Screening', count: 89 },
-    { stage: 'Interviews', count: 45 },
-    { stage: 'Finalists', count: 18 },
-    { stage: 'Offers', count: 12 },
-    { stage: 'Hires', count: 8 }
+    { stage: 'Applications', count: 247 },
+    { stage: 'Screening', count: 156 },
+    { stage: 'Interviews', count: 89 },
+    { stage: 'Finalists', count: 34 },
+    { stage: 'Offers', count: 23 },
+    { stage: 'Hires', count: 18 }
   ],
   monthlyHires: [
-    { month: 'Jan', count: 3 },
-    { month: 'Feb', count: 5 },
-    { month: 'Mar', count: 4 },
-    { month: 'Apr', count: 6 },
-    { month: 'May', count: 7 },
-    { month: 'Jun', count: 5 }
+    { month: 'Jan', count: 4 },
+    { month: 'Feb', count: 6 },
+    { month: 'Mar', count: 5 },
+    { month: 'Apr', count: 8 },
+    { month: 'May', count: 9 },
+    { month: 'Jun', count: 7 },
+    { month: 'Jul', count: 11 },
+    { month: 'Aug', count: 8 },
+    { month: 'Sep', count: 10 },
+    { month: 'Oct', count: 12 },
+    { month: 'Nov', count: 9 },
+    { month: 'Dec', count: 6 }
   ]
 };
 

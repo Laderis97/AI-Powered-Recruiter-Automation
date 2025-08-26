@@ -2549,6 +2549,40 @@ function renderTimeToHireChart(data) {
           }).join('')}
         </div>
       </div>
+      
+      <div class="metrics-summary">
+        <div class="metric-item">
+          <div class="metric-number">${data.totalHires}</div>
+          <div class="metric-text">Total Hires</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-number">${data.avgHiresPerMonth}</div>
+          <div class="metric-text">Avg/Month</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-number">${data.yearToDate}</div>
+          <div class="metric-text">YTD Hires</div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-number">${data.conversionRate}</div>
+          <div class="metric-text">Conversion</div>
+        </div>
+      </div>
+      
+      <div class="performance-insights">
+        <div class="insight-item">
+          <i class="fas fa-trophy"></i>
+          <span>Best Month: ${data.bestMonth.month} (${data.bestMonth.count} hires)</span>
+        </div>
+        <div class="insight-item">
+          <i class="fas fa-chart-line"></i>
+          <span>Cost per Hire: $${data.costPerHire.toLocaleString()}</span>
+        </div>
+        <div class="insight-item">
+          <i class="fas fa-star"></i>
+          <span>Quality Score: ${data.qualityOfHire}/5.0</span>
+        </div>
+      </div>
     </div>
   `;
   

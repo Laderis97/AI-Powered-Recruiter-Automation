@@ -1325,6 +1325,92 @@ p {
   max-width: 100%;
 }
 
+/* Metrics Summary */
+.metrics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+}
+
+.metric-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--space-3);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  transition: all var(--duration-300) var(--ease-in-out);
+}
+
+.metric-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.metric-number {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-600);
+  line-height: 1;
+  margin-bottom: var(--space-1);
+}
+
+.metric-text {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Performance Insights */
+.performance-insights {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+}
+
+.insight-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  background: var(--color-background-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  transition: all var(--duration-300) var(--ease-in-out);
+}
+
+.insight-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-md);
+}
+
+.insight-item i {
+  font-size: var(--font-size-lg);
+  color: var(--color-primary-500);
+  width: 20px;
+  text-align: center;
+}
+
+.insight-item span {
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .analytics-grid {
@@ -1393,5 +1479,36 @@ p {
   
   .score-text {
     font-size: var(--font-size-xl);
+  }
+  
+  .metrics-summary {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+    padding: var(--space-3);
+  }
+  
+  .metric-item {
+    padding: var(--space-2);
+  }
+  
+  .metric-number {
+    font-size: var(--font-size-xl);
+  }
+  
+  .metric-text {
+    font-size: var(--font-size-xs);
+  }
+  
+  .performance-insights {
+    padding: var(--space-3);
+  }
+  
+  .insight-item {
+    padding: var(--space-2);
+    font-size: var(--font-size-sm);
+  }
+  
+  .insight-item i {
+    font-size: var(--font-size-base);
   }
 }
