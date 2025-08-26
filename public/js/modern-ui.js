@@ -2081,3 +2081,349 @@ function initializeCandidateManagement() {
   console.log('initializeCandidateManagement: Loading initial candidates...');
   loadCandidates();
 }
+
+// ===== AI TOOLS FUNCTIONALITY =====
+
+// Initialize AI tools functionality
+function initializeAITools() {
+  console.log('🧠 Initializing AI Tools...');
+  
+  // Add event listeners for AI tool buttons
+  const aiToolButtons = document.querySelectorAll('.ai-tool-btn');
+  aiToolButtons.forEach(button => {
+    button.addEventListener('click', handleAIToolClick);
+  });
+  
+  console.log(`✅ AI Tools initialized with ${aiToolButtons.length} buttons`);
+}
+
+// Handle AI tool button clicks
+function handleAIToolClick(event) {
+  const button = event.currentTarget;
+  const toolType = button.getAttribute('data-track')?.replace('use-ai-', '');
+  
+  if (!toolType) {
+    showNotification('Unknown AI tool', 'error');
+    return;
+  }
+  
+  // Show candidate and job selection modal
+  showAISelectionModal(toolType);
+}
+
+// Show AI selection modal
+function showAISelectionModal(toolType) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Select Candidate and Job for ${getToolDisplayName(toolType)}</h3>
+        <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="ai-candidate-select">Candidate:</label>
+          <select id="ai-candidate-select" class="form-select">
+            <option value="">Select a candidate...</option>
+            ${candidatesData.map(c => `<option value="${c.id}">${c.name} - ${c.title}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="ai-job-select">Job:</label>
+          <select id="ai-job-select" class="form-select">
+            <option value="">Select a job...</option>
+            ${jobsData.map(j => `<option value="${j.id}">${j.title}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Cancel</button>
+        <button class="btn btn-primary" onclick="runAIAnalysis('${toolType}')">
+          <i class="fas fa-magic"></i>
+          Run Analysis
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Get display name for AI tool
+function getToolDisplayName(toolType) {
+  const toolNames = {
+    'matching': 'Smart Candidate Matching',
+    'skills': 'Skills Gap Analysis',
+    'interview': 'Interview Question Generator',
+    'cultural': 'Cultural Fit Assessment'
+  };
+  return toolNames[toolType] || toolType;
+}
+
+// Run AI analysis
+async function runAIAnalysis(toolType) {
+  const candidateId = document.getElementById('ai-candidate-select').value;
+  const jobId = document.getElementById('ai-job-select').value;
+  
+  if (!candidateId || !jobId) {
+    showNotification('Please select both a candidate and a job', 'error');
+    return;
+  }
+  
+  // Close the modal
+  document.querySelector('.modal-overlay').remove();
+  
+  // Show loading state
+  showNotification(`Running ${getToolDisplayName(toolType)}...`, 'info');
+  
+  try {
+    let result;
+    const requestBody = { candidateId, jobId };
+    
+    switch (toolType) {
+      case 'matching':
+        result = await fetch('/api/role-alignment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        break;
+        
+      case 'skills':
+        result = await fetch('/api/skills-gap', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        break;
+        
+      case 'interview':
+        result = await fetch('/api/interview-questions/categorized', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        break;
+        
+      case 'cultural':
+        result = await fetch('/api/cultural-fit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody)
+        });
+        break;
+        
+      default:
+        throw new Error('Unknown AI tool type');
+    }
+    
+    const data = await result.json();
+    
+    if (data.success) {
+      showAIAnalysisResults(toolType, data);
+    } else {
+      showNotification(`Analysis failed: ${data.error}`, 'error');
+    }
+    
+  } catch (error) {
+    console.error('AI analysis error:', error);
+    showNotification('Analysis failed. Please try again.', 'error');
+  }
+}
+
+// Show AI analysis results
+function showAIAnalysisResults(toolType, data) {
+  const modal = document.createElement('div');
+  modal.className = 'modal-overlay';
+  
+  let content = '';
+  
+  switch (toolType) {
+    case 'matching':
+      content = `
+        <div class="modal-header">
+          <h3>🎯 Role Alignment Results</h3>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="ai-result-card">
+            <div class="ai-score">
+              <div class="score-circle" style="background: conic-gradient(var(--color-primary) 0deg ${data.alignment?.overallScore * 3.6}deg, var(--color-border) 0deg);">
+                <span class="score-text">${data.alignment?.overallScore || 0}%</span>
+              </div>
+              <h4>Overall Match</h4>
+            </div>
+            <div class="ai-breakdown">
+              <div class="breakdown-item">
+                <span class="label">Technical Skills:</span>
+                <span class="value">${data.alignment?.technicalScore || 0}%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">Experience:</span>
+                <span class="value">${data.alignment?.experienceScore || 0}%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">Cultural Fit:</span>
+                <span class="value">${data.alignment?.culturalScore || 0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      break;
+      
+    case 'skills':
+      content = `
+        <div class="modal-header">
+          <h3>📊 Skills Gap Analysis</h3>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="skills-gap-results">
+            <div class="gap-section">
+              <h4>✅ Strong Skills</h4>
+              <div class="skills-list">
+                ${(data.skillsGap?.strongSkills || []).map(skill => `<span class="skill-tag strong">${skill}</span>`).join('')}
+              </div>
+            </div>
+            <div class="gap-section">
+              <h4>⚠️ Skills to Develop</h4>
+              <div class="skills-list">
+                ${(data.skillsGap?.skillsToDevelop || []).map(skill => `<span class="skill-tag weak">${skill}</span>`).join('')}
+            </div>
+            </div>
+            <div class="gap-section">
+              <h4>📈 Development Recommendations</h4>
+              <ul class="recommendations">
+                ${(data.skillsGap?.recommendations || []).map(rec => `<li>${rec}</li>`).join('')}
+              </ul>
+            </div>
+          </div>
+        </div>
+      `;
+      break;
+      
+    case 'interview':
+      content = `
+        <div class="modal-header">
+          <h3>💬 Interview Questions</h3>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="questions-container">
+            <div class="question-category">
+              <h4>🔧 Technical Questions (${data.categorizedQuestions?.technical?.length || 0})</h4>
+              <ol class="questions-list">
+                ${(data.categorizedQuestions?.technical || []).map(q => `<li>${q}</li>`).join('')}
+              </ol>
+            </div>
+            <div class="question-category">
+              <h4>💼 Experience Questions (${data.categorizedQuestions?.experience?.length || 0})</h4>
+              <ol class="questions-list">
+                ${(data.categorizedQuestions?.experience || []).map(q => `<li>${q}</li>`).join('')}
+              </ol>
+            </div>
+            <div class="question-category">
+              <h4>🧠 Problem Solving (${data.categorizedQuestions?.problemSolving?.length || 0})</h4>
+              <ol class="questions-list">
+                ${(data.categorizedQuestions?.problemSolving || []).map(q => `<li>${q}</li>`).join('')}
+              </ol>
+            </div>
+            <div class="question-category">
+              <h4>👥 Cultural Fit (${data.categorizedQuestions?.cultural?.length || 0})</h4>
+              <ol class="questions-list">
+                ${(data.categorizedQuestions?.cultural || []).map(q => `<li>${q}</li>`).join('')}
+              </ol>
+            </div>
+          </div>
+        </div>
+      `;
+      break;
+      
+    case 'cultural':
+      content = `
+        <div class="modal-header">
+          <h3>🔍 Cultural Fit Assessment</h3>
+          <button class="modal-close" onclick="this.closest('.modal-overlay').remove()">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="cultural-fit-results">
+            <div class="fit-score">
+              <div class="score-circle" style="background: conic-gradient(var(--color-primary) 0deg ${data.culturalFit?.fitScore * 3.6}deg, var(--color-border) 0deg);">
+                <span class="score-text">${data.culturalFit?.fitScore || 0}%</span>
+              </div>
+              <h4>Cultural Fit Score</h4>
+            </div>
+            <div class="fit-breakdown">
+              <div class="breakdown-item">
+                <span class="label">Values Alignment:</span>
+                <span class="value">${data.culturalFit?.valuesAlignment || 0}%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">Work Style:</span>
+                <span class="value">${data.culturalFit?.workStyle || 0}%</span>
+              </div>
+              <div class="breakdown-item">
+                <span class="label">Team Dynamics:</span>
+                <span class="value">${data.culturalFit?.teamDynamics || 0}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      break;
+  }
+  
+  modal.innerHTML = `
+    <div class="modal-content ai-results-modal">
+      ${content}
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">Close</button>
+        <button class="btn btn-primary" onclick="exportAIResults('${toolType}', ${JSON.stringify(data).replace(/"/g, '&quot;')})">
+          <i class="fas fa-download"></i>
+          Export Results
+        </button>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+// Export AI results
+function exportAIResults(toolType, data) {
+  const timestamp = new Date().toISOString().split('T')[0];
+  const filename = `${toolType}-analysis-${timestamp}.json`;
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showNotification('Results exported successfully!', 'success');
+}
+
+// Add AI tools initialization to DOMContentLoaded
+document.addEventListener('DOMContentLoaded', function() {
+  // ... existing initialization code ...
+  
+  // Initialize AI tools
+  initializeAITools();
+});

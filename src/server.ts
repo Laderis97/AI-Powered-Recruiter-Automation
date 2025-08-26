@@ -527,8 +527,6 @@ app.post('/api/email-config', async (req, res) => {
 });
 */
 
-// AI Role Alignment endpoints temporarily disabled
-/*
 // AI Role Alignment endpoints
   // Role alignment analysis
   app.post('/api/role-alignment', async (req, res) => {
@@ -539,16 +537,13 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
       }
 
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
+      const candidate = await databaseService.getCandidateById(candidateId);
+      const job = await databaseService.getJobById(jobId);
 
       if (!candidate || !job) {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
-*/
 
-      // AI endpoints temporarily disabled
-      /*
       const result = await aiAgent.calculateRoleAlignment(candidate, job);
       
       if (result.ok) {
@@ -576,8 +571,8 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
       }
 
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
+      const candidate = await databaseService.getCandidateById(candidateId);
+      const job = await databaseService.getJobById(jobId);
 
       if (!candidate || !job) {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
@@ -610,8 +605,8 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
       }
 
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
+      const candidate = await databaseService.getCandidateById(candidateId);
+      const job = await databaseService.getJobById(jobId);
 
       if (!candidate || !job) {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
@@ -643,12 +638,9 @@ app.post('/api/email-config', async (req, res) => {
       if (!candidateId || !jobId) {
         return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
       }
-      */
 
-      // AI endpoints temporarily disabled
-      /*
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
+      const candidate = await databaseService.getCandidateById(candidateId);
+      const job = await databaseService.getJobById(jobId);
 
       if (!candidate || !job) {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
@@ -679,10 +671,7 @@ app.post('/api/email-config', async (req, res) => {
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });
-      */
 
-  // Cultural fit assessment temporarily disabled
-  /*
   // Cultural fit assessment
   app.post('/api/cultural-fit', async (req, res) => {
     try {
@@ -692,8 +681,8 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
       }
 
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
+      const candidate = await databaseService.getCandidateById(candidateId);
+      const job = await databaseService.getJobById(jobId);
 
       if (!candidate || !job) {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
@@ -716,7 +705,6 @@ app.post('/api/email-config', async (req, res) => {
       res.status(500).json({ success: false, error: 'Internal server error' });
     }
   });
-  */
 
 /*
 // Enhanced AI Analysis endpoints temporarily disabled

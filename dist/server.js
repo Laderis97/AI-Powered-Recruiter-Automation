@@ -5,6 +5,7 @@ import * as dotenv from 'dotenv';
 import { documentParser } from './documentParser.js';
 import { parseJobDescription } from './openai.js';
 import { databaseService } from './databaseService.js';
+import { aiAgent } from './aiAgent.js';
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -491,193 +492,165 @@ app.post('/api/email-config', async (req, res) => {
   }
 });
 */
-// AI Role Alignment endpoints temporarily disabled
-/*
 // AI Role Alignment endpoints
-  // Role alignment analysis
-  app.post('/api/role-alignment', async (req, res) => {
+// Role alignment analysis
+app.post('/api/role-alignment', async (req, res) => {
     try {
-      const { candidateId, jobId } = req.body;
-      
-      if (!candidateId || !jobId) {
-        return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
-      }
-
-      const candidate = await databaseService.getCandidate(candidateId);
-      const job = await databaseService.getJob(jobId);
-
-      if (!candidate || !job) {
-        return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
-      }
-*/
-// AI endpoints temporarily disabled
-/*
-const result = await aiAgent.calculateRoleAlignment(candidate, job);
-
-if (result.ok) {
-  res.json({
-    success: true,
-    alignment: result.data,
-    message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`
-  });
-} else {
-  console.error('Role alignment failed:', result.error);
-  res.status(500).json({ success: false, error: 'Failed to analyze role alignment' });
-}
-} catch (error) {
-console.error('Error in role alignment:', error);
-res.status(500).json({ success: false, error: 'Internal server error' });
-}
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidateById(candidateId);
+        const job = await databaseService.getJobById(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.calculateRoleAlignment(candidate, job);
+        if (result.ok) {
+            res.json({
+                success: true,
+                alignment: result.data,
+                message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`
+            });
+        }
+        else {
+            console.error('Role alignment failed:', result.error);
+            res.status(500).json({ success: false, error: 'Failed to analyze role alignment' });
+        }
+    }
+    catch (error) {
+        console.error('Error in role alignment:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 });
-
 // Skills gap analysis
 app.post('/api/skills-gap', async (req, res) => {
-try {
-const { candidateId, jobId } = req.body;
-
-if (!candidateId || !jobId) {
-  return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
-}
-
-const candidate = await databaseService.getCandidate(candidateId);
-const job = await databaseService.getJob(jobId);
-
-if (!candidate || !job) {
-  return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
-}
-
-const result = await aiAgent.analyzeSkillsGap(candidate, job);
-
-if (result.ok) {
-  res.json({
-    success: true,
-    skillsGap: result.data,
-    message: 'Skills gap analysis completed'
-  });
-} else {
-  console.error('Skills gap analysis failed:', result.error);
-  res.status(500).json({ success: false, error: 'Failed to analyze skills gap' });
-}
-} catch (error) {
-console.error('Error in skills gap analysis:', error);
-res.status(500).json({ success: false, error: 'Internal server error' });
-}
+    try {
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidateById(candidateId);
+        const job = await databaseService.getJobById(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.analyzeSkillsGap(candidate, job);
+        if (result.ok) {
+            res.json({
+                success: true,
+                skillsGap: result.data,
+                message: 'Skills gap analysis completed'
+            });
+        }
+        else {
+            console.error('Skills gap analysis failed:', result.error);
+            res.status(500).json({ success: false, error: 'Failed to analyze skills gap' });
+        }
+    }
+    catch (error) {
+        console.error('Error in skills gap analysis:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 });
-
 // Interview questions generation
 app.post('/api/interview-questions', async (req, res) => {
-try {
-const { candidateId, jobId } = req.body;
-
-if (!candidateId || !jobId) {
-  return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
-}
-
-const candidate = await databaseService.getCandidate(candidateId);
-const job = await databaseService.getJob(jobId);
-
-if (!candidate || !job) {
-  return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
-}
-
-const result = await aiAgent.generateInterviewQuestions(candidate, job);
-
-if (result.ok) {
-  res.json({
-    success: true,
-    questions: result.data,
-    message: `${result.data?.length || 0} interview questions generated`
-  });
-} else {
-  console.error('Interview questions generation failed:', result.error);
-  res.status(500).json({ success: false, error: 'Failed to generate interview questions' });
-}
-} catch (error) {
-console.error('Error in interview questions generation:', error);
-res.status(500).json({ success: false, error: 'Internal server error' });
-}
+    try {
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidateById(candidateId);
+        const job = await databaseService.getJobById(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.generateInterviewQuestions(candidate, job);
+        if (result.ok) {
+            res.json({
+                success: true,
+                questions: result.data,
+                message: `${result.data?.length || 0} interview questions generated`
+            });
+        }
+        else {
+            console.error('Interview questions generation failed:', result.error);
+            res.status(500).json({ success: false, error: 'Failed to generate interview questions' });
+        }
+    }
+    catch (error) {
+        console.error('Error in interview questions generation:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 });
-
 // Categorized interview questions generation
 app.post('/api/interview-questions/categorized', async (req, res) => {
-try {
-const { candidateId, jobId } = req.body;
-
-if (!candidateId || !jobId) {
-  return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
-}
-*/
-// AI endpoints temporarily disabled
-/*
-const candidate = await databaseService.getCandidate(candidateId);
-const job = await databaseService.getJob(jobId);
-
-if (!candidate || !job) {
-  return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
-}
-
-const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, job);
-
-if (result.ok) {
-  res.json({
-    success: true,
-    categorizedQuestions: result.data,
-    message: `${result.data?.all?.length || 0} categorized interview questions generated`,
-    summary: {
-      technical: result.data?.technical?.length || 0,
-      experience: result.data?.experience?.length || 0,
-      problemSolving: result.data?.problemSolving?.length || 0,
-      leadership: result.data?.leadership?.length || 0,
-      cultural: result.data?.cultural?.length || 0,
-      total: result.data?.all?.length || 0
+    try {
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidateById(candidateId);
+        const job = await databaseService.getJobById(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, job);
+        if (result.ok) {
+            res.json({
+                success: true,
+                categorizedQuestions: result.data,
+                message: `${result.data?.all?.length || 0} categorized interview questions generated`,
+                summary: {
+                    technical: result.data?.technical?.length || 0,
+                    experience: result.data?.experience?.length || 0,
+                    problemSolving: result.data?.problemSolving?.length || 0,
+                    leadership: result.data?.leadership?.length || 0,
+                    cultural: result.data?.cultural?.length || 0,
+                    total: result.data?.all?.length || 0
+                }
+            });
+        }
+        else {
+            console.error('Categorized interview questions generation failed:', result.error);
+            res.status(500).json({ success: false, error: 'Failed to generate categorized interview questions' });
+        }
     }
-  });
-} else {
-  console.error('Categorized interview questions generation failed:', result.error);
-  res.status(500).json({ success: false, error: 'Failed to generate categorized interview questions' });
-}
-} catch (error) {
-console.error('Error in categorized interview questions generation:', error);
-res.status(500).json({ success: false, error: 'Internal server error' });
-}
+    catch (error) {
+        console.error('Error in categorized interview questions generation:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
+    }
 });
-*/
-// Cultural fit assessment temporarily disabled
-/*
 // Cultural fit assessment
 app.post('/api/cultural-fit', async (req, res) => {
-  try {
-    const { candidateId, jobId } = req.body;
-    
-    if (!candidateId || !jobId) {
-      return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+    try {
+        const { candidateId, jobId } = req.body;
+        if (!candidateId || !jobId) {
+            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+        }
+        const candidate = await databaseService.getCandidateById(candidateId);
+        const job = await databaseService.getJobById(jobId);
+        if (!candidate || !job) {
+            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+        }
+        const result = await aiAgent.assessCulturalFit(candidate, job);
+        if (result.ok) {
+            res.json({
+                success: true,
+                culturalFit: result.data,
+                message: `Cultural fit score: ${result.data?.fitScore || 0}%`
+            });
+        }
+        else {
+            console.error('Cultural fit assessment failed:', result.error);
+            res.status(500).json({ success: false, error: 'Failed to assess cultural fit' });
+        }
     }
-
-    const candidate = await databaseService.getCandidate(candidateId);
-    const job = await databaseService.getJob(jobId);
-
-    if (!candidate || !job) {
-      return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+    catch (error) {
+        console.error('Error in cultural fit assessment:', error);
+        res.status(500).json({ success: false, error: 'Internal server error' });
     }
-
-    const result = await aiAgent.assessCulturalFit(candidate, job);
-    
-    if (result.ok) {
-      res.json({
-        success: true,
-        culturalFit: result.data,
-        message: `Cultural fit score: ${result.data?.fitScore || 0}%`
-      });
-    } else {
-      console.error('Cultural fit assessment failed:', result.error);
-      res.status(500).json({ success: false, error: 'Failed to assess cultural fit' });
-    }
-  } catch (error) {
-    console.error('Error in cultural fit assessment:', error);
-    res.status(500).json({ success: false, error: 'Internal server error' });
-  }
 });
-*/
 /*
 // Enhanced AI Analysis endpoints temporarily disabled
 app.post('/api/ai/enhanced-role-alignment', async (req, res) => {
