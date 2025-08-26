@@ -1857,12 +1857,15 @@ function renderCandidates() {
   candidatesData.forEach((candidate, index) => {
     console.log(`Creating card ${index + 1}:`, candidate);
     const candidateCard = createCandidateCard(candidate);
-    if (candidateCard) {
-      candidatesGrid.appendChild(candidateCard);
-      console.log(`Card ${index + 1} added to grid`);
-    } else {
-      console.error(`Failed to create card for candidate ${index + 1}:`, candidate);
-    }
+         if (candidateCard) {
+       candidatesGrid.appendChild(candidateCard);
+       console.log(`Card ${index + 1} added to grid`);
+       console.log(`Grid now has ${candidatesGrid.children.length} children`);
+       console.log(`Grid display style: ${candidatesGrid.style.display}`);
+       console.log(`Grid computed display: ${window.getComputedStyle(candidatesGrid).display}`);
+     } else {
+       console.error(`Failed to create card for candidate ${index + 1}:`, candidate);
+     }
   });
 }
 
