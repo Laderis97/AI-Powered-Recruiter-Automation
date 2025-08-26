@@ -31,6 +31,8 @@ export interface JobPosting {
   id: string;
   title: string;
   description: string;
+  skills?: string;
+  requirements?: string;
   parsedData?: {
     skills?: string[];
     seniority?: 'IC' | 'Manager' | 'Senior' | 'Lead';
@@ -86,10 +88,13 @@ export class AIAgent {
     try {
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
       
+      // Parse job skills from string to array
+      const jobSkills = this.parseJobSkills(job);
+      
       // Use semantic search for better skill analysis
       const semanticAnalysis = this.semanticSearch.analyzeSkills(
         candidate.skills, 
-        job.parsedData?.skills || []
+        jobSkills
       );
       
       const prompt = this.buildEnhancedRoleAlignmentPrompt(candidate, job, analysisConfig, semanticAnalysis);
@@ -104,7 +109,8 @@ export class AIAgent {
       return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
     } catch (error) {
       this.log.error('Unexpected error in role alignment:', error);
-      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
+      const jobSkills = this.parseJobSkills(job);
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, jobSkills);
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
       return { ok: true, data: this.generateEnhancedFallbackAlignment(candidate, job, analysisConfig, semanticAnalysis) };
     }
@@ -121,16 +127,19 @@ export class AIAgent {
     try {
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
       
+      // Parse job skills from string to array
+      const jobSkills = this.parseJobSkills(job);
+      
       // Use semantic search for comprehensive skills analysis
       console.log('🔍 Calling semantic search with:', { 
         candidateSkills: candidate.skills, 
-        jobSkills: job.parsedData?.skills || [],
-        jobParsedData: job.parsedData
+        jobSkills: jobSkills,
+        jobTitle: job.title
       });
       
       const semanticAnalysis = this.semanticSearch.analyzeSkills(
         candidate.skills, 
-        job.parsedData?.skills || []
+        jobSkills
       );
       
       console.log('🔍 Semantic analysis result:', semanticAnalysis);
@@ -149,7 +158,8 @@ export class AIAgent {
       return { ok: true, data: fallbackData };
     } catch (error) {
       this.log.error('Unexpected error in skills gap analysis:', error);
-      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, job.parsedData?.skills || []);
+      const jobSkills = this.parseJobSkills(job);
+      const semanticAnalysis = this.semanticSearch.analyzeSkills(candidate.skills, jobSkills);
       const analysisConfig: AnalysisConfig = { ...this.defaultConfig, ...config };
       return { ok: true, data: this.generateEnhancedFallbackSkillsGap(candidate, job, analysisConfig, semanticAnalysis) };
     }
@@ -911,6 +921,66 @@ Return valid JSON matching the CulturalFit schema exactly.`;
     if (years >= 5) return 'advanced';
     if (years >= 2) return 'intermediate';
     return 'beginner';
+  }
+
+  /**
+   * Parse job skills from job data
+   */
+  private parseJobSkills(job: JobPosting): string[] {
+    // First try to get skills from parsedData
+    if (job.parsedData?.skills && job.parsedData.skills.length > 0) {
+      return job.parsedData.skills;
+    }
+    
+    // Try to extract from job skills string field
+    if (job.skills && typeof job.skills === 'string') {
+      return job.skills.split(',').map((skill: string) => skill.trim()).filter((skill: string) => skill.length > 0);
+    }
+    
+    // Fallback to extracting skills from job description
+    const description = job.description.toLowerCase();
+    const requirements = job.requirements ? job.requirements.toLowerCase() : '';
+    const fullText = `${description} ${requirements}`;
+    
+    const skills: string[] = [];
+
+    // Common skill keywords with variations
+    const skillKeywords = [
+      'javascript', 'js', 'react', 'vue', 'angular', 'css', 'html', 'typescript', 'ts',
+      'node.js', 'nodejs', 'python', 'java', 'c#', 'csharp', 'go', 'golang',
+      'database', 'sql', 'nosql', 'mongodb', 'postgresql', 'mysql', 'redis',
+      'api', 'rest', 'graphql', 'microservices', 'authentication', 'auth',
+      'security', 'testing', 'unit testing', 'integration testing', 'docker',
+      'kubernetes', 'k8s', 'aws', 'azure', 'gcp', 'cloud', 'ci/cd', 'cicd',
+      'terraform', 'monitoring', 'infrastructure as code', 'iac',
+      'machine learning', 'ml', 'ai', 'artificial intelligence', 'data analysis',
+      'statistics', 'pandas', 'numpy', 'data visualization', 'big data',
+      'etl processes', 'etl', 'a/b testing', 'ab testing', 'product strategy',
+      'market research', 'user experience design', 'ux', 'ui', 'stakeholder management',
+      'product roadmap', 'customer research', 'business metrics', 'competitive analysis',
+      'business strategy', 'market analysis', 'financial modeling', 'project management',
+      'risk assessment', 'compliance knowledge', 'regulatory compliance', 'risk management',
+      'audit processes', 'policy development', 'data governance', 'security frameworks',
+      'compliance monitoring', 'regulatory reporting', 'internal controls',
+      'compliance training', 'team leadership', 'strategic planning',
+      'resource management', 'performance management', 'stakeholder communication',
+      'change management', 'process improvement', 'budget management',
+      'strategic decision making', 'figma', 'adobe', 'prototyping', 'design systems',
+      'user research', 'agile', 'scrum', 'kanban', 'jira', 'confluence'
+    ];
+
+    skillKeywords.forEach(keyword => {
+      if (fullText.includes(keyword)) {
+        // Capitalize the skill name properly
+        const skillName = keyword.split(' ').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
+        skills.push(skillName);
+      }
+    });
+
+    // Remove duplicates and sort
+    return Array.from(new Set(skills)).sort();
   }
 }
 
