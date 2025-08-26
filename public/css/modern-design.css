@@ -1034,6 +1034,7 @@ p {
   box-shadow: var(--shadow-lg);
   border: 1px solid var(--color-border-subtle);
   transition: all var(--duration-300) var(--ease-in-out);
+  overflow: hidden;
 }
 
 .analytics-card:hover {
@@ -1067,12 +1068,14 @@ p {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .chart-container {
   width: 100%;
   height: 100%;
   min-height: 300px;
+  overflow: hidden;
 }
 
 .chart-loading {
@@ -1111,6 +1114,7 @@ p {
   flex-direction: column;
   gap: var(--space-3);
   width: 100%;
+  overflow: hidden;
 }
 
 .funnel-stage {
@@ -1189,6 +1193,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
+  overflow: hidden;
 }
 
 .metric-card {
@@ -1244,6 +1249,7 @@ p {
   border: 1px solid var(--color-border);
   overflow: hidden;
   width: 100%;
+  max-width: 100%;
 }
 
 .monthly-chart h4 {
@@ -1257,11 +1263,12 @@ p {
   display: flex;
   align-items: end;
   justify-content: space-around;
-  gap: var(--space-2);
+  gap: var(--space-1);
   height: 200px;
-  padding: var(--space-4) var(--space-2);
+  padding: var(--space-4) var(--space-1);
   width: 100%;
   overflow: hidden;
+  max-width: 100%;
 }
 
 .chart-bar {
@@ -1271,7 +1278,8 @@ p {
   gap: var(--space-2);
   flex: 1;
   min-width: 0;
-  max-width: 50px;
+  max-width: 40px;
+  overflow: hidden;
 }
 
 .bar-fill {
@@ -1281,6 +1289,7 @@ p {
   transition: height var(--duration-1000) var(--ease-out);
   position: relative;
   min-height: 4px;
+  max-width: 100%;
 }
 
 .bar-fill::after {
@@ -1295,17 +1304,25 @@ p {
 }
 
 .bar-label {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 .bar-value {
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-sm);
   font-weight: var(--font-weight-bold);
   color: var(--color-primary-600);
   text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
 /* Responsive Design */
@@ -1347,7 +1364,7 @@ p {
   }
   
   .chart-bar {
-    max-width: 35px;
+    max-width: 30px;
     min-width: 0;
   }
   
