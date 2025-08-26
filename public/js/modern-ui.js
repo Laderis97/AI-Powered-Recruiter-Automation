@@ -1243,6 +1243,12 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize candidate management functionality
   initializeCandidateManagement();
   
+  // Initialize AI tools
+  initializeAITools();
+  
+  // Initialize analytics
+  initializeAnalytics();
+  
   // Test candidate data after a short delay
   setTimeout(() => {
     console.log('DOMContentLoaded: Testing candidate data after delay...');
@@ -2596,14 +2602,3 @@ function refreshTimeToHire() {
 // Global functions for analytics
 window.refreshHiringFunnel = refreshHiringFunnel;
 window.refreshTimeToHire = refreshTimeToHire;
-
-// Add analytics initialization to DOMContentLoaded
-document.addEventListener('DOMContentLoaded', function() {
-  // ... existing initialization code ...
-  
-  // Initialize AI tools
-  initializeAITools();
-  
-  // Initialize analytics
-  initializeAnalytics();
-});
