@@ -497,7 +497,7 @@
           </div>
         </div>
         
-        <div class="analytics-card" data-stagger>
+        <div class="analytics-card" data-stagger onclick="openTimeToHireModal()" style="cursor: pointer;">
           <div class="analytics-header">
             <h3 class="analytics-title">Time to Hire</h3>
             <div class="analytics-actions">
@@ -601,6 +601,31 @@
         <button class="btn btn-primary" onclick="processResumeUpload()" id="processResumeBtn" disabled>
           <i class="fas fa-magic"></i>
           Process Resume
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Time to Hire Modal -->
+  <div id="timeToHireModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 class="modal-title">📊 Time to Hire Analytics</h3>
+        <button class="modal-close" onclick="closeTimeToHireModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body modal-scrollable">
+        <div id="timeToHireModalContent">
+          <!-- Content will be populated by JavaScript -->
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeTimeToHireModal()">Close</button>
+        <button class="btn btn-primary" onclick="refreshTimeToHireModal()">
+          <i class="fas fa-sync-alt"></i> Refresh Data
         </button>
       </div>
     </div>

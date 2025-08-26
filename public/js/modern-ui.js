@@ -2836,3 +2836,196 @@ function exportStageData() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+// Time to Hire Modal Functions
+function openTimeToHireModal() {
+  console.log('🔍 openTimeToHireModal: Opening modal...');
+  const modal = document.getElementById('timeToHireModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    loadTimeToHireModalData();
+  } else {
+    console.error('❌ timeToHireModal not found');
+  }
+}
+
+function closeTimeToHireModal() {
+  console.log('🔍 closeTimeToHireModal: Closing modal...');
+  const modal = document.getElementById('timeToHireModal');
+  if (modal) {
+    modal.style.display = 'none';
+  }
+}
+
+function refreshTimeToHireModal() {
+  console.log('🔍 refreshTimeToHireModal: Refreshing modal data...');
+  loadTimeToHireModalData();
+}
+
+async function loadTimeToHireModalData() {
+  console.log('🔄 loadTimeToHireModalData: Loading data for modal...');
+  try {
+    const response = await fetch('/api/analytics/time-to-hire');
+    console.log('📡 loadTimeToHireModalData: Response status:', response.status);
+    if (response.ok) {
+      const result = await response.json();
+      console.log('📊 loadTimeToHireModalData: API response:', result);
+      if (result.success) {
+        console.log('✅ loadTimeToHireModalData: Data loaded successfully, populating modal');
+        populateTimeToHireModal(result.data);
+      } else {
+        console.error('❌ loadTimeToHireModalData: API returned success: false');
+        showModalError('Failed to load time to hire data');
+      }
+    } else {
+      console.error('❌ loadTimeToHireModalData: HTTP error:', response.status);
+      showModalError('Failed to fetch time to hire data');
+    }
+  } catch (error) {
+    console.error('❌ loadTimeToHireModalData: Error:', error);
+    showModalError('Error loading time to hire data');
+  }
+}
+
+function populateTimeToHireModal(data) {
+  console.log('🔍 populateTimeToHireModal: Populating modal with data:', data);
+  const modalContent = document.getElementById('timeToHireModalContent');
+  if (!modalContent) {
+    console.error('❌ timeToHireModalContent not found');
+    return;
+  }
+
+  // Calculate additional metrics
+  const totalHires = data.monthlyHires.reduce((sum, month) => sum + month.count, 0);
+  const avgHiresPerMonth = totalHires / data.monthlyHires.length;
+  const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
+  const minHires = Math.min(...data.monthlyHires.map(m => m.count));
+  
+  // Calculate trends
+  const recentMonths = data.monthlyHires.slice(-3);
+  const previousMonths = data.monthlyHires.slice(-6, -3);
+  const recentAvg = recentMonths.reduce((sum, m) => sum + m.count, 0) / recentMonths.length;
+  const previousAvg = previousMonths.reduce((sum, m) => sum + m.count, 0) / previousMonths.length;
+  const trend = recentAvg > previousAvg ? 'positive' : recentAvg < previousAvg ? 'negative' : 'neutral';
+  const trendPercentage = previousAvg > 0 ? ((recentAvg - previousAvg) / previousAvg * 100).toFixed(1) : 0;
+
+  const modalHTML = `
+    <div class="time-to-hire-metrics">
+      <div class="time-to-hire-metric">
+        <div class="time-to-hire-metric-value">${data.averageTimeToHire}</div>
+        <div class="time-to-hire-metric-label">Average Days to Hire</div>
+      </div>
+      <div class="time-to-hire-metric">
+        <div class="time-to-hire-metric-value">${totalHires}</div>
+        <div class="time-to-hire-metric-label">Total Hires</div>
+      </div>
+      <div class="time-to-hire-metric">
+        <div class="time-to-hire-metric-value">${avgHiresPerMonth.toFixed(1)}</div>
+        <div class="time-to-hire-metric-label">Avg Hires per Month</div>
+      </div>
+      <div class="time-to-hire-metric">
+        <div class="time-to-hire-metric-value">${maxHires}</div>
+        <div class="time-to-hire-metric-label">Peak Month</div>
+      </div>
+    </div>
+
+    <div class="time-to-hire-trends">
+      <div class="time-to-hire-trend">
+        <div class="trend-icon ${trend}">
+          <i class="fas fa-${trend === 'positive' ? 'arrow-up' : trend === 'negative' ? 'arrow-down' : 'minus'}"></i>
+        </div>
+        <div class="trend-content">
+          <h5>Hiring Trend</h5>
+          <p>${trend === 'positive' ? 'Increasing' : trend === 'negative' ? 'Decreasing' : 'Stable'} (${trendPercentage}%)</p>
+        </div>
+      </div>
+      <div class="time-to-hire-trend">
+        <div class="trend-icon neutral">
+          <i class="fas fa-calendar"></i>
+        </div>
+        <div class="trend-content">
+          <h5>Best Month</h5>
+          <p>${data.monthlyHires.find(m => m.count === maxHires)?.month || 'N/A'} (${maxHires} hires)</p>
+        </div>
+      </div>
+      <div class="time-to-hire-trend">
+        <div class="trend-icon neutral">
+          <i class="fas fa-clock"></i>
+        </div>
+        <div class="trend-content">
+          <h5>Efficiency</h5>
+          <p>${data.averageTimeToHire <= 30 ? 'Excellent' : data.averageTimeToHire <= 45 ? 'Good' : 'Needs Improvement'}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="time-to-hire-chart-section">
+      <h4>Monthly Hires Trend</h4>
+      <div class="chart-bars">
+        ${data.monthlyHires.map(item => {
+          const height = maxHires > 0 ? (item.count / maxHires) * 200 : 0;
+          return `
+            <div class="chart-bar">
+              <div class="bar-fill" style="height: ${height}px; min-height: 8px;"></div>
+              <div class="bar-label">${item.month}</div>
+              <div class="bar-value">${item.count}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+
+    <div class="time-to-hire-insights">
+      <div class="time-to-hire-insight-card">
+        <div class="time-to-hire-insight-title">Hiring Efficiency</div>
+        <div class="time-to-hire-insight-description">
+          ${data.averageTimeToHire <= 30 ? 'Your hiring process is highly efficient with an average time to hire of ' + data.averageTimeToHire + ' days. This is well below industry standards.' : 
+            data.averageTimeToHire <= 45 ? 'Your hiring process is performing well with an average time to hire of ' + data.averageTimeToHire + ' days. Consider optimizing bottlenecks to improve further.' : 
+            'Your hiring process could benefit from optimization. The current average of ' + data.averageTimeToHire + ' days suggests potential bottlenecks in the recruitment funnel.'}
+        </div>
+      </div>
+      
+      <div class="time-to-hire-insight-card">
+        <div class="time-to-hire-insight-title">Seasonal Patterns</div>
+        <div class="time-to-hire-insight-description">
+          ${maxHires > avgHiresPerMonth * 1.5 ? 'There are clear seasonal hiring patterns with ' + data.monthlyHires.find(m => m.count === maxHires)?.month + ' being the peak hiring month. Consider planning recruitment campaigns around these periods.' : 
+            'Hiring appears to be relatively consistent throughout the year with no major seasonal spikes. This suggests stable recruitment needs.'}
+        </div>
+      </div>
+      
+      <div class="time-to-hire-insight-card">
+        <div class="time-to-hire-insight-title">Growth Opportunities</div>
+        <div class="time-to-hire-insight-description">
+          ${trend === 'positive' ? 'Your hiring is trending upward, indicating growing business needs and effective recruitment strategies. Consider scaling your recruitment team to maintain this momentum.' : 
+            trend === 'negative' ? 'Hiring has decreased recently. This could indicate market conditions, business strategy changes, or recruitment challenges that need attention.' : 
+            'Hiring has remained stable. This consistency suggests well-established recruitment processes and predictable business growth.'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  console.log('📝 Generated modal HTML length:', modalHTML.length);
+  modalContent.innerHTML = modalHTML;
+  console.log('✅ Modal populated successfully');
+}
+
+function showModalError(message) {
+  const modalContent = document.getElementById('timeToHireModalContent');
+  if (modalContent) {
+    modalContent.innerHTML = `
+      <div class="error-message" style="text-align: center; padding: var(--space-8); color: var(--color-error-600);">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; margin-bottom: var(--space-4);"></i>
+        <h4>Error Loading Data</h4>
+        <p>${message}</p>
+        <button class="btn btn-primary" onclick="loadTimeToHireModalData()">
+          <i class="fas fa-sync-alt"></i> Try Again
+        </button>
+      </div>
+    `;
+  }
+}
+
+// Make functions globally available
+window.openTimeToHireModal = openTimeToHireModal;
+window.closeTimeToHireModal = closeTimeToHireModal;
+window.refreshTimeToHireModal = refreshTimeToHireModal;
