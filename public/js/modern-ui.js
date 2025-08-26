@@ -1634,9 +1634,11 @@ function createJobCard(job) {
   card.setAttribute('data-track', 'job-card');
   card.setAttribute('data-job-id', job.id);
 
-  const skills = job.skills ? job.skills.split(',').slice(0, 3) : [];
+  // Handle skills as array (new format) or string (old format)
+  const skillsArray = Array.isArray(job.skills) ? job.skills : (job.skills ? job.skills.split(',') : []);
+  const skills = skillsArray.slice(0, 3);
   const skillsDisplay = skills.map(skill => `<span class="skill-tag">${skill.trim()}</span>`).join('');
-  const moreSkills = job.skills ? job.skills.split(',').length - 3 : 0;
+  const moreSkills = skillsArray.length - 3;
 
   card.innerHTML = `
     <div class="job-header">
@@ -1710,15 +1712,20 @@ function populateJobForm(job) {
 
   // Populate form fields
   form.querySelector('[name="title"]').value = job.title || '';
-  form.querySelector('[name="department"]').value = job.department || '';
+  form.querySelector('[name="department"]').value = job.company || '';
   form.querySelector('[name="location"]').value = job.location || '';
-  form.querySelector('[name="employmentType"]').value = job.employmentType || '';
+  form.querySelector('[name="employmentType"]').value = job.type || '';
   form.querySelector('[name="salary"]').value = job.salary || '';
   form.querySelector('[name="experienceLevel"]').value = job.experienceLevel || '';
   form.querySelector('[name="description"]').value = job.description || '';
   form.querySelector('[name="responsibilities"]').value = job.responsibilities || '';
-  form.querySelector('[name="requirements"]').value = job.requirements || '';
-  form.querySelector('[name="skills"]').value = job.skills || '';
+  
+  // Handle requirements and skills as arrays
+  const requirements = Array.isArray(job.requirements) ? job.requirements.join(', ') : job.requirements || '';
+  const skills = Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || '';
+  
+  form.querySelector('[name="requirements"]').value = requirements;
+  form.querySelector('[name="skills"]').value = skills;
   form.querySelector('[name="niceToHave"]').value = job.niceToHave || '';
   form.querySelector('[name="benefits"]').value = job.benefits || '';
   form.querySelector('[name="perks"]').value = job.perks || '';
@@ -2686,7 +2693,7 @@ function populateFunnelModal(stage, data) {
   populateInsightsTab(data.insights);
   
   // Set active tab to candidates
-  switchFunnelTab('candidates');
+  switchFunnelTab('candidates', null);
 }
 
 // Populate candidates tab
@@ -2743,12 +2750,14 @@ function populateInsightsTab(insights) {
 }
 
 // Switch funnel modal tabs
-function switchFunnelTab(tabName) {
+function switchFunnelTab(tabName, event) {
   // Update tab buttons
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.classList.remove('active');
   });
-  event.target.classList.add('active');
+  if (event && event.target) {
+    event.target.classList.add('active');
+  }
   
   // Update tab panes
   document.querySelectorAll('.tab-pane').forEach(pane => {
