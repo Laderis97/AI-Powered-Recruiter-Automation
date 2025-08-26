@@ -577,56 +577,134 @@
       
       <div class="modal-body">
         <div class="upload-section">
-          <div class="upload-zone" id="uploadZone">
-            <div class="upload-icon">
-              <i class="fas fa-cloud-upload-alt"></i>
-            </div>
-            <h4>Drag & Drop Resume</h4>
-            <p>or click to browse files</p>
-            <p class="upload-formats">Supported: PDF, DOCX, DOC, TXT</p>
-            <input type="file" id="resumeFileInput" accept=".pdf,.docx,.doc,.txt" multiple style="display: none;">
+          <div class="upload-area" onclick="document.getElementById('resumeFile').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Click to upload or drag and drop</p>
+            <span class="upload-hint">PDF, DOC, DOCX (max 5MB)</span>
           </div>
-          
-          <div class="upload-options">
-            <div class="upload-option">
-              <button class="btn btn-primary" onclick="document.getElementById('resumeFileInput').click()">
-                <i class="fas fa-folder-open"></i>
-                Choose Files
-              </button>
-            </div>
-            <div class="upload-option">
-              <button class="btn btn-secondary" onclick="openBulkUpload()">
-                <i class="fas fa-layer-group"></i>
-                Bulk Upload
-              </button>
-            </div>
-          </div>
+          <input type="file" id="resumeFile" accept=".pdf,.doc,.docx" style="display: none;" onchange="handleResumeUpload(event)">
         </div>
         
-        <div class="upload-progress" id="uploadProgress" style="display: none;">
-          <div class="progress-bar">
-            <div class="progress-fill" id="progressFill"></div>
-          </div>
-          <p class="progress-text" id="progressText">Processing...</p>
-        </div>
-        
-        <div class="upload-results" id="uploadResults" style="display: none;">
-          <div class="results-header">
-            <h4>Upload Results</h4>
-            <button class="btn btn-sm btn-outline" onclick="clearResults()">
-              <i class="fas fa-trash"></i>
-              Clear
+        <div class="upload-preview" id="uploadPreview" style="display: none;">
+          <div class="preview-header">
+            <h4>Resume Preview</h4>
+            <button class="btn-icon" onclick="clearResumeUpload()">
+              <i class="fas fa-times"></i>
             </button>
           </div>
-          <div class="results-content" id="resultsContent"></div>
+          <div class="preview-content" id="previewContent"></div>
         </div>
       </div>
       
       <div class="modal-footer">
-        <button class="btn btn-outline" onclick="closeResumeUploadModal()">Cancel</button>
-        <button class="btn btn-primary" id="processBtn" onclick="processUploads()" style="display: none;">
+        <button class="btn btn-secondary" onclick="closeResumeUploadModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="processResumeUpload()" id="processResumeBtn" disabled>
           <i class="fas fa-magic"></i>
-          Process Resumes
+          Process Resume
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hiring Funnel Expanded View Modal -->
+  <div id="hiringFunnelModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content modal-large">
+      <div class="modal-header">
+        <h3 class="modal-title" id="funnelModalTitle">
+          <i class="fas fa-funnel"></i>
+          <span id="funnelStageName">Stage Details</span>
+        </h3>
+        <button class="modal-close" onclick="closeHiringFunnelModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="modal-body">
+        <div class="funnel-stage-overview">
+          <div class="stage-metrics">
+            <div class="metric-card">
+              <div class="metric-value" id="stageCount">0</div>
+              <div class="metric-label">Candidates</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="stagePercentage">0%</div>
+              <div class="metric-label">Conversion Rate</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="stageAvgTime">0 days</div>
+              <div class="metric-label">Avg Time in Stage</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-value" id="stageSuccessRate">0%</div>
+              <div class="metric-label">Success Rate</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="funnel-stage-details">
+          <div class="details-tabs">
+            <button class="tab-btn active" onclick="switchFunnelTab('candidates')">
+              <i class="fas fa-users"></i>
+              Candidates
+            </button>
+            <button class="tab-btn" onclick="switchFunnelTab('analytics')">
+              <i class="fas fa-chart-bar"></i>
+              Analytics
+            </button>
+            <button class="tab-btn" onclick="switchFunnelTab('insights')">
+              <i class="fas fa-lightbulb"></i>
+              Insights
+            </button>
+          </div>
+          
+          <div class="tab-content">
+            <div id="candidates-tab" class="tab-pane active">
+              <div class="candidates-list" id="stageCandidatesList">
+                <!-- Candidates will be populated here -->
+              </div>
+            </div>
+            
+            <div id="analytics-tab" class="tab-pane">
+              <div class="analytics-content">
+                <div class="chart-container">
+                  <h4>Stage Performance Over Time</h4>
+                  <div id="stagePerformanceChart" class="performance-chart">
+                    <!-- Performance chart will be rendered here -->
+                  </div>
+                </div>
+                <div class="metrics-grid">
+                  <div class="metric-item">
+                    <div class="metric-number" id="stageDropoffRate">0%</div>
+                    <div class="metric-text">Drop-off Rate</div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-number" id="stageBottleneck">No</div>
+                    <div class="metric-text">Bottleneck</div>
+                  </div>
+                  <div class="metric-item">
+                    <div class="metric-number" id="stageEfficiency">0%</div>
+                    <div class="metric-text">Efficiency</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div id="insights-tab" class="tab-pane">
+              <div class="insights-content">
+                <div class="insight-cards" id="stageInsights">
+                  <!-- Insights will be populated here -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeHiringFunnelModal()">Close</button>
+        <button class="btn btn-primary" onclick="exportStageData()">
+          <i class="fas fa-download"></i>
+          Export Data
         </button>
       </div>
     </div>

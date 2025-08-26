@@ -14,6 +14,8 @@ import { databaseService } from './databaseService.js';
 import { aiAgent } from './aiAgent.js';
 import { type AlignmentScore, type SkillsGap, type CulturalFit } from './schemas.js';
 import type { Request, Response, NextFunction } from 'express';
+import type { Job } from './databaseService.js';
+import type { JobPosting } from './aiAgent.js';
 
 dotenv.config();
 
@@ -67,6 +69,18 @@ function checkAccess(req: Request, res: Response, next: NextFunction) {
 
 // Apply access control to all routes
 app.use(checkAccess);
+
+// Helper function to convert Job to JobPosting
+function convertJobToJobPosting(job: Job): JobPosting {
+  return {
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    skills: job.skills.join(', '),
+    requirements: job.requirements.join(', '),
+    createdAt: job.createdAt
+  };
+}
 
 // Multer configuration for file uploads
 const upload = multer({
@@ -276,26 +290,20 @@ app.post('/api/jobs', async (req, res) => {
         salaryRange: 'N/A',
         keywords: []
       };
-      console.log('   Using fallback job description data.');
-    }
-    
-    const job = await databaseService.createJob({
-      title,
-      department: 'General',
-      location: 'Remote',
-      employmentType: 'Full-time',
-      salary: 'Competitive',
-      experienceLevel: 'Mid-Level',
-      description,
-      responsibilities: 'TBD',
-      requirements: 'TBD',
-      skills: 'TBD',
-      niceToHave: 'TBD',
-      benefits: 'Competitive benefits',
-      perks: 'TBD',
-      startDate: new Date().toISOString().split('T')[0],
-      status: 'draft'
-    });
+          console.log('   Using fallback job description data.');
+  }
+  
+  const job = await databaseService.createJob({
+    title,
+    company: 'General',
+    location: 'Remote',
+    type: 'Full-time',
+    salary: 'Competitive',
+    description,
+    requirements: ['TBD'],
+    skills: ['TBD'],
+    status: 'draft'
+  });
     res.json(job);
   } catch (error) {
     console.error('Error creating job:', error);
@@ -449,6 +457,30 @@ app.get('/api/analytics/hiring-funnel', async (req, res) => {
   }
 });
 
+// Funnel stage details endpoint
+app.get('/api/analytics/funnel-stage/:stage', async (req, res) => {
+  try {
+    const { stage } = req.params;
+    const stageDetails = await databaseService.getStageDetails(stage);
+    const candidates = await databaseService.getCandidatesByStage(stage);
+    
+    if (!stageDetails) {
+      return res.status(404).json({ success: false, error: 'Stage not found' });
+    }
+    
+    res.json({ 
+      success: true, 
+      data: {
+        ...stageDetails,
+        candidates
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching stage details:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch stage details' });
+  }
+});
+
 // Time to hire analytics endpoint
 app.get('/api/analytics/time-to-hire', async (req, res) => {
   try {
@@ -599,7 +631,7 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
 
-      const result = await aiAgent.calculateRoleAlignment(candidate, job);
+      const result = await aiAgent.calculateRoleAlignment(candidate, convertJobToJobPosting(job));
       
       if (result.ok) {
         res.json({ 
@@ -633,7 +665,7 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
 
-      const result = await aiAgent.analyzeSkillsGap(candidate, job);
+      const result = await aiAgent.analyzeSkillsGap(candidate, convertJobToJobPosting(job));
       
       if (result.ok) {
         res.json({ 
@@ -667,7 +699,7 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
 
-      const result = await aiAgent.generateInterviewQuestions(candidate, job);
+      const result = await aiAgent.generateInterviewQuestions(candidate, convertJobToJobPosting(job));
       
       if (result.ok) {
         res.json({ 
@@ -701,7 +733,7 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
 
-      const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, job);
+      const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, convertJobToJobPosting(job));
       
       if (result.ok) {
         res.json({ 
@@ -743,7 +775,7 @@ app.post('/api/email-config', async (req, res) => {
         return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
       }
 
-      const result = await aiAgent.assessCulturalFit(candidate, job);
+      const result = await aiAgent.assessCulturalFit(candidate, convertJobToJobPosting(job));
       
       if (result.ok) {
         res.json({ 

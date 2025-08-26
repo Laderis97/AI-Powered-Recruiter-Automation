@@ -48,6 +48,17 @@ function checkAccess(req, res, next) {
 }
 // Apply access control to all routes
 app.use(checkAccess);
+// Helper function to convert Job to JobPosting
+function convertJobToJobPosting(job) {
+    return {
+        id: job.id,
+        title: job.title,
+        description: job.description,
+        skills: job.skills.join(', '),
+        requirements: job.requirements.join(', '),
+        createdAt: job.createdAt
+    };
+}
 // Multer configuration for file uploads
 const upload = multer({
     storage: multer.diskStorage({
@@ -251,19 +262,13 @@ app.post('/api/jobs', async (req, res) => {
         }
         const job = await databaseService.createJob({
             title,
-            department: 'General',
+            company: 'General',
             location: 'Remote',
-            employmentType: 'Full-time',
+            type: 'Full-time',
             salary: 'Competitive',
-            experienceLevel: 'Mid-Level',
             description,
-            responsibilities: 'TBD',
-            requirements: 'TBD',
-            skills: 'TBD',
-            niceToHave: 'TBD',
-            benefits: 'Competitive benefits',
-            perks: 'TBD',
-            startDate: new Date().toISOString().split('T')[0],
+            requirements: ['TBD'],
+            skills: ['TBD'],
             status: 'draft'
         });
         res.json(job);
@@ -416,6 +421,28 @@ app.get('/api/analytics/hiring-funnel', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch hiring funnel data' });
     }
 });
+// Funnel stage details endpoint
+app.get('/api/analytics/funnel-stage/:stage', async (req, res) => {
+    try {
+        const { stage } = req.params;
+        const stageDetails = await databaseService.getStageDetails(stage);
+        const candidates = await databaseService.getCandidatesByStage(stage);
+        if (!stageDetails) {
+            return res.status(404).json({ success: false, error: 'Stage not found' });
+        }
+        res.json({
+            success: true,
+            data: {
+                ...stageDetails,
+                candidates
+            }
+        });
+    }
+    catch (error) {
+        console.error('Error fetching stage details:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch stage details' });
+    }
+});
 // Time to hire analytics endpoint
 app.get('/api/analytics/time-to-hire', async (req, res) => {
     try {
@@ -555,7 +582,7 @@ app.post('/api/role-alignment', async (req, res) => {
         if (!candidate || !job) {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
-        const result = await aiAgent.calculateRoleAlignment(candidate, job);
+        const result = await aiAgent.calculateRoleAlignment(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
@@ -585,7 +612,7 @@ app.post('/api/skills-gap', async (req, res) => {
         if (!candidate || !job) {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
-        const result = await aiAgent.analyzeSkillsGap(candidate, job);
+        const result = await aiAgent.analyzeSkillsGap(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
@@ -615,7 +642,7 @@ app.post('/api/interview-questions', async (req, res) => {
         if (!candidate || !job) {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
-        const result = await aiAgent.generateInterviewQuestions(candidate, job);
+        const result = await aiAgent.generateInterviewQuestions(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
@@ -645,7 +672,7 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
         if (!candidate || !job) {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
-        const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, job);
+        const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
@@ -683,7 +710,7 @@ app.post('/api/cultural-fit', async (req, res) => {
         if (!candidate || !job) {
             return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
         }
-        const result = await aiAgent.assessCulturalFit(candidate, job);
+        const result = await aiAgent.assessCulturalFit(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,

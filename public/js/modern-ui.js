@@ -2477,7 +2477,7 @@ function renderHiringFunnelChart(data) {
         const width = Math.max(20, 100 - (index * 15)); // Decreasing width for funnel effect
         
         return `
-          <div class="funnel-stage" style="width: ${width}%">
+          <div class="funnel-stage clickable" style="width: ${width}%" onclick="openFunnelStageModal('${item.stage}')">
             <div class="funnel-bar">
               <div class="funnel-fill" style="width: 100%; background: var(--color-primary-${Math.max(100, 500 - index * 100)})"></div>
             </div>
@@ -2636,3 +2636,153 @@ function refreshTimeToHire() {
 // Global functions for analytics
 window.refreshHiringFunnel = refreshHiringFunnel;
 window.refreshTimeToHire = refreshTimeToHire;
+window.openFunnelStageModal = openFunnelStageModal;
+window.switchFunnelTab = switchFunnelTab;
+window.closeHiringFunnelModal = closeHiringFunnelModal;
+window.exportStageData = exportStageData;
+
+// ===== HIRING FUNNEL MODAL FUNCTIONS =====
+
+// Open funnel stage modal
+async function openFunnelStageModal(stage) {
+  try {
+    const response = await fetch(`/api/analytics/funnel-stage/${encodeURIComponent(stage)}`);
+    if (response.ok) {
+      const result = await response.json();
+      if (result.success) {
+        populateFunnelModal(stage, result.data);
+        document.getElementById('hiringFunnelModal').style.display = 'flex';
+      } else {
+        console.error('Failed to load stage details:', result.error);
+      }
+    } else {
+      console.error('Failed to fetch stage details');
+    }
+  } catch (error) {
+    console.error('Error opening funnel stage modal:', error);
+  }
+}
+
+// Populate funnel modal with data
+function populateFunnelModal(stage, data) {
+  // Update modal title
+  document.getElementById('funnelStageName').textContent = stage;
+  
+  // Update stage metrics
+  document.getElementById('stageCount').textContent = data.candidates.length;
+  document.getElementById('stagePercentage').textContent = data.conversionRate;
+  document.getElementById('stageAvgTime').textContent = data.avgTimeInStage;
+  document.getElementById('stageSuccessRate').textContent = data.successRate;
+  
+  // Update analytics tab metrics
+  document.getElementById('stageDropoffRate').textContent = data.dropoffRate;
+  document.getElementById('stageBottleneck').textContent = data.isBottleneck ? 'Yes' : 'No';
+  document.getElementById('stageEfficiency').textContent = data.efficiency;
+  
+  // Populate candidates tab
+  populateCandidatesTab(data.candidates);
+  
+  // Populate insights tab
+  populateInsightsTab(data.insights);
+  
+  // Set active tab to candidates
+  switchFunnelTab('candidates');
+}
+
+// Populate candidates tab
+function populateCandidatesTab(candidates) {
+  const candidatesList = document.getElementById('stageCandidatesList');
+  
+  if (candidates.length === 0) {
+    candidatesList.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-users"></i>
+        <p>No candidates in this stage</p>
+      </div>
+    `;
+    return;
+  }
+  
+  const candidatesHTML = candidates.map(candidate => `
+    <div class="candidate-item">
+      <div class="candidate-avatar">
+        ${candidate.name.split(' ').map(n => n[0]).join('')}
+      </div>
+      <div class="candidate-info">
+        <div class="candidate-name">${candidate.name}</div>
+        <div class="candidate-title">${candidate.title}</div>
+        <div class="candidate-meta">
+          <span><i class="fas fa-map-marker-alt"></i> ${candidate.location}</span>
+          <span><i class="fas fa-clock"></i> ${candidate.daysInStage || 0} days</span>
+        </div>
+      </div>
+      <div class="candidate-status ${candidate.status}">${candidate.status}</div>
+    </div>
+  `).join('');
+  
+  candidatesList.innerHTML = candidatesHTML;
+}
+
+// Populate insights tab
+function populateInsightsTab(insights) {
+  const insightsContainer = document.getElementById('stageInsights');
+  
+  const insightsHTML = insights.map(insight => `
+    <div class="insight-card ${insight.type}">
+      <div class="insight-header">
+        <div class="insight-icon">
+          <i class="fas fa-${insight.type === 'success' ? 'check' : insight.type === 'warning' ? 'exclamation-triangle' : 'times'}"></i>
+        </div>
+        <div class="insight-title">${insight.title}</div>
+      </div>
+      <div class="insight-description">${insight.description}</div>
+    </div>
+  `).join('');
+  
+  insightsContainer.innerHTML = insightsHTML;
+}
+
+// Switch funnel modal tabs
+function switchFunnelTab(tabName) {
+  // Update tab buttons
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  // Update tab panes
+  document.querySelectorAll('.tab-pane').forEach(pane => {
+    pane.classList.remove('active');
+  });
+  document.getElementById(`${tabName}-tab`).classList.add('active');
+}
+
+// Close hiring funnel modal
+function closeHiringFunnelModal() {
+  document.getElementById('hiringFunnelModal').style.display = 'none';
+}
+
+// Export stage data
+function exportStageData() {
+  const stageName = document.getElementById('funnelStageName').textContent;
+  const data = {
+    stage: stageName,
+    timestamp: new Date().toISOString(),
+    metrics: {
+      count: document.getElementById('stageCount').textContent,
+      conversionRate: document.getElementById('stagePercentage').textContent,
+      avgTime: document.getElementById('stageAvgTime').textContent,
+      successRate: document.getElementById('stageSuccessRate').textContent
+    }
+  };
+  
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${stageName.toLowerCase().replace(/\s+/g, '-')}-data.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}

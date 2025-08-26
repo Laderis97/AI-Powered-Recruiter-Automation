@@ -13,8 +13,8 @@ interface Candidate {
   location: string;
   experience: string;
   skills: string[];
-  education: string[];
-  currentCompany: string;
+  education?: string[];
+  currentCompany?: string;
   linkedin?: string;
   github?: string;
   portfolio?: string;
@@ -23,29 +23,24 @@ interface Candidate {
   isArchived: boolean;
   matchScore?: number;
   status: 'active' | 'contacted' | 'interviewed' | 'hired' | 'rejected' | 'archived';
+  resumeUrl?: string;
+  notes?: string;
+  stage?: string;
 }
 
-interface Job {
+export interface Job {
   id: string;
   title: string;
-  department: string;
+  company: string;
   location: string;
-  employmentType: string;
+  type: string;
   salary: string;
-  experienceLevel: string;
   description: string;
-  responsibilities: string;
-  requirements: string;
-  skills: string;
-  niceToHave: string;
-  benefits: string;
-  perks: string;
-  startDate: string;
+  requirements: string[];
   status: 'draft' | 'active' | 'closed';
   applications: number;
-  interviews: number;
-  finalists: number;
   createdAt: Date;
+  skills: string[];
 }
 
 interface Analytics {
@@ -62,277 +57,195 @@ interface Analytics {
   monthlyHires: { month: string; count: number }[];
 }
 
-// ===== DUMMY CANDIDATES DATA =====
+// ===== DUMMY DATA =====
 
+// Dummy candidates data
 const dummyCandidates: Candidate[] = [
   {
-    id: 'a2949235-6748-435b-8bef-9487c79969e7',
-    name: 'Lee Ladke',
-    email: 'lee.k.ladke@gmail.com',
-    phone: '425-241-7532',
+    id: '1',
+    name: 'Sarah Johnson',
+    email: 'sarah.johnson@email.com',
+    phone: '+1 (555) 123-4567',
     title: 'Senior Software Engineer',
-    location: 'Renton, WA',
-    experience: '8 years',
-    skills: ['Python', 'React', 'Vue.js', 'Node.js', 'AWS', 'Docker'],
-    education: ['BS Computer Science', 'University of Washington'],
-    currentCompany: 'TechCorp Inc.',
-    linkedin: 'linkedin.com/in/leekladke',
-    github: 'github.com/leeladke',
-    summary: 'Experienced full-stack developer with expertise in modern web technologies and cloud infrastructure.',
+    skills: ['JavaScript', 'React', 'Node.js', 'TypeScript', 'MongoDB'],
+    experience: '5 years',
+    location: 'San Francisco, CA',
+    matchScore: 95,
+    status: 'active',
     createdAt: new Date('2024-01-15'),
     isArchived: false,
-    matchScore: 92,
-    status: 'active'
+    resumeUrl: '/resumes/sarah-johnson.pdf',
+    notes: 'Strong React experience, excellent communication skills',
+    stage: 'Interviews'
   },
   {
-    id: 'b3850346-7859-546c-9cfg-0598d80070f8',
-    name: 'Sarah Chen',
-    email: 'sarah.chen@outlook.com',
-    phone: '206-555-0123',
-    title: 'Product Manager',
-    location: 'Seattle, WA',
-    experience: '6 years',
-    skills: ['Product Strategy', 'Agile', 'User Research', 'Data Analysis', 'JIRA', 'Figma'],
-    education: ['MBA', 'Stanford University', 'BS Engineering', 'MIT'],
-    currentCompany: 'InnovateTech Solutions',
-    linkedin: 'linkedin.com/in/sarahchen',
-    summary: 'Strategic product leader with a track record of launching successful SaaS products.',
+    id: '2',
+    name: 'Michael Chen',
+    email: 'michael.chen@email.com',
+    phone: '+1 (555) 234-5678',
+    title: 'Full Stack Developer',
+    skills: ['Python', 'Django', 'React', 'PostgreSQL', 'Docker'],
+    experience: '3 years',
+    location: 'New York, NY',
+    matchScore: 88,
+    status: 'active',
     createdAt: new Date('2024-01-20'),
     isArchived: false,
-    matchScore: 88,
-    status: 'contacted'
+    resumeUrl: '/resumes/michael-chen.pdf',
+    notes: 'Good Python skills, needs improvement in React',
+    stage: 'Screening'
   },
   {
-    id: 'c4761457-8960-657d-0dgh-1609e91181g9',
-    name: 'Marcus Rodriguez',
-    email: 'm.rodriguez@yahoo.com',
-    phone: '415-555-0456',
-    title: 'DevOps Engineer',
-    location: 'San Francisco, CA',
-    experience: '5 years',
-    skills: ['Kubernetes', 'Terraform', 'Jenkins', 'AWS', 'Linux', 'Python'],
-    education: ['BS Information Technology', 'UC Berkeley'],
-    currentCompany: 'CloudScale Systems',
-    github: 'github.com/marcusrodriguez',
-    summary: 'DevOps specialist focused on scalable infrastructure and CI/CD pipelines.',
+    id: '3',
+    name: 'Emily Rodriguez',
+    email: 'emily.rodriguez@email.com',
+    phone: '+1 (555) 345-6789',
+    title: 'Frontend Developer',
+    skills: ['JavaScript', 'Vue.js', 'CSS', 'HTML', 'Webpack'],
+    experience: '4 years',
+    location: 'Austin, TX',
+    matchScore: 92,
+    status: 'active',
     createdAt: new Date('2024-01-25'),
     isArchived: false,
-    matchScore: 85,
-    status: 'interviewed'
+    resumeUrl: '/resumes/emily-rodriguez.pdf',
+    notes: 'Excellent Vue.js skills, great UI/UX sense',
+    stage: 'Finalists'
   },
   {
-    id: 'd5672568-9071-768e-1ehi-2710f02292h0',
-    name: 'Emily Watson',
-    email: 'emily.watson@gmail.com',
-    phone: '512-555-0789',
-    title: 'UX/UI Designer',
-    location: 'Austin, TX',
-    experience: '4 years',
-    skills: ['Figma', 'Adobe Creative Suite', 'User Research', 'Prototyping', 'Design Systems'],
-    education: ['BFA Design', 'Parsons School of Design'],
-    currentCompany: 'DesignForward Studio',
-    linkedin: 'linkedin.com/in/emilywatson',
-    portfolio: 'emilywatson.design',
-    summary: 'Creative designer passionate about user-centered design and digital experiences.',
-    createdAt: new Date('2024-02-01'),
-    isArchived: false,
-    matchScore: 90,
-    status: 'active'
-  },
-  {
-    id: 'e6783679-0182-879f-2fij-3821g13303i1',
+    id: '4',
     name: 'David Kim',
-    email: 'david.kim@hotmail.com',
-    phone: '303-555-0122',
-    title: 'Data Scientist',
-    location: 'Denver, CO',
-    experience: '7 years',
-    skills: ['Python', 'R', 'Machine Learning', 'SQL', 'TensorFlow', 'Tableau'],
-    education: ['PhD Computer Science', 'University of Colorado', 'MS Statistics', 'Stanford'],
-    currentCompany: 'DataInsight Analytics',
-    linkedin: 'linkedin.com/in/davidkim',
-    github: 'github.com/davidkim',
-    summary: 'Data scientist with expertise in machine learning and statistical modeling.',
+    email: 'david.kim@email.com',
+    phone: '+1 (555) 456-7890',
+    title: 'DevOps Engineer',
+    skills: ['Kubernetes', 'Docker', 'AWS', 'Terraform', 'Jenkins'],
+    experience: '6 years',
+    location: 'Seattle, WA',
+    matchScore: 87,
+    status: 'active',
+    createdAt: new Date('2024-01-30'),
+    isArchived: false,
+    resumeUrl: '/resumes/david-kim.pdf',
+    notes: 'Strong DevOps background, AWS certified',
+    stage: 'Offers'
+  },
+  {
+    id: '5',
+    name: 'Lisa Wang',
+    email: 'lisa.wang@email.com',
+    phone: '+1 (555) 567-8901',
+    title: 'Backend Engineer',
+    skills: ['Java', 'Spring Boot', 'MySQL', 'Redis', 'Kafka'],
+    experience: '4 years',
+    location: 'Boston, MA',
+    matchScore: 90,
+    status: 'active',
     createdAt: new Date('2024-02-05'),
     isArchived: false,
-    matchScore: 87,
-    status: 'hired'
+    resumeUrl: '/resumes/lisa-wang.pdf',
+    notes: 'Solid Java skills, good system design knowledge',
+    stage: 'Hires'
   },
   {
-    id: 'f7894780-1293-980g-3gjk-4932h24414j2',
-    name: 'Lisa Thompson',
-    email: 'lisa.thompson@protonmail.com',
-    phone: '617-555-0555',
-    title: 'Frontend Developer',
-    location: 'Boston, MA',
+    id: '6',
+    name: 'James Wilson',
+    email: 'james.wilson@email.com',
+    phone: '+1 (555) 678-9012',
+    title: 'Data Scientist',
+    skills: ['Python', 'Pandas', 'Scikit-learn', 'TensorFlow', 'SQL'],
     experience: '3 years',
-    skills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'Webpack', 'Jest'],
-    education: ['BS Computer Science', 'Northeastern University'],
-    currentCompany: 'WebCraft Solutions',
-    linkedin: 'linkedin.com/in/lisathompson',
-    github: 'github.com/lisathompson',
-    summary: 'Frontend developer focused on creating responsive and accessible web applications.',
+    location: 'Chicago, IL',
+    matchScore: 85,
+    status: 'active',
     createdAt: new Date('2024-02-10'),
     isArchived: false,
-    matchScore: 83,
-    status: 'rejected'
+    resumeUrl: '/resumes/james-wilson.pdf',
+    notes: 'Good ML skills, needs more production experience',
+    stage: 'Applications'
   },
   {
-    id: 'g8905891-2304-091h-4hkl-5043i35525k3',
-    name: 'James Wilson',
-    email: 'james.wilson@icloud.com',
-    phone: '404-555-0888',
-    title: 'Backend Engineer',
-    location: 'Atlanta, GA',
-    experience: '9 years',
-    skills: ['Java', 'Spring Boot', 'PostgreSQL', 'Redis', 'Microservices', 'Docker'],
-    education: ['BS Software Engineering', 'Georgia Tech'],
-    currentCompany: 'BackendPro Systems',
-    linkedin: 'linkedin.com/in/jameswilson',
-    github: 'github.com/jameswilson',
-    summary: 'Senior backend engineer with expertise in scalable microservices architecture.',
+    id: '7',
+    name: 'Maria Garcia',
+    email: 'maria.garcia@email.com',
+    phone: '+1 (555) 789-0123',
+    title: 'Mobile Developer',
+    skills: ['Swift', 'iOS', 'React Native', 'Firebase', 'Git'],
+    experience: '5 years',
+    location: 'Miami, FL',
+    matchScore: 93,
+    status: 'active',
     createdAt: new Date('2024-02-15'),
     isArchived: false,
-    matchScore: 89,
-    status: 'active'
+    resumeUrl: '/resumes/maria-garcia.pdf',
+    notes: 'Excellent iOS skills, good React Native experience',
+    stage: 'Interviews'
   },
   {
-    id: 'h9016902-3415-102i-5ilm-6154j46636l4',
-    name: 'Rachel Green',
-    email: 'rachel.green@outlook.com',
-    phone: '305-555-0221',
-    title: 'Marketing Manager',
-    location: 'Miami, FL',
-    experience: '5 years',
-    skills: ['Digital Marketing', 'SEO', 'Google Analytics', 'HubSpot', 'Social Media', 'Content Strategy'],
-    education: ['MBA Marketing', 'University of Miami', 'BS Communications', 'Florida State'],
-    currentCompany: 'MarketingMasters Inc.',
-    linkedin: 'linkedin.com/in/rachelgreen',
-    summary: 'Digital marketing expert with a proven track record of driving growth through data-driven strategies.',
+    id: '8',
+    name: 'Robert Taylor',
+    email: 'robert.taylor@email.com',
+    phone: '+1 (555) 890-1234',
+    title: 'QA Engineer',
+    skills: ['Selenium', 'Jest', 'Cypress', 'Postman', 'JIRA'],
+    experience: '4 years',
+    location: 'Denver, CO',
+    matchScore: 82,
+    status: 'active',
     createdAt: new Date('2024-02-20'),
-    isArchived: true,
-    matchScore: 76,
-    status: 'archived'
+    isArchived: false,
+    resumeUrl: '/resumes/robert-taylor.pdf',
+    notes: 'Good testing skills, needs automation experience',
+    stage: 'Screening'
   }
 ];
 
-// ===== DUMMY JOBS DATA =====
-
+// Dummy jobs data
 const dummyJobs: Job[] = [
   {
-    id: 'job-001',
-    title: 'Senior Full-Stack Developer',
-    department: 'Engineering',
-    location: 'Seattle, WA (Hybrid)',
-    employmentType: 'Full-time',
+    id: '1',
+    title: 'Senior Frontend Developer',
+    company: 'TechCorp Inc.',
+    location: 'San Francisco, CA',
+    type: 'Full-time',
     salary: '$120,000 - $150,000',
-    experienceLevel: 'Senior',
-    description: 'We are looking for a Senior Full-Stack Developer to join our growing engineering team. You will be responsible for developing and maintaining web applications using modern technologies.',
-    responsibilities: 'Design and implement scalable web applications, Collaborate with cross-functional teams, Mentor junior developers, Participate in code reviews',
-    requirements: '5+ years of experience in full-stack development, Proficiency in React, Node.js, and TypeScript, Experience with cloud platforms (AWS/Azure), Strong problem-solving skills',
-    skills: 'React, Node.js, TypeScript, AWS, PostgreSQL, Docker',
-    niceToHave: 'Experience with GraphQL, Knowledge of microservices architecture, Familiarity with CI/CD pipelines',
-    benefits: 'Health insurance, 401(k) matching, Flexible PTO, Remote work options',
-    perks: 'Free lunch, Gym membership, Professional development budget',
-    startDate: '2024-03-01',
+    description: 'We are looking for a Senior Frontend Developer to join our team...',
+    requirements: ['React', 'TypeScript', '5+ years experience', 'CSS/SCSS'],
     status: 'active',
-    applications: 24,
-    interviews: 8,
-    finalists: 3,
-    createdAt: new Date('2024-01-10')
+    createdAt: new Date('2024-01-10'),
+    applications: 45,
+    skills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML']
   },
   {
-    id: 'job-002',
-    title: 'Product Manager',
-    department: 'Product',
-    location: 'San Francisco, CA (Remote)',
-    employmentType: 'Full-time',
-    salary: '$130,000 - $160,000',
-    experienceLevel: 'Mid-Senior',
-    description: 'Join our product team to drive the development of innovative SaaS solutions. You will work closely with engineering, design, and business teams to deliver exceptional user experiences.',
-    responsibilities: 'Define product strategy and roadmap, Gather and prioritize user requirements, Work with engineering teams to deliver features, Analyze product metrics',
-    requirements: '3+ years of product management experience, Strong analytical and communication skills, Experience with agile methodologies, Technical background preferred',
-    skills: 'Product Strategy, User Research, Data Analysis, Agile, JIRA, Figma',
-    niceToHave: 'Experience with B2B SaaS products, Knowledge of SQL and analytics tools, MBA or technical degree',
-    benefits: 'Comprehensive health coverage, Stock options, Unlimited PTO, Home office setup',
-    perks: 'Annual retreat, Learning stipend, Wellness programs',
-    startDate: '2024-03-15',
-    status: 'active',
-    applications: 18,
-    interviews: 6,
-    finalists: 2,
-    createdAt: new Date('2024-01-15')
-  },
-  {
-    id: 'job-003',
-    title: 'DevOps Engineer',
-    department: 'Infrastructure',
-    location: 'Austin, TX (On-site)',
-    employmentType: 'Full-time',
-    salary: '$110,000 - $140,000',
-    experienceLevel: 'Mid-Senior',
-    description: 'Help us build and maintain scalable infrastructure that supports our growing platform. You will work on automation, monitoring, and deployment processes.',
-    responsibilities: 'Design and implement CI/CD pipelines, Manage cloud infrastructure, Monitor system performance, Automate deployment processes',
-    requirements: '4+ years of DevOps experience, Proficiency in AWS or Azure, Experience with Docker and Kubernetes, Strong scripting skills',
-    skills: 'AWS, Docker, Kubernetes, Terraform, Jenkins, Python',
-    niceToHave: 'Experience with monitoring tools (Prometheus, Grafana), Knowledge of security best practices, Certifications (AWS, Kubernetes)',
-    benefits: 'Health, dental, and vision insurance, 401(k) with matching, Flexible work hours',
-    perks: 'Free parking, On-site gym, Catered lunches',
-    startDate: '2024-04-01',
-    status: 'active',
-    applications: 15,
-    interviews: 5,
-    finalists: 2,
-    createdAt: new Date('2024-01-20')
-  },
-  {
-    id: 'job-004',
-    title: 'UX/UI Designer',
-    department: 'Design',
-    location: 'New York, NY (Hybrid)',
-    employmentType: 'Full-time',
-    salary: '$90,000 - $120,000',
-    experienceLevel: 'Mid-Level',
-    description: 'Create beautiful and intuitive user experiences for our digital products. You will work closely with product and engineering teams to bring designs to life.',
-    responsibilities: 'Design user interfaces and experiences, Conduct user research and testing, Create wireframes and prototypes, Collaborate with development teams',
-    requirements: '3+ years of UX/UI design experience, Proficiency in Figma and Adobe Creative Suite, Strong portfolio demonstrating user-centered design, Experience with design systems',
-    skills: 'Figma, Adobe Creative Suite, User Research, Prototyping, Design Systems',
-    niceToHave: 'Experience with animation tools, Knowledge of front-end development, Experience with accessibility design',
-    benefits: 'Health insurance, 401(k), Flexible PTO, Professional development',
-    perks: 'Design conference attendance, Latest design tools, Creative workspace',
-    startDate: '2024-03-20',
-    status: 'draft',
-    applications: 0,
-    interviews: 0,
-    finalists: 0,
-    createdAt: new Date('2024-01-25')
-  },
-  {
-    id: 'job-005',
-    title: 'Data Scientist',
-    department: 'Analytics',
-    location: 'Remote (US)',
-    employmentType: 'Full-time',
+    id: '2',
+    title: 'Backend Engineer',
+    company: 'StartupXYZ',
+    location: 'New York, NY',
+    type: 'Full-time',
     salary: '$100,000 - $130,000',
-    experienceLevel: 'Mid-Senior',
-    description: 'Join our data science team to extract insights from large datasets and build machine learning models that drive business decisions.',
-    responsibilities: 'Develop machine learning models, Analyze large datasets, Create data visualizations, Present findings to stakeholders',
-    requirements: '3+ years of data science experience, Proficiency in Python and R, Experience with SQL and data visualization tools, Strong statistical background',
-    skills: 'Python, R, SQL, Machine Learning, TensorFlow, Tableau',
-    niceToHave: 'Experience with big data technologies (Spark, Hadoop), Knowledge of deep learning, PhD in quantitative field',
-    benefits: 'Comprehensive benefits package, Remote work flexibility, Professional development',
-    perks: 'Data science conference attendance, Latest tools and software, Collaborative team environment',
-    startDate: '2024-04-15',
-    status: 'closed',
+    description: 'Join our fast-growing startup as a Backend Engineer...',
+    requirements: ['Node.js', 'MongoDB', '3+ years experience', 'REST APIs'],
+    status: 'active',
+    createdAt: new Date('2024-01-15'),
     applications: 32,
-    interviews: 12,
-    finalists: 4,
-    createdAt: new Date('2024-01-30')
+    skills: ['Node.js', 'MongoDB', 'Express', 'REST APIs', 'JavaScript']
+  },
+  {
+    id: '3',
+    title: 'DevOps Engineer',
+    company: 'Enterprise Solutions',
+    location: 'Seattle, WA',
+    type: 'Full-time',
+    salary: '$110,000 - $140,000',
+    description: 'We need a DevOps Engineer to help us scale our infrastructure...',
+    requirements: ['AWS', 'Docker', 'Kubernetes', '4+ years experience'],
+    status: 'active',
+    createdAt: new Date('2024-01-20'),
+    applications: 28,
+    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins']
   }
 ];
 
-// ===== DUMMY ANALYTICS DATA =====
-
+// Dummy analytics data
 const dummyAnalytics: Analytics = {
   totalCandidates: 247,
   totalJobs: 34,
@@ -345,18 +258,16 @@ const dummyAnalytics: Analytics = {
     { source: 'LinkedIn', count: 89 },
     { source: 'Indeed', count: 67 },
     { source: 'Referrals', count: 45 },
-    { source: 'Company Website', count: 38 },
-    { source: 'Glassdoor', count: 28 },
-    { source: 'AngelList', count: 15 },
-    { source: 'Other', count: 15 }
+    { source: 'Company Website', count: 34 },
+    { source: 'Glassdoor', count: 12 }
   ],
   topSkills: [
-    { skill: 'JavaScript', count: 89 },
-    { skill: 'Python', count: 76 },
-    { skill: 'React', count: 67 },
-    { skill: 'AWS', count: 58 },
-    { skill: 'SQL', count: 52 },
-    { skill: 'Node.js', count: 48 },
+    { skill: 'JavaScript', count: 156 },
+    { skill: 'React', count: 134 },
+    { skill: 'Python', count: 98 },
+    { skill: 'Node.js', count: 87 },
+    { skill: 'SQL', count: 76 },
+    { skill: 'AWS', count: 65 },
     { skill: 'Docker', count: 42 },
     { skill: 'TypeScript', count: 38 },
     { skill: 'Kubernetes', count: 31 },
@@ -384,6 +295,169 @@ const dummyAnalytics: Analytics = {
     { month: 'Nov', count: 9 },
     { month: 'Dec', count: 6 }
   ]
+};
+
+// Detailed stage data for expanded funnel view
+const stageDetails = {
+  Applications: {
+    conversionRate: '63.2%',
+    avgTimeInStage: '2.5 days',
+    successRate: '78.5%',
+    dropoffRate: '21.5%',
+    isBottleneck: false,
+    efficiency: '85.2%',
+    candidates: [
+      { id: '6', name: 'James Wilson', title: 'Data Scientist', status: 'active', daysInStage: 1 },
+      { id: '9', name: 'Alex Thompson', title: 'UX Designer', status: 'active', daysInStage: 2 },
+      { id: '10', name: 'Rachel Green', title: 'Product Manager', status: 'active', daysInStage: 3 },
+      { id: '11', name: 'Tom Anderson', title: 'System Architect', status: 'active', daysInStage: 1 },
+      { id: '12', name: 'Jessica Lee', title: 'QA Lead', status: 'active', daysInStage: 2 }
+    ],
+    insights: [
+      {
+        type: 'success',
+        title: 'High Application Quality',
+        description: '78.5% of applications meet basic requirements, indicating good job posting targeting.'
+      },
+      {
+        type: 'warning',
+        title: 'Slow Response Time',
+        description: 'Average response time of 2.5 days could be improved to maintain candidate interest.'
+      }
+    ]
+  },
+  Screening: {
+    conversionRate: '57.1%',
+    avgTimeInStage: '3.2 days',
+    successRate: '65.3%',
+    dropoffRate: '34.7%',
+    isBottleneck: false,
+    efficiency: '72.1%',
+    candidates: [
+      { id: '2', name: 'Michael Chen', title: 'Full Stack Developer', status: 'active', daysInStage: 2 },
+      { id: '8', name: 'Robert Taylor', title: 'QA Engineer', status: 'active', daysInStage: 3 },
+      { id: '13', name: 'Kevin Martinez', title: 'Backend Developer', status: 'active', daysInStage: 1 },
+      { id: '14', name: 'Amanda White', title: 'Frontend Developer', status: 'active', daysInStage: 4 },
+      { id: '15', name: 'Daniel Brown', title: 'DevOps Engineer', status: 'active', daysInStage: 2 }
+    ],
+    insights: [
+      {
+        type: 'success',
+        title: 'Good Technical Assessment',
+        description: '65.3% pass rate indicates effective screening criteria and assessment methods.'
+      },
+      {
+        type: 'warning',
+        title: 'Screening Bottleneck',
+        description: '3.2 days average time suggests need for more screening resources or streamlined process.'
+      }
+    ]
+  },
+  Interviews: {
+    conversionRate: '38.2%',
+    avgTimeInStage: '5.8 days',
+    successRate: '52.1%',
+    dropoffRate: '47.9%',
+    isBottleneck: true,
+    efficiency: '68.4%',
+    candidates: [
+      { id: '1', name: 'Sarah Johnson', title: 'Senior Software Engineer', status: 'active', daysInStage: 4 },
+      { id: '7', name: 'Maria Garcia', title: 'Mobile Developer', status: 'active', daysInStage: 6 },
+      { id: '16', name: 'Chris Davis', title: 'Data Engineer', status: 'active', daysInStage: 3 },
+      { id: '17', name: 'Sophie Turner', title: 'UI/UX Designer', status: 'active', daysInStage: 5 },
+      { id: '18', name: 'Ryan Cooper', title: 'Security Engineer', status: 'active', daysInStage: 7 }
+    ],
+    insights: [
+      {
+        type: 'error',
+        title: 'Interview Bottleneck',
+        description: '5.8 days average time and 47.9% dropoff rate indicate significant interview process issues.'
+      },
+      {
+        type: 'warning',
+        title: 'High Dropoff Rate',
+        description: 'Nearly half of candidates drop out during interviews, suggesting process improvements needed.'
+      }
+    ]
+  },
+  Finalists: {
+    conversionRate: '67.6%',
+    avgTimeInStage: '4.1 days',
+    successRate: '82.4%',
+    dropoffRate: '17.6%',
+    isBottleneck: false,
+    efficiency: '89.7%',
+    candidates: [
+      { id: '3', name: 'Emily Rodriguez', title: 'Frontend Developer', status: 'active', daysInStage: 3 },
+      { id: '19', name: 'Mark Johnson', title: 'Senior Backend Engineer', status: 'active', daysInStage: 5 },
+      { id: '20', name: 'Lisa Chen', title: 'Product Designer', status: 'active', daysInStage: 2 },
+      { id: '21', name: 'David Park', title: 'Machine Learning Engineer', status: 'active', daysInStage: 4 }
+    ],
+    insights: [
+      {
+        type: 'success',
+        title: 'Strong Finalist Quality',
+        description: '82.4% success rate shows excellent candidate selection for final round.'
+      },
+      {
+        type: 'success',
+        title: 'Efficient Process',
+        description: '4.1 days average time indicates well-organized finalist evaluation process.'
+      }
+    ]
+  },
+  Offers: {
+    conversionRate: '78.3%',
+    avgTimeInStage: '2.8 days',
+    successRate: '91.3%',
+    dropoffRate: '8.7%',
+    isBottleneck: false,
+    efficiency: '94.2%',
+    candidates: [
+      { id: '4', name: 'David Kim', title: 'DevOps Engineer', status: 'active', daysInStage: 2 },
+      { id: '22', name: 'Anna Wilson', title: 'Senior Frontend Developer', status: 'active', daysInStage: 3 },
+      { id: '23', name: 'Mike Thompson', title: 'Backend Lead', status: 'active', daysInStage: 1 },
+      { id: '24', name: 'Sarah Davis', title: 'UX Researcher', status: 'active', daysInStage: 4 }
+    ],
+    insights: [
+      {
+        type: 'success',
+        title: 'High Offer Acceptance',
+        description: '91.3% acceptance rate indicates competitive compensation and strong candidate experience.'
+      },
+      {
+        type: 'success',
+        title: 'Quick Decision Making',
+        description: '2.8 days average time shows efficient offer negotiation and decision process.'
+      }
+    ]
+  },
+  Hires: {
+    conversionRate: '100%',
+    avgTimeInStage: '1.5 days',
+    successRate: '100%',
+    dropoffRate: '0%',
+    isBottleneck: false,
+    efficiency: '100%',
+    candidates: [
+      { id: '5', name: 'Lisa Wang', title: 'Backend Engineer', status: 'active', daysInStage: 1 },
+      { id: '25', name: 'John Smith', title: 'Full Stack Developer', status: 'active', daysInStage: 2 },
+      { id: '26', name: 'Emma Wilson', title: 'DevOps Engineer', status: 'active', daysInStage: 1 },
+      { id: '27', name: 'Carlos Rodriguez', title: 'Frontend Developer', status: 'active', daysInStage: 1 }
+    ],
+    insights: [
+      {
+        type: 'success',
+        title: 'Perfect Onboarding',
+        description: '100% success rate and 1.5 days average time indicate excellent onboarding process.'
+      },
+      {
+        type: 'success',
+        title: 'Strong Retention',
+        description: 'All hired candidates successfully completed onboarding and started their roles.'
+      }
+    ]
+  }
 };
 
 // ===== DATABASE SERVICE CLASS =====
@@ -458,14 +532,12 @@ export class DatabaseService {
     return this.jobs.find(job => job.id === id) || null;
   }
 
-  async createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'applications' | 'interviews' | 'finalists'>): Promise<Job> {
+  async createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'applications'>): Promise<Job> {
     const newJob: Job = {
       ...jobData,
       id: `job-${Date.now()}`,
       createdAt: new Date(),
-      applications: 0,
-      interviews: 0,
-      finalists: 0
+      applications: 0
     };
     
     this.jobs.push(newJob);
@@ -495,9 +567,9 @@ export class DatabaseService {
     const searchTerm = query.toLowerCase();
     return this.jobs.filter(job => 
       job.title.toLowerCase().includes(searchTerm) ||
-      job.department.toLowerCase().includes(searchTerm) ||
+      job.company.toLowerCase().includes(searchTerm) ||
       job.location.toLowerCase().includes(searchTerm) ||
-      job.skills.toLowerCase().includes(searchTerm)
+      job.skills.some(skill => skill.toLowerCase().includes(searchTerm))
     );
   }
 
@@ -526,6 +598,14 @@ export class DatabaseService {
 
   async getHiringFunnel(): Promise<{ stage: string; count: number }[]> {
     return this.analytics.hiringFunnel;
+  }
+
+  async getStageDetails(stage: string): Promise<any> {
+    return stageDetails[stage as keyof typeof stageDetails] || null;
+  }
+
+  async getCandidatesByStage(stage: string): Promise<Candidate[]> {
+    return this.candidates.filter(candidate => candidate.stage === stage && !candidate.isArchived);
   }
 
   async getMonthlyHires(): Promise<{ month: string; count: number }[]> {
