@@ -2611,6 +2611,14 @@ function renderTimeToHireChart(data) {
   `;
   
   console.log('📝 Generated chart HTML length:', chartHTML.length);
+  
+  // Force visibility with inline styles to override any CSS conflicts
+  chartContainer.style.display = 'block';
+  chartContainer.style.visibility = 'visible';
+  chartContainer.style.opacity = '1';
+  chartContainer.style.height = 'auto';
+  chartContainer.style.overflow = 'visible';
+  
   chartContainer.innerHTML = chartHTML;
   console.log('✅ Chart rendered successfully');
   

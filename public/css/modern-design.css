@@ -1806,3 +1806,109 @@ p {
     font-size: var(--font-size-xs);
   }
 }
+
+/* Monthly Hires Trend Chart - Enhanced Visibility */
+.monthly-chart {
+  margin: var(--space-6) 0 !important;
+  padding: var(--space-4) !important;
+  background: var(--color-surface) !important;
+  border-radius: var(--radius-xl) !important;
+  border: 2px solid var(--color-primary-500) !important;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.monthly-chart h4 {
+  text-align: center !important;
+  margin-bottom: var(--space-4) !important;
+  color: var(--color-text-primary) !important;
+  font-size: var(--font-size-lg) !important;
+  font-weight: var(--font-weight-semibold) !important;
+  display: block !important;
+  visibility: visible !important;
+}
+
+.chart-bars {
+  display: flex !important;
+  align-items: end !important;
+  justify-content: space-around !important;
+  gap: var(--space-2) !important;
+  height: 250px !important;
+  padding: var(--space-4) var(--space-2) !important;
+  width: 100% !important;
+  overflow: visible !important;
+  max-width: 100% !important;
+  background: var(--color-background-subtle) !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--color-border-subtle) !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.chart-bar {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: var(--space-2) !important;
+  flex: 1 !important;
+  min-width: 30px !important;
+  max-width: 50px !important;
+  overflow: visible !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+.bar-fill {
+  width: 100% !important;
+  background: var(--gradient-primary) !important;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0 !important;
+  transition: height var(--duration-1000) var(--ease-out) !important;
+  position: relative !important;
+  min-height: 8px !important;
+  max-width: 100% !important;
+  box-shadow: var(--shadow-sm) !important;
+  border: 1px solid var(--color-primary-300) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.bar-label {
+  font-size: var(--font-size-xs) !important;
+  font-weight: var(--font-weight-medium) !important;
+  color: var(--color-text-secondary) !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: 100% !important;
+  margin-top: var(--space-2) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
+
+.bar-value {
+  font-size: var(--font-size-sm) !important;
+  font-weight: var(--font-weight-bold) !important;
+  color: var(--color-primary-600) !important;
+  text-align: center !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-width: 100% !important;
+  background: var(--color-surface) !important;
+  padding: var(--space-1) var(--space-2) !important;
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--color-border-subtle) !important;
+  box-shadow: var(--shadow-sm) !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  display: block !important;
+}
