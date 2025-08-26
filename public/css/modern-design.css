@@ -1848,6 +1848,7 @@ p {
   position: relative !important;
   visibility: visible !important;
   opacity: 1 !important;
+  min-height: 250px !important;
 }
 
 .chart-bar {
@@ -1862,6 +1863,8 @@ p {
   position: relative !important;
   visibility: visible !important;
   opacity: 1 !important;
+  height: 100% !important;
+  justify-content: flex-end !important;
 }
 
 .bar-fill {
@@ -1877,6 +1880,7 @@ p {
   visibility: visible !important;
   opacity: 1 !important;
   display: block !important;
+  flex-shrink: 0 !important;
 }
 
 .bar-label {

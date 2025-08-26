@@ -2560,12 +2560,11 @@ function renderTimeToHireChart(data) {
         <div class="chart-bars">
           ${data.monthlyHires.map(item => {
             const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
-            const height = maxHires > 0 ? (item.count / maxHires) * 100 : 0;
-            console.log(`📊 Bar ${item.month}: count=${item.count}, height=${height}%`);
+            const height = maxHires > 0 ? (item.count / maxHires) * 200 : 0; // Use 200px as base height
             
             return `
               <div class="chart-bar">
-                <div class="bar-fill" style="height: ${height}%"></div>
+                <div class="bar-fill" style="height: ${height}px; min-height: 8px;"></div>
                 <div class="bar-label">${item.month}</div>
                 <div class="bar-value">${item.count}</div>
               </div>
