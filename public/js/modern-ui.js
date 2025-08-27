@@ -3033,3 +3033,74 @@ function showModalError(message) {
 window.openTimeToHireModal = openTimeToHireModal;
 window.closeTimeToHireModal = closeTimeToHireModal;
 window.refreshTimeToHireModal = refreshTimeToHireModal;
+
+// Debug function for chart container styles - run in console
+function debugChartContainer() {
+  console.log('🔍 Debugging chart container styles...');
+  
+  // Try different selectors to find the chart
+  const selectors = [
+    '.time-to-hire-chart',
+    '.time-to-hire-chart-section',
+    '.monthly-chart',
+    '.chart-bars',
+    '#timeToHireChart'
+  ];
+  
+  let chartElement = null;
+  for (const selector of selectors) {
+    chartElement = document.querySelector(selector);
+    if (chartElement) {
+      console.log(`✅ Found chart element with selector: ${selector}`);
+      break;
+    }
+  }
+  
+  if (!chartElement) {
+    console.log('❌ No chart element found with any selector');
+    return;
+  }
+  
+  // Debug the element hierarchy
+  let n = chartElement;
+  let level = 0;
+  
+  while (n && level < 10) {
+    const cs = getComputedStyle(n);
+    console.log(`Level ${level}:`, n.tagName, n.className, {
+      overflow: cs.overflow,
+      clipPath: cs.clipPath,
+      mask: cs.maskImage,
+      borderRadius: cs.borderRadius,
+      height: cs.height,
+      minHeight: cs.minHeight,
+      maxHeight: cs.maxHeight,
+      paddingTop: cs.paddingTop,
+      display: cs.display,
+      visibility: cs.visibility,
+      opacity: cs.opacity
+    });
+    
+    n = n.parentElement;
+    level++;
+  }
+  
+  // Also check for any conflicting CSS rules
+  console.log('🔍 Checking for potential CSS conflicts...');
+  const allCharts = document.querySelectorAll('[class*="chart"]');
+  console.log(`Found ${allCharts.length} elements with "chart" in class name`);
+  
+  allCharts.forEach((el, index) => {
+    if (index < 5) { // Limit output
+      const cs = getComputedStyle(el);
+      console.log(`Chart element ${index}:`, el.className, {
+        overflow: cs.overflow,
+        height: cs.height,
+        minHeight: cs.minHeight
+      });
+    }
+  });
+}
+
+// Make function globally available
+window.debugChartContainer = debugChartContainer;
