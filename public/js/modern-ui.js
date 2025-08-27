@@ -2515,189 +2515,83 @@ async function loadTimeToHire() {
       
       if (result.success) {
         console.log('✅ loadTimeToHire: Data loaded successfully, calling renderTimeToHireChart');
-        renderTimeToHireChart(result.data);
+        renderTimeToHireChart(result.data, 8);
       } else {
         console.error('❌ loadTimeToHire: API returned success: false');
-        showAnalyticsError('timeToHireChart', 'Failed to load time to hire data');
+        console.error('Failed to load time to hire data');
       }
     } else {
       console.error('❌ loadTimeToHire: HTTP error:', response.status);
-      showAnalyticsError('timeToHireChart', 'Failed to fetch time to hire data');
+      console.error('Failed to fetch time to hire data');
     }
   } catch (error) {
     console.error('❌ loadTimeToHire: Error:', error);
-    showAnalyticsError('timeToHireChart', 'Error loading time to hire data');
+    console.error('Error loading time to hire data');
   }
 }
 
 // Render time to hire chart with Chart.js
-function renderTimeToHireChart(data, sla = 8) {
-  console.log('🔍 renderTimeToHireChart called with data:', data, 'SLA:', sla);
-  
-  const chartContainer = document.getElementById('timeToHireChart');
-  if (!chartContainer) {
-    console.error('❌ timeToHireChart container not found');
-    return;
-  }
-  
-  console.log('📊 Chart container found, rendering chart...');
-  console.log('📈 Monthly hires data:', data.monthlyHires);
-  
-  // Create time to hire chart HTML
-  const chartHTML = `
-    <div class="time-to-hire-chart">
-      <div class="metric-card">
-        <div class="metric-value">${data.averageTimeToHire}</div>
-        <div class="metric-label">Average Days to Hire</div>
-        <div class="metric-trend ${data.trend}">
-          <i class="fas fa-${data.trend === 'improving' ? 'arrow-down' : 'arrow-up'}"></i>
-          ${data.trend === 'improving' ? 'Improving' : 'Needs Attention'}
-        </div>
-      </div>
-      
-      <div class="monthly-chart">
-        <h4>Monthly Hires Trend</h4>
-        <div class="chart-panel">
-          <canvas id="tthChart"></canvas>
-        </div>
-      </div>
-      
-      <div class="metrics-summary">
-        <div class="metric-item">
-          <div class="metric-number">${data.totalHires}</div>
-          <div class="metric-text">Total Hires</div>
-        </div>
-        <div class="metric-item">
-          <div class="metric-number">${data.avgHiresPerMonth}</div>
-          <div class="metric-text">Avg/Month</div>
-        </div>
-        <div class="metric-item">
-          <div class="metric-number">${data.yearToDate}</div>
-          <div class="metric-text">YTD Hires</div>
-        </div>
-        <div class="metric-item">
-          <div class="metric-number">${data.conversionRate}</div>
-          <div class="metric-text">Conversion</div>
-        </div>
-      </div>
-      
-      <div class="performance-insights">
-        <div class="insight-item">
-          <i class="fas fa-trophy"></i>
-          <span>Best Month: ${data.bestMonth.month} (${data.bestMonth.count} hires)</span>
-        </div>
-        <div class="insight-item">
-          <i class="fas fa-chart-line"></i>
-          <span>Cost per Hire: $${data.costPerHire.toLocaleString()}</span>
-        </div>
-        <div class="insight-item">
-          <i class="fas fa-star"></i>
-          <span>Quality Score: ${data.qualityOfHire}/5.0</span>
-        </div>
-      </div>
-    </div>
-  `;
-  
-  console.log('📝 Generated chart HTML length:', chartHTML.length);
-  
-  // Force visibility with inline styles to override any CSS conflicts
-  chartContainer.style.display = 'block';
-  chartContainer.style.visibility = 'visible';
-  chartContainer.style.opacity = '1';
-  chartContainer.style.height = 'auto';
-  chartContainer.style.overflow = 'visible';
-  
-  chartContainer.innerHTML = chartHTML;
-  console.log('✅ Chart rendered successfully');
-  
-  // Initialize Chart.js after DOM is ready
-  setTimeout(() => {
-    const canvas = document.getElementById('tthChart');
-    if (canvas) {
-      const ctx = canvas.getContext('2d');
-      
-      // SLA reference line plugin
-      const slaPlugin = {
-        id: 'slaReference',
-        afterDraw: (chart) => {
-          const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
-          const slaY = y.getPixelForValue(sla);
-          
-          ctx.save();
-          ctx.strokeStyle = '#ff6b6b';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([5, 5]);
-          ctx.beginPath();
-          ctx.moveTo(left, slaY);
-          ctx.lineTo(right, slaY);
-          ctx.stroke();
-          ctx.restore();
-          
-          // Add SLA label
-          ctx.fillStyle = '#ff6b6b';
-          ctx.font = '12px Inter';
-          ctx.fillText(`SLA: ${sla} days`, right - 10, slaY - 5);
-        }
-      };
-      
-      new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: data.monthlyHires.map(item => item.month),
-          datasets: [{
-            label: 'Hires',
-            data: data.monthlyHires.map(item => item.count),
-            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1,
-            borderRadius: 4
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grace: '15%',
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)'
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              }
-            }
-          }
-        },
-        plugins: [slaPlugin]
-      });
+let tthChart;
+
+function renderTimeToHireChart(apiData, sla = 8) {
+  const monthly = apiData.monthlyHires || apiData.monthly || apiData.data || [];
+  const labels = monthly.map(m => m.month || m.label);
+  const values = monthly.map(m => m.value ?? m.days ?? m.count ?? 0);
+
+  const el = document.getElementById('tthChart');
+  if (!el) { console.warn('tthChart canvas not found'); return; }
+  const ctx = el.getContext('2d');
+
+  if (tthChart) tthChart.destroy();
+
+  // dashed SLA line
+  const slaLine = {
+    id: 'slaLine',
+    afterDraw(chart, _args, opts) {
+      const {ctx, chartArea:{top, bottom, left, right}, scales:{y}} = chart;
+      if (!y) return;
+      const yPos = y.getPixelForValue(opts.sla);
+      ctx.save();
+      ctx.setLineDash([6,6]);
+      ctx.strokeStyle = 'rgba(239,68,68,0.95)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(239,68,68,0.95)';
+      ctx.font = '12px system-ui, sans-serif';
+      ctx.fillText(`SLA ${opts.sla}d`, right - 64, yPos - 6);
+      ctx.restore();
     }
-  }, 100);
+  };
+  Chart.register(slaLine);
+
+  tthChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{ label: 'Time to Hire (days)', data: values, borderRadius: 6, barThickness: 'flex', maxBarThickness: 42 }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      layout: { padding: { top: 12, right: 8, bottom: 24, left: 8 } },
+      scales: {
+        y: { beginAtZero: true, grace: '15%', title: { display: true, text: 'Days' }, grid: { color: 'rgba(148,163,184,0.2)' } },
+        x: { grid: { display: false } }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: (c) => `${c.parsed.y} days` } },
+        slaLine: { sla }
+      }
+    },
+    plugins: [slaLine]
+  });
+
+  console.log('Chart.js: chart created', { labelsCount: labels.length, valuesMax: Math.max(...values) });
 }
 
-// Show analytics error
-function showAnalyticsError(chartId, message) {
-  const chartContainer = document.getElementById(chartId);
-  if (chartContainer) {
-    chartContainer.innerHTML = `
-      <div class="chart-error">
-        <i class="fas fa-exclamation-triangle"></i>
-        <p>${message}</p>
-        <button class="btn btn-sm" onclick="refresh${chartId.charAt(0).toUpperCase() + chartId.slice(1)}()">
-          <i class="fas fa-sync-alt"></i>
-          Retry
-        </button>
-      </div>
-    `;
-  }
-}
+
 
 // Refresh functions for analytics
 function refreshHiringFunnel() {
@@ -2714,14 +2608,10 @@ function refreshHiringFunnel() {
 }
 
 function refreshTimeToHire() {
-  const chartContainer = document.getElementById('timeToHireChart');
-  if (chartContainer) {
-    chartContainer.innerHTML = `
-      <div class="chart-loading">
-        <i class="fas fa-spinner fa-spin"></i>
-        <p>Refreshing time to hire data...</p>
-      </div>
-    `;
+  // Destroy existing chart if it exists
+  if (tthChart) {
+    tthChart.destroy();
+    tthChart = null;
   }
   loadTimeToHire();
 }
@@ -2889,6 +2779,9 @@ function openTimeToHireModal() {
   if (modal) {
     modal.style.display = 'flex';
     loadTimeToHireModalData();
+    
+    // Trigger modal opened event for chart resize
+    document.dispatchEvent(new CustomEvent('timeToHireModal:opened'));
   } else {
     console.error('❌ timeToHireModal not found');
   }
@@ -3050,68 +2943,48 @@ function populateTimeToHireModal(data) {
     if (canvas) {
       const ctx = canvas.getContext('2d');
       
-      // SLA reference line plugin
-      const slaPlugin = {
-        id: 'slaReference',
-        afterDraw: (chart) => {
-          const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
-          const slaY = y.getPixelForValue(8); // Default SLA of 8 days
-          
+      // dashed SLA line
+      const slaLine = {
+        id: 'slaLine',
+        afterDraw(chart, _args, opts) {
+          const {ctx, chartArea:{top, bottom, left, right}, scales:{y}} = chart;
+          if (!y) return;
+          const yPos = y.getPixelForValue(8); // Default SLA of 8 days
           ctx.save();
-          ctx.strokeStyle = '#ff6b6b';
-          ctx.lineWidth = 2;
-          ctx.setLineDash([5, 5]);
-          ctx.beginPath();
-          ctx.moveTo(left, slaY);
-          ctx.lineTo(right, slaY);
-          ctx.stroke();
+          ctx.setLineDash([6,6]);
+          ctx.strokeStyle = 'rgba(239,68,68,0.95)';
+          ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = 'rgba(239,68,68,0.95)';
+          ctx.font = '12px system-ui, sans-serif';
+          ctx.fillText('SLA 8d', right - 64, yPos - 6);
           ctx.restore();
-          
-          // Add SLA label
-          ctx.fillStyle = '#ff6b6b';
-          ctx.font = '12px Inter';
-          ctx.textAlign = 'right';
-          ctx.fillText('SLA: 8 days', right - 10, slaY - 5);
         }
       };
-      
+      Chart.register(slaLine);
+
       new Chart(ctx, {
         type: 'bar',
         data: {
           labels: data.monthlyHires.map(item => item.month),
-          datasets: [{
-            label: 'Hires',
-            data: data.monthlyHires.map(item => item.count),
-            backgroundColor: 'rgba(59, 130, 246, 0.8)',
-            borderColor: 'rgba(59, 130, 246, 1)',
-            borderWidth: 1,
-            borderRadius: 4
-          }]
+          datasets: [{ label: 'Hires', data: data.monthlyHires.map(item => item.count), borderRadius: 6, barThickness: 'flex', maxBarThickness: 42 }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false
-            }
-          },
+          layout: { padding: { top: 12, right: 8, bottom: 24, left: 8 } },
           scales: {
-            y: {
-              beginAtZero: true,
-              grace: '15%',
-              grid: {
-                color: 'rgba(0, 0, 0, 0.1)'
-              }
-            },
-            x: {
-              grid: {
-                display: false
-              }
-            }
+            y: { beginAtZero: true, grace: '15%', title: { display: true, text: 'Days' }, grid: { color: 'rgba(148,163,184,0.2)' } },
+            x: { grid: { display: false } }
+          },
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: (c) => `${c.parsed.y} days` } },
+            slaLine: { sla: 8 }
           }
         },
-        plugins: [slaPlugin]
+        plugins: [slaLine]
       });
     }
   }, 100);
@@ -3137,6 +3010,11 @@ function showModalError(message) {
 window.openTimeToHireModal = openTimeToHireModal;
 window.closeTimeToHireModal = closeTimeToHireModal;
 window.refreshTimeToHireModal = refreshTimeToHireModal;
+
+// Modal resize event listener for charts
+document.addEventListener('timeToHireModal:opened', () => {
+  if (tthChart) tthChart.resize();
+});
 
 // Debug function for chart container styles - run in console
 function debugChartContainer() {

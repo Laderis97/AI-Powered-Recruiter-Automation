@@ -2205,8 +2205,11 @@ p {
 }
 
 /* Chart.js Integration */
-.time-to-hire {
-  height: 280px !important;
+.time-to-hire { 
+  height: 288px; 
+}
+.time-to-hire canvas { 
+  display: block; 
 }
 
 /* Chart Card and Panel Fixes for Main Dashboard */
