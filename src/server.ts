@@ -25,6 +25,7 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/resumes', express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), '../resumes')));
 app.set('view engine', 'ejs');
 
 // Add access control middleware
