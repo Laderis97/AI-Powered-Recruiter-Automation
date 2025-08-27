@@ -1,0 +1,72 @@
+repos:
+  # Formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.1.0
+    hooks:
+      - id: prettier
+        types: [file]
+        additional_dependencies:
+          - prettier@3.1.0
+
+  # ESLint for JavaScript/TypeScript
+  - repo: https://github.com/pre-commit/mirrors-eslint
+    rev: v8.57.0
+    hooks:
+      - id: eslint
+        files: \.(js|ts|tsx)$
+        types: [file]
+        additional_dependencies:
+          - eslint@8.57.0
+          - '@typescript-eslint/eslint-plugin@6.21.0'
+          - '@typescript-eslint/parser@6.21.0'
+          - eslint-config-prettier@9.1.0
+          - eslint-plugin-prettier@5.1.3
+
+  # TypeScript type checking
+  - repo: local
+    hooks:
+      - id: typescript-check
+        name: TypeScript Check
+        entry: npx tsc --noEmit
+        language: system
+        types: [typescript]
+        pass_filenames: false
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
+    hooks:
+      - id: markdownlint
+        args: [--fix]
+
+  # Secret scanning with gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
+        args: [detect, --source, ., --report-format, json, --report-path, gitleaks-report.json]
+
+  # Spell checking with codespell
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.2.6
+    hooks:
+      - id: codespell
+        args: [--ignore-words-list, crate,hist,nd,te, --skip, "*.lock,*.min.js,*.min.css,node_modules,dist,build,.git"]
+
+  # General file checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: name-tests-test
+      - id: requirements-txt-fixer
+      - id: fix-byte-order-marker

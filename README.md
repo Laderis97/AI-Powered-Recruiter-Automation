@@ -308,6 +308,39 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 - [Issue Templates](.github/ISSUE_TEMPLATE/)
 - [Security Policy](SECURITY.md)
 
+#### Pre-commit Hooks & Quality Assurance
+
+The project uses pre-commit hooks to ensure code quality and security:
+
+```bash
+# Install pre-commit hooks
+npm run install-hooks
+
+# Run all quality checks
+npm run qa
+
+# Or use make directly
+make install-hooks
+make qa
+```
+
+**Pre-commit checks include:**
+
+- ✅ **Code formatting** (Prettier)
+- ✅ **Linting** (ESLint + TypeScript)
+- ✅ **Type checking** (TypeScript compiler)
+- ✅ **Secret scanning** (Gitleaks)
+- ✅ **Spell checking** (Codespell)
+- ✅ **Documentation validation** (Markdown linting)
+
+**Quality Assurance targets:**
+
+- `make lint` - Run linting and formatting checks
+- `make test-unit` - Run unit tests
+- `make scan` - Run security and spell checks
+- `make qa` - Run all checks (lint + test + scan)
+- `make format` - Format code with Prettier
+
 ## 📄 License
 
 MIT License - see LICENSE file for details

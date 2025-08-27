@@ -1613,7 +1613,7 @@ app.post('/api/ai/feedback', async (req, res) => {
 // Delete a job posting
 app.delete('/api/jobs/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     console.log(`🗑️ Deleting job: ${id}`);
     
     // Get the job first to check if it exists
