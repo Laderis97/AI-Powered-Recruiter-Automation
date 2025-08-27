@@ -537,12 +537,10 @@ app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
     });
   } catch (error) {
     console.error('Error fetching stage performance data:', error);
-    res
-      .status(500)
-      .json({
-        success: false,
-        error: 'Failed to fetch stage performance data',
-      });
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch stage performance data',
+    });
   }
 });
 
@@ -696,12 +694,10 @@ app.post('/api/role-alignment', async (req, res) => {
     const { candidateId, jobId } = req.body;
 
     if (!candidateId || !jobId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Candidate ID and Job ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
 
     const candidate = await databaseService.getCandidateById(candidateId);
@@ -742,12 +738,10 @@ app.post('/api/skills-gap', async (req, res) => {
     const { candidateId, jobId } = req.body;
 
     if (!candidateId || !jobId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Candidate ID and Job ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
 
     const candidate = await databaseService.getCandidateById(candidateId);
@@ -788,12 +782,10 @@ app.post('/api/interview-questions', async (req, res) => {
     const { candidateId, jobId } = req.body;
 
     if (!candidateId || !jobId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Candidate ID and Job ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
 
     const candidate = await databaseService.getCandidateById(candidateId);
@@ -818,12 +810,10 @@ app.post('/api/interview-questions', async (req, res) => {
       });
     } else {
       console.error('Interview questions generation failed:', result.error);
-      res
-        .status(500)
-        .json({
-          success: false,
-          error: 'Failed to generate interview questions',
-        });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate interview questions',
+      });
     }
   } catch (error) {
     console.error('Error in interview questions generation:', error);
@@ -837,12 +827,10 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
     const { candidateId, jobId } = req.body;
 
     if (!candidateId || !jobId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Candidate ID and Job ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
 
     const candidate = await databaseService.getCandidateById(candidateId);
@@ -878,12 +866,10 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
         'Categorized interview questions generation failed:',
         result.error
       );
-      res
-        .status(500)
-        .json({
-          success: false,
-          error: 'Failed to generate categorized interview questions',
-        });
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate categorized interview questions',
+      });
     }
   } catch (error) {
     console.error(
@@ -900,12 +886,10 @@ app.post('/api/cultural-fit', async (req, res) => {
     const { candidateId, jobId } = req.body;
 
     if (!candidateId || !jobId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Candidate ID and Job ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
 
     const candidate = await databaseService.getCandidateById(candidateId);
@@ -1495,12 +1479,10 @@ app.get('/api/ai/ab-test/:testId/variant', async (req, res) => {
     const { candidateId } = req.query;
 
     if (!testId || !candidateId) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          error: 'Test ID and candidate ID are required',
-        });
+      return res.status(400).json({
+        success: false,
+        error: 'Test ID and candidate ID are required',
+      });
     }
 
     const machineLearning = new (

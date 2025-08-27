@@ -30,6 +30,7 @@ This guide will help you set up Supabase as your database service and migrate fr
 ## ⚙️ **Step 4: Update Environment Variables**
 
 1. In your project root, edit `.env` file:
+
 ```bash
 # Add these lines to your .env file:
 SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
@@ -50,6 +51,7 @@ SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 If you have existing data in your JSON files, you can migrate it:
 
 1. **Export current data:**
+
    ```bash
    # Your current data is in data/app-data.json
    # You can manually copy this data to Supabase tables
@@ -63,6 +65,7 @@ If you have existing data in your JSON files, you can migrate it:
 ## 🧪 **Step 6: Test Database Connection**
 
 1. **Build and start your server:**
+
    ```bash
    npm run build
    npm start
@@ -79,7 +82,7 @@ If you have existing data in your JSON files, you can migrate it:
 1. Go to **Table Editor** in your Supabase dashboard
 2. You should see these tables:
    - `jobs`
-   - `candidates` 
+   - `candidates`
    - `campaigns`
    - `email_config`
 
@@ -88,15 +91,18 @@ If you have existing data in your JSON files, you can migrate it:
 ## 🚨 **Troubleshooting**
 
 ### **Error: "Missing Supabase environment variables"**
+
 - Check your `.env` file has `SUPABASE_URL` and `SUPABASE_ANON_KEY`
 - Restart your server after updating `.env`
 
 ### **Error: "Database health check failed"**
+
 - Verify your Supabase project is active
 - Check your API keys are correct
 - Ensure tables were created successfully
 
 ### **Error: "Permission denied"**
+
 - Check Row Level Security (RLS) policies in Supabase
 - Verify your API key has the correct permissions
 

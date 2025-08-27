@@ -17,11 +17,14 @@
     "lint": "eslint public/**/*.js --ext .js",
     "lint:fix": "eslint src/**/*.ts public/**/*.js --ext .ts,.js --fix",
     "typecheck": "tsc --noEmit",
-    "format": "prettier --write \"src/**/*.ts\" \"public/**/*.js\" \"views/**/*.ejs\"",
+    "format": "prettier --write \"src/**/*.ts\" \"public/**/*.js\" \"**/*.md\" \"**/*.json\"",
     "format:check": "prettier --check \"src/**/*.ts\" \"public/**/*.js\" \"views/**/*.ejs\"",
     "deploy:staging": "echo 'Deploy to staging - implement your deployment script'",
     "deploy:prod": "echo 'Deploy to production - implement your deployment script'",
     "rollback": "echo 'Rollback deployment - implement your rollback script'",
+    "commit": "git-cz",
+    "prepare": "husky install",
+    "markdownlint": "markdownlint '**/*.md' --ignore node_modules",
     "postinstall": "npm run build"
   },
   "dependencies": {
@@ -45,6 +48,8 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@commitlint/cli": "^18.0.0",
+    "@commitlint/config-conventional": "^18.0.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@types/body-parser": "^1.19.6",
@@ -57,12 +62,17 @@
     "@types/react-dom": "^19.1.7",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "commitizen": "^4.3.0",
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.1.3",
+    "husky": "^8.0.3",
     "jest": "^30.0.5",
     "jest-environment-jsdom": "^30.0.5",
     "jsdom": "^26.1.0",
+    "lint-staged": "^15.0.0",
+    "markdownlint-cli": "^0.37.0",
     "prettier": "^3.2.5",
     "supertest": "^7.0.0",
     "@types/supertest": "^6.0.2",
@@ -73,5 +83,10 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
 }

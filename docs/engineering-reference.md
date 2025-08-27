@@ -19,17 +19,18 @@
 
 ### Non-Negotiables
 
-| Gate | Requirement | Tool/Process | Owner |
-|------|-------------|--------------|-------|
-| **Linting** | Zero linting errors | ESLint + Prettier | Pre-commit hook |
-| **Type Safety** | Zero TypeScript errors | `npm run build` | CI/CD |
-| **Unit Tests** | All tests pass | Jest | CI/CD |
-| **SAST** | Zero critical/high vulnerabilities | SonarQube/Snyk | CI/CD |
-| **Coverage** | Critical paths > 80% | Jest + Istanbul | CI/CD |
-| **Secrets** | No secrets in code | pre-commit hooks + TruffleHog | Security team |
-| **Build** | Immutable artifacts | Docker + registry | CI/CD |
+| Gate            | Requirement                        | Tool/Process                  | Owner           |
+| --------------- | ---------------------------------- | ----------------------------- | --------------- |
+| **Linting**     | Zero linting errors                | ESLint + Prettier             | Pre-commit hook |
+| **Type Safety** | Zero TypeScript errors             | `npm run build`               | CI/CD           |
+| **Unit Tests**  | All tests pass                     | Jest                          | CI/CD           |
+| **SAST**        | Zero critical/high vulnerabilities | SonarQube/Snyk                | CI/CD           |
+| **Coverage**    | Critical paths > 80%               | Jest + Istanbul               | CI/CD           |
+| **Secrets**     | No secrets in code                 | pre-commit hooks + TruffleHog | Security team   |
+| **Build**       | Immutable artifacts                | Docker + registry             | CI/CD           |
 
 ### Critical Paths (80% coverage required)
+
 - Candidate management workflows
 - Job posting creation/editing
 - Analytics data processing
@@ -42,13 +43,13 @@
 
 ### Branch Strategy
 
-| Branch Type | Pattern | Purpose | Auto-delete |
-|-------------|---------|---------|-------------|
-| **Feature** | `feat/*` | New functionality | ✅ |
-| **Bug Fix** | `fix/*` | Bug fixes | ✅ |
-| **Chore** | `chore/*` | Maintenance tasks | ✅ |
-| **Documentation** | `docs/*` | Documentation updates | ✅ |
-| **Hotfix** | `hotfix/*` | Critical production fixes | ✅ |
+| Branch Type       | Pattern    | Purpose                   | Auto-delete |
+| ----------------- | ---------- | ------------------------- | ----------- |
+| **Feature**       | `feat/*`   | New functionality         | ✅          |
+| **Bug Fix**       | `fix/*`    | Bug fixes                 | ✅          |
+| **Chore**         | `chore/*`  | Maintenance tasks         | ✅          |
+| **Documentation** | `docs/*`   | Documentation updates     | ✅          |
+| **Hotfix**        | `hotfix/*` | Critical production fixes | ✅          |
 
 ### Conventional Commits
 
@@ -64,36 +65,41 @@ chore(deps): update TypeScript to 5.0
 
 ```markdown
 ## Summary
+
 Brief description of changes
 
 ## Risk Assessment
+
 - [ ] Low risk (UI changes, docs)
 - [ ] Medium risk (new features, refactoring)
 - [ ] High risk (core logic, database changes)
 
 ## Rollout Plan
+
 - [ ] Feature flag enabled
 - [ ] Canary deployment
 - [ ] Full rollout
 - [ ] Rollback plan documented
 
 ## Test Evidence
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests pass
 - [ ] E2E tests pass
 - [ ] Manual testing completed
 
 ## Screenshots/Recordings
+
 (if applicable)
 ```
 
 ### Release Process
 
-| Version Type | Trigger | Process |
-|--------------|---------|---------|
-| **Patch** | `fix:` commits | Auto-release |
-| **Minor** | `feat:` commits | Manual review |
-| **Major** | Breaking changes | RFC required |
+| Version Type | Trigger          | Process       |
+| ------------ | ---------------- | ------------- |
+| **Patch**    | `fix:` commits   | Auto-release  |
+| **Minor**    | `feat:` commits  | Manual review |
+| **Major**    | Breaking changes | RFC required  |
 
 ---
 
@@ -101,15 +107,16 @@ Brief description of changes
 
 ### Test Pyramid
 
-| Level | Coverage | Speed | Examples |
-|-------|----------|-------|----------|
-| **Unit** | 80% | <1s | Component functions, utilities |
-| **Integration** | 15% | <30s | API endpoints, database ops |
-| **E2E** | 5% | <5min | User workflows, critical paths |
+| Level           | Coverage | Speed | Examples                       |
+| --------------- | -------- | ----- | ------------------------------ |
+| **Unit**        | 80%      | <1s   | Component functions, utilities |
+| **Integration** | 15%      | <30s  | API endpoints, database ops    |
+| **E2E**         | 5%       | <5min | User workflows, critical paths |
 
 ### Test Categories
 
 #### Unit Tests
+
 ```typescript
 // Fast, isolated, no external dependencies
 describe('CandidateService', () => {
@@ -123,6 +130,7 @@ describe('CandidateService', () => {
 ```
 
 #### Integration Tests
+
 ```typescript
 // Dockerized dependencies, real database
 describe('Candidate API', () => {
@@ -136,6 +144,7 @@ describe('Candidate API', () => {
 ```
 
 #### E2E Tests
+
 ```typescript
 // Full browser automation
 test('complete candidate onboarding flow', async ({ page }) => {
@@ -161,22 +170,22 @@ test('complete candidate onboarding flow', async ({ page }) => {
 
 ```yaml
 stages:
-  - verify      # Lint, typecheck, security scan
-  - build       # Create immutable artifacts
-  - test        # Unit, integration, E2E
-  - scan        # SAST, DAST, dependency audit
-  - package     # Docker images, SBOM
-  - deploy      # Staging → Canary → Production
+  - verify # Lint, typecheck, security scan
+  - build # Create immutable artifacts
+  - test # Unit, integration, E2E
+  - scan # SAST, DAST, dependency audit
+  - package # Docker images, SBOM
+  - deploy # Staging → Canary → Production
 ```
 
 ### Deployment Strategy
 
-| Environment | Purpose | Auto-deploy | Rollback |
-|-------------|---------|-------------|----------|
-| **Development** | Feature testing | ✅ | ✅ |
-| **Staging** | Integration testing | ✅ | ✅ |
-| **Canary** | Production validation | Manual | ✅ |
-| **Production** | Live users | Manual | ✅ |
+| Environment     | Purpose               | Auto-deploy | Rollback |
+| --------------- | --------------------- | ----------- | -------- |
+| **Development** | Feature testing       | ✅          | ✅       |
+| **Staging**     | Integration testing   | ✅          | ✅       |
+| **Canary**      | Production validation | Manual      | ✅       |
+| **Production**  | Live users            | Manual      | ✅       |
 
 ### Feature Flags
 
@@ -185,7 +194,7 @@ stages:
 const FEATURES = {
   NEW_CANDIDATE_UI: process.env.ENABLE_NEW_UI === 'true',
   AI_ENHANCED_MATCHING: process.env.ENABLE_AI_MATCHING === 'true',
-  BULK_IMPORT: process.env.ENABLE_BULK_IMPORT === 'true'
+  BULK_IMPORT: process.env.ENABLE_BULK_IMPORT === 'true',
 };
 ```
 
@@ -195,24 +204,24 @@ const FEATURES = {
 
 ### Threat Model (STRIDE-lite)
 
-| Threat | Mitigation | Owner |
-|--------|------------|-------|
-| **Spoofing** | JWT tokens, OAuth2 | Auth team |
-| **Tampering** | Input validation, HTTPS | Backend team |
-| **Repudiation** | Audit logs, signatures | Security team |
-| **Information Disclosure** | Encryption, RBAC | Security team |
-| **Denial of Service** | Rate limiting, CDN | Infrastructure team |
-| **Elevation of Privilege** | Least privilege, RBAC | Security team |
+| Threat                     | Mitigation              | Owner               |
+| -------------------------- | ----------------------- | ------------------- |
+| **Spoofing**               | JWT tokens, OAuth2      | Auth team           |
+| **Tampering**              | Input validation, HTTPS | Backend team        |
+| **Repudiation**            | Audit logs, signatures  | Security team       |
+| **Information Disclosure** | Encryption, RBAC        | Security team       |
+| **Denial of Service**      | Rate limiting, CDN      | Infrastructure team |
+| **Elevation of Privilege** | Least privilege, RBAC   | Security team       |
 
 ### Security Tools
 
-| Tool | Purpose | Frequency |
-|------|---------|-----------|
-| **SAST** | Code vulnerability scan | Every PR |
-| **DAST** | Runtime vulnerability scan | Weekly |
-| **Dependency Audit** | Known vulnerabilities | Daily |
-| **SBOM** | Software bill of materials | Every release |
-| **Secret Scanner** | Credential detection | Pre-commit |
+| Tool                 | Purpose                    | Frequency     |
+| -------------------- | -------------------------- | ------------- |
+| **SAST**             | Code vulnerability scan    | Every PR      |
+| **DAST**             | Runtime vulnerability scan | Weekly        |
+| **Dependency Audit** | Known vulnerabilities      | Daily         |
+| **SBOM**             | Software bill of materials | Every release |
+| **Secret Scanner**   | Credential detection       | Pre-commit    |
 
 ### Compliance Checklist
 
@@ -228,12 +237,12 @@ const FEATURES = {
 
 ### Golden Signals
 
-| Signal | Metric | Target | Alert Threshold |
-|--------|--------|--------|-----------------|
-| **Latency** | P95 response time | <500ms | >1s |
-| **Traffic** | Requests per second | Monitor trends | 50% drop |
-| **Errors** | Error rate | <1% | >5% |
-| **Saturation** | CPU/Memory usage | <80% | >90% |
+| Signal         | Metric              | Target         | Alert Threshold |
+| -------------- | ------------------- | -------------- | --------------- |
+| **Latency**    | P95 response time   | <500ms         | >1s             |
+| **Traffic**    | Requests per second | Monitor trends | 50% drop        |
+| **Errors**     | Error rate          | <1%            | >5%             |
+| **Saturation** | CPU/Memory usage    | <80%           | >90%            |
 
 ### Logging Standards
 
@@ -244,20 +253,20 @@ logger.info('Candidate created', {
   userId: '456',
   action: 'create',
   duration: 150,
-  success: true
+  success: true,
 });
 ```
 
 ### Metrics (RED/USE)
 
-| Category | Metrics | Collection |
-|----------|---------|------------|
-| **Rate** | Requests/sec, Errors/sec | Prometheus |
-| **Errors** | Error rate, Error types | Prometheus |
-| **Duration** | Response time, Percentiles | Prometheus |
-| **Utilization** | CPU, Memory, Disk | Node Exporter |
-| **Saturation** | Queue depth, Connection pools | Custom metrics |
-| **Errors** | System errors, User errors | Error tracking |
+| Category        | Metrics                       | Collection     |
+| --------------- | ----------------------------- | -------------- |
+| **Rate**        | Requests/sec, Errors/sec      | Prometheus     |
+| **Errors**      | Error rate, Error types       | Prometheus     |
+| **Duration**    | Response time, Percentiles    | Prometheus     |
+| **Utilization** | CPU, Memory, Disk             | Node Exporter  |
+| **Saturation**  | Queue depth, Connection pools | Custom metrics |
+| **Errors**      | System errors, User errors    | Error tracking |
 
 ### Tracing
 
@@ -280,23 +289,27 @@ span.end();
 # AI-Powered Recruiter Automation
 
 ## Quick Start
+
 1. Clone repository
 2. `npm install`
 3. `npm run dev`
 4. Visit http://localhost:1000
 
 ## Architecture
+
 - Frontend: EJS + Vanilla JS
 - Backend: Node.js + Express
 - Database: Supabase
 - AI: OpenAI Integration
 
 ## Development
+
 - [Development Guide](docs/development.md)
 - [API Reference](docs/api.md)
 - [Testing Guide](docs/testing.md)
 
 ## Deployment
+
 - [Deployment Guide](docs/deployment.md)
 - [Environment Setup](docs/environment.md)
 ```
@@ -307,15 +320,19 @@ span.end();
 # ADR-000: [Title]
 
 ## Status
+
 [Proposed | Accepted | Deprecated | Superseded]
 
 ## Context
+
 What is the issue that we're seeing that is motivating this decision or change?
 
 ## Decision
+
 What is the change that we're proposing and/or doing?
 
 ## Consequences
+
 What becomes easier or more difficult to do because of this change?
 ```
 
@@ -341,40 +358,47 @@ What becomes easier or more difficult to do because of this change?
 
 ### Decision SLA
 
-| Decision Type | Timeline | Escalation |
-|---------------|----------|------------|
-| **Technical** | 3 business days | Tech lead |
-| **Architecture** | 1 week | CTO |
-| **Process** | 2 weeks | Engineering manager |
+| Decision Type    | Timeline        | Escalation          |
+| ---------------- | --------------- | ------------------- |
+| **Technical**    | 3 business days | Tech lead           |
+| **Architecture** | 1 week          | CTO                 |
+| **Process**      | 2 weeks         | Engineering manager |
 
 ### Incident Response
 
 #### Incident Template
+
 ```markdown
 ## Incident Report
 
 ### Summary
+
 Brief description of the incident
 
 ### Timeline
+
 - **Detected**: [timestamp]
 - **Escalated**: [timestamp]
 - **Resolved**: [timestamp]
 
 ### Root Cause
+
 What caused the incident?
 
 ### Impact
+
 - Users affected: [number]
 - Downtime: [duration]
 - Data loss: [details]
 
 ### Actions Taken
+
 1. Immediate response
 2. Investigation
 3. Resolution
 
 ### Lessons Learned
+
 - What went well?
 - What could be improved?
 - Action items
@@ -410,11 +434,11 @@ npm run rollback          # Rollback to previous version
 
 ### Emergency Contacts
 
-| Role | Contact | Escalation |
-|------|---------|------------|
-| **On-call** | #oncall | PagerDuty |
-| **Tech Lead** | @tech-lead | Slack |
-| **CTO** | @cto | Phone |
+| Role          | Contact    | Escalation |
+| ------------- | ---------- | ---------- |
+| **On-call**   | #oncall    | PagerDuty  |
+| **Tech Lead** | @tech-lead | Slack      |
+| **CTO**       | @cto       | Phone      |
 
 ### Useful Links
 
@@ -426,5 +450,5 @@ npm run rollback          # Rollback to previous version
 
 ---
 
-*Last updated: [Date]*
-*Version: 1.0*
+_Last updated: [Date]_
+_Version: 1.0_

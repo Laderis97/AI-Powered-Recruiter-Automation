@@ -1,12 +1,14 @@
 # Onboarding Checklist
 
 ## Pre-First Day
+
 - [ ] Repository access granted
 - [ ] Development environment requirements documented
 - [ ] Team introductions scheduled
 - [ ] First project assigned
 
 ## Day 1 - Environment Setup
+
 - [ ] Clone repository
 - [ ] Install Node.js (v18+)
 - [ ] Install dependencies (`npm install`)
@@ -17,6 +19,7 @@
 - [ ] Install recommended VS Code extensions
 
 ## Day 1 - First Commit
+
 - [ ] Create feature branch (`git checkout -b feat/onboarding`)
 - [ ] Make a small change (update README, fix typo, etc.)
 - [ ] Run linting (`npm run lint`)
@@ -26,6 +29,7 @@
 - [ ] Complete first code review
 
 ## Week 1 - Process Understanding
+
 - [ ] Code review process explained
 - [ ] Testing strategy understood
 - [ ] Deployment process documented
@@ -34,6 +38,7 @@
 - [ ] Team communication channels identified
 
 ## Week 1 - Technical Knowledge
+
 - [ ] Architecture overview
 - [ ] Database schema understanding
 - [ ] API endpoints documented
@@ -42,6 +47,7 @@
 - [ ] Error handling practices
 
 ## Week 2 - First Feature
+
 - [ ] Assigned first real feature
 - [ ] Requirements understood
 - [ ] Design/architecture approved
@@ -52,6 +58,7 @@
 - [ ] Feature deployed to staging
 
 ## Month 1 - Full Integration
+
 - [ ] Participated in team standups
 - [ ] Contributed to technical discussions
 - [ ] Helped with code reviews
@@ -60,6 +67,7 @@
 - [ ] Performance review scheduled
 
 ## Resources
+
 - [Engineering Reference Guide](../docs/engineering-reference.md)
 - [API Documentation](../docs/api.md)
 - [Testing Guide](../docs/testing.md)

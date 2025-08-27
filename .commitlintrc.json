@@ -1,0 +1,62 @@
+{
+  "extends": ["@commitlint/config-conventional"],
+  "rules": {
+    "type-enum": [
+      2,
+      "always",
+      [
+        "feat",
+        "fix",
+        "docs",
+        "style",
+        "refactor",
+        "perf",
+        "test",
+        "build",
+        "ci",
+        "chore",
+        "revert",
+        "security",
+        "deps"
+      ]
+    ],
+    "type-case": [2, "always", "lower-case"],
+    "type-empty": [2, "never"],
+    "subject-case": [2, "always", "lower-case"],
+    "subject-empty": [2, "never"],
+    "subject-full-stop": [2, "never", "."],
+    "subject-max-length": [2, "always", 72],
+    "body-leading-blank": [2, "always"],
+    "body-max-line-length": [2, "always", 100],
+    "footer-leading-blank": [2, "always"],
+    "footer-max-line-length": [2, "always", 100],
+    "scope-case": [2, "always", "lower-case"],
+    "scope-empty": [2, "never"],
+    "scope-enum": [
+      2,
+      "always",
+      [
+        "candidates",
+        "jobs",
+        "analytics",
+        "ai",
+        "ui",
+        "api",
+        "auth",
+        "database",
+        "email",
+        "docs",
+        "ci",
+        "deps",
+        "security",
+        "testing",
+        "deployment"
+      ]
+    ]
+  },
+  "parserPreset": {
+    "parserOpts": {
+      "issuePrefixes": ["#"]
+    }
+  }
+}
