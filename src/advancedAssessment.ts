@@ -1,9 +1,18 @@
 // src/advancedAssessment.ts
 
 export interface BehavioralAssessment {
-  communicationStyle: 'assertive' | 'passive' | 'aggressive' | 'passive-aggressive';
+  communicationStyle:
+    | 'assertive'
+    | 'passive'
+    | 'aggressive'
+    | 'passive-aggressive';
   teamworkPreference: 'collaborator' | 'independent' | 'leader' | 'supporter';
-  conflictResolution: 'avoidant' | 'accommodating' | 'compromising' | 'collaborating' | 'competing';
+  conflictResolution:
+    | 'avoidant'
+    | 'accommodating'
+    | 'compromising'
+    | 'collaborating'
+    | 'competing';
   stressResponse: 'calm' | 'anxious' | 'focused' | 'overwhelmed';
   adaptabilityScore: number; // 0-100
   emotionalIntelligence: number; // 0-100
@@ -67,7 +76,7 @@ export interface ComprehensiveAssessment {
 
 export class AdvancedAssessmentEngine {
   private assessmentTemplates: Map<string, any> = new Map();
-  
+
   constructor() {
     this.initializeTemplates();
   }
@@ -81,13 +90,28 @@ export class AdvancedAssessmentEngine {
     interviewResponses?: any[]
   ): BehavioralAssessment {
     // Analyze candidate background and responses
-    const communicationStyle = this.assessCommunicationStyle(candidate, interviewResponses);
-    const teamworkPreference = this.assessTeamworkPreference(candidate, interviewResponses);
-    const conflictResolution = this.assessConflictResolution(candidate, interviewResponses);
-    const stressResponse = this.assessStressResponse(candidate, interviewResponses);
+    const communicationStyle = this.assessCommunicationStyle(
+      candidate,
+      interviewResponses
+    );
+    const teamworkPreference = this.assessTeamworkPreference(
+      candidate,
+      interviewResponses
+    );
+    const conflictResolution = this.assessConflictResolution(
+      candidate,
+      interviewResponses
+    );
+    const stressResponse = this.assessStressResponse(
+      candidate,
+      interviewResponses
+    );
     const adaptabilityScore = this.calculateAdaptabilityScore(candidate, job);
-    const emotionalIntelligence = this.calculateEmotionalIntelligence(candidate, interviewResponses);
-    
+    const emotionalIntelligence = this.calculateEmotionalIntelligence(
+      candidate,
+      interviewResponses
+    );
+
     const recommendations = this.generateBehavioralRecommendations(
       communicationStyle,
       teamworkPreference,
@@ -104,7 +128,7 @@ export class AdvancedAssessmentEngine {
       stressResponse,
       adaptabilityScore,
       emotionalIntelligence,
-      recommendations
+      recommendations,
     };
   }
 
@@ -116,12 +140,21 @@ export class AdvancedAssessmentEngine {
     job: any,
     technicalQuestions?: any[]
   ): TechnicalAssessment {
-    const codingAbility = this.assessCodingAbility(candidate, technicalQuestions);
-    const problemSolving = this.assessProblemSolving(candidate, technicalQuestions);
+    const codingAbility = this.assessCodingAbility(
+      candidate,
+      technicalQuestions
+    );
+    const problemSolving = this.assessProblemSolving(
+      candidate,
+      technicalQuestions
+    );
     const systemDesign = this.assessSystemDesign(candidate, technicalQuestions);
-    const debuggingSkills = this.assessDebuggingSkills(candidate, technicalQuestions);
+    const debuggingSkills = this.assessDebuggingSkills(
+      candidate,
+      technicalQuestions
+    );
     const codeQuality = this.assessCodeQuality(candidate, technicalQuestions);
-    
+
     const overallScore = this.calculateTechnicalScore(
       codingAbility,
       problemSolving,
@@ -154,7 +187,7 @@ export class AdvancedAssessmentEngine {
       codeQuality,
       overallScore,
       strengths,
-      areasForImprovement
+      areasForImprovement,
     };
   }
 
@@ -169,32 +202,52 @@ export class AdvancedAssessmentEngine {
     const communication = {
       verbal: this.assessVerbalCommunication(candidate, behavioralQuestions),
       written: this.assessWrittenCommunication(candidate, behavioralQuestions),
-      presentation: this.assessPresentationSkills(candidate, behavioralQuestions),
-      listening: this.assessListeningSkills(candidate, behavioralQuestions)
+      presentation: this.assessPresentationSkills(
+        candidate,
+        behavioralQuestions
+      ),
+      listening: this.assessListeningSkills(candidate, behavioralQuestions),
     };
 
     const leadership = {
       vision: this.assessVision(candidate, behavioralQuestions),
       motivation: this.assessMotivation(candidate, behavioralQuestions),
       delegation: this.assessDelegation(candidate, behavioralQuestions),
-      conflictManagement: this.assessConflictManagement(candidate, behavioralQuestions)
+      conflictManagement: this.assessConflictManagement(
+        candidate,
+        behavioralQuestions
+      ),
     };
 
     const collaboration = {
       teamwork: this.assessTeamwork(candidate, behavioralQuestions),
-      crossFunctional: this.assessCrossFunctional(candidate, behavioralQuestions),
-      stakeholderManagement: this.assessStakeholderManagement(candidate, behavioralQuestions)
+      crossFunctional: this.assessCrossFunctional(
+        candidate,
+        behavioralQuestions
+      ),
+      stakeholderManagement: this.assessStakeholderManagement(
+        candidate,
+        behavioralQuestions
+      ),
     };
 
-    const overallScore = this.calculateSoftSkillsScore(communication, leadership, collaboration);
-    const recommendations = this.generateSoftSkillsRecommendations(communication, leadership, collaboration);
+    const overallScore = this.calculateSoftSkillsScore(
+      communication,
+      leadership,
+      collaboration
+    );
+    const recommendations = this.generateSoftSkillsRecommendations(
+      communication,
+      leadership,
+      collaboration
+    );
 
     return {
       communication,
       leadership,
       collaboration,
       overallScore,
-      recommendations
+      recommendations,
     };
   }
 
@@ -261,7 +314,7 @@ export class AdvancedAssessmentEngine {
       developmentAreas,
       timeline,
       confidence,
-      recommendations
+      recommendations,
     };
   }
 
@@ -295,11 +348,11 @@ export class AdvancedAssessmentEngine {
       assessmentData?.behavioralQuestions
     );
 
-    const leadership = this.assessLeadershipPotential(
-      candidate,
-      job,
-      { behavioral, technical, softSkills }
-    );
+    const leadership = this.assessLeadershipPotential(candidate, job, {
+      behavioral,
+      technical,
+      softSkills,
+    });
 
     const overallScore = this.calculateOverallAssessmentScore(
       behavioral,
@@ -345,109 +398,145 @@ export class AdvancedAssessmentEngine {
       riskFactors,
       strengths,
       developmentPlan,
-      nextSteps
+      nextSteps,
     };
   }
 
   // Private helper methods for behavioral assessment
-  private assessCommunicationStyle(candidate: any, responses?: any[]): 'assertive' | 'passive' | 'aggressive' | 'passive-aggressive' {
+  private assessCommunicationStyle(
+    candidate: any,
+    responses?: any[]
+  ): 'assertive' | 'passive' | 'aggressive' | 'passive-aggressive' {
     // Analyze candidate's communication patterns
     if (responses && responses.length > 0) {
       // Analyze interview responses for communication style indicators
-      const assertiveIndicators = responses.filter(r => 
-        r.includes('confident') || r.includes('direct') || r.includes('clear')
+      const assertiveIndicators = responses.filter(
+        r =>
+          r.includes('confident') || r.includes('direct') || r.includes('clear')
       ).length;
-      
+
       if (assertiveIndicators > 2) return 'assertive';
       if (assertiveIndicators === 0) return 'passive';
       return 'passive-aggressive';
     }
-    
+
     // Fallback based on candidate background
     return 'assertive';
   }
 
-  private assessTeamworkPreference(candidate: any, responses?: any[]): 'collaborator' | 'independent' | 'leader' | 'supporter' {
+  private assessTeamworkPreference(
+    candidate: any,
+    responses?: any[]
+  ): 'collaborator' | 'independent' | 'leader' | 'supporter' {
     if (responses && responses.length > 0) {
-      const leadershipIndicators = responses.filter(r => 
-        r.includes('led') || r.includes('managed') || r.includes('coordinated')
+      const leadershipIndicators = responses.filter(
+        r =>
+          r.includes('led') ||
+          r.includes('managed') ||
+          r.includes('coordinated')
       ).length;
-      
+
       if (leadershipIndicators > 2) return 'leader';
       if (leadershipIndicators > 0) return 'collaborator';
       return 'supporter';
     }
-    
+
     return 'collaborator';
   }
 
-  private assessConflictResolution(candidate: any, responses?: any[]): 'avoidant' | 'accommodating' | 'compromising' | 'collaborating' | 'competing' {
+  private assessConflictResolution(
+    candidate: any,
+    responses?: any[]
+  ):
+    | 'avoidant'
+    | 'accommodating'
+    | 'compromising'
+    | 'collaborating'
+    | 'competing' {
     if (responses && responses.length > 0) {
-      const collaborativeIndicators = responses.filter(r => 
-        r.includes('discussed') || r.includes('understood') || r.includes('agreed')
+      const collaborativeIndicators = responses.filter(
+        r =>
+          r.includes('discussed') ||
+          r.includes('understood') ||
+          r.includes('agreed')
       ).length;
-      
+
       if (collaborativeIndicators > 2) return 'collaborating';
       if (collaborativeIndicators > 1) return 'compromising';
       return 'accommodating';
     }
-    
+
     return 'compromising';
   }
 
-  private assessStressResponse(candidate: any, responses?: any[]): 'calm' | 'anxious' | 'focused' | 'overwhelmed' {
+  private assessStressResponse(
+    candidate: any,
+    responses?: any[]
+  ): 'calm' | 'anxious' | 'focused' | 'overwhelmed' {
     if (responses && responses.length > 0) {
-      const stressIndicators = responses.filter(r => 
-        r.includes('pressure') || r.includes('deadline') || r.includes('challenge')
+      const stressIndicators = responses.filter(
+        r =>
+          r.includes('pressure') ||
+          r.includes('deadline') ||
+          r.includes('challenge')
       ).length;
-      
+
       if (stressIndicators === 0) return 'calm';
       if (stressIndicators > 2) return 'anxious';
       return 'focused';
     }
-    
+
     return 'focused';
   }
 
   private calculateAdaptabilityScore(candidate: any, job: any): number {
     let score = 70; // Base score
-    
+
     // Adjust based on experience diversity
     if (candidate.skills && candidate.skills.length > 5) score += 10;
     if (candidate.location && candidate.location !== 'Remote') score += 5;
-    
+
     // Adjust based on job requirements
     if (job.parsedData?.skills && job.parsedData.skills.length > 3) score += 10;
-    
+
     return Math.min(100, score);
   }
 
-  private calculateEmotionalIntelligence(candidate: any, responses?: any[]): number {
+  private calculateEmotionalIntelligence(
+    candidate: any,
+    responses?: any[]
+  ): number {
     let score = 75; // Base score
-    
+
     if (responses && responses.length > 0) {
-      const empathyIndicators = responses.filter(r => 
-        r.includes('understand') || r.includes('feel') || r.includes('perspective')
+      const empathyIndicators = responses.filter(
+        r =>
+          r.includes('understand') ||
+          r.includes('feel') ||
+          r.includes('perspective')
       ).length;
-      
+
       score += empathyIndicators * 5;
     }
-    
+
     return Math.min(100, score);
   }
 
   // Private helper methods for technical assessment
-  private assessCodingAbility(candidate: any, questions?: any[]): 'beginner' | 'intermediate' | 'advanced' | 'expert' {
+  private assessCodingAbility(
+    candidate: any,
+    questions?: any[]
+  ): 'beginner' | 'intermediate' | 'advanced' | 'expert' {
     if (questions && questions.length > 0) {
       const correctAnswers = questions.filter(q => q.correct).length;
       const totalQuestions = questions.length;
-      
+
       if (correctAnswers / totalQuestions >= 0.9) return 'expert';
       if (correctAnswers / totalQuestions >= 0.7) return 'advanced';
       if (correctAnswers / totalQuestions >= 0.5) return 'intermediate';
       return 'beginner';
     }
-    
+
     // Fallback based on experience
     const years = this.extractYearsFromExperience(candidate.experience);
     if (years >= 8) return 'expert';
@@ -456,33 +545,39 @@ export class AdvancedAssessmentEngine {
     return 'beginner';
   }
 
-  private assessProblemSolving(candidate: any, questions?: any[]): 'basic' | 'analytical' | 'creative' | 'strategic' {
+  private assessProblemSolving(
+    candidate: any,
+    questions?: any[]
+  ): 'basic' | 'analytical' | 'creative' | 'strategic' {
     if (questions && questions.length > 0) {
       const creativeAnswers = questions.filter(q => q.creative).length;
       const strategicAnswers = questions.filter(q => q.strategic).length;
-      
+
       if (strategicAnswers > 2) return 'strategic';
       if (creativeAnswers > 2) return 'creative';
       if (creativeAnswers > 0) return 'analytical';
       return 'basic';
     }
-    
+
     return 'analytical';
   }
 
-  private assessSystemDesign(candidate: any, questions?: any[]): 'none' | 'basic' | 'intermediate' | 'advanced' {
+  private assessSystemDesign(
+    candidate: any,
+    questions?: any[]
+  ): 'none' | 'basic' | 'intermediate' | 'advanced' {
     if (questions && questions.length > 0) {
       const designQuestions = questions.filter(q => q.type === 'system_design');
       if (designQuestions.length === 0) return 'none';
-      
+
       const correctDesigns = designQuestions.filter(q => q.correct).length;
       const totalDesigns = designQuestions.length;
-      
+
       if (correctDesigns / totalDesigns >= 0.8) return 'advanced';
       if (correctDesigns / totalDesigns >= 0.6) return 'intermediate';
       return 'basic';
     }
-    
+
     // Fallback based on experience
     const years = this.extractYearsFromExperience(candidate.experience);
     if (years >= 6) return 'intermediate';
@@ -490,216 +585,264 @@ export class AdvancedAssessmentEngine {
     return 'none';
   }
 
-  private assessDebuggingSkills(candidate: any, questions?: any[]): 'basic' | 'methodical' | 'efficient' | 'expert' {
+  private assessDebuggingSkills(
+    candidate: any,
+    questions?: any[]
+  ): 'basic' | 'methodical' | 'efficient' | 'expert' {
     if (questions && questions.length > 0) {
       const debuggingQuestions = questions.filter(q => q.type === 'debugging');
       if (debuggingQuestions.length === 0) return 'basic';
-      
+
       const correctDebugging = debuggingQuestions.filter(q => q.correct).length;
       const totalDebugging = debuggingQuestions.length;
-      
+
       if (correctDebugging / totalDebugging >= 0.9) return 'expert';
       if (correctDebugging / totalDebugging >= 0.7) return 'efficient';
       if (correctDebugging / totalDebugging >= 0.5) return 'methodical';
       return 'basic';
     }
-    
+
     return 'methodical';
   }
 
-  private assessCodeQuality(candidate: any, questions?: any[]): 'poor' | 'adequate' | 'good' | 'excellent' {
+  private assessCodeQuality(
+    candidate: any,
+    questions?: any[]
+  ): 'poor' | 'adequate' | 'good' | 'excellent' {
     if (questions && questions.length > 0) {
       const qualityQuestions = questions.filter(q => q.type === 'code_quality');
       if (qualityQuestions.length === 0) return 'adequate';
-      
-      const highQuality = qualityQuestions.filter(q => q.quality === 'high').length;
+
+      const highQuality = qualityQuestions.filter(
+        q => q.quality === 'high'
+      ).length;
       const totalQuality = qualityQuestions.length;
-      
+
       if (highQuality / totalQuality >= 0.8) return 'excellent';
       if (highQuality / totalQuality >= 0.6) return 'good';
       if (highQuality / totalQuality >= 0.4) return 'adequate';
       return 'poor';
     }
-    
+
     return 'adequate';
   }
 
   // Private helper methods for soft skills assessment
   private assessVerbalCommunication(candidate: any, questions?: any[]): number {
     let score = 75;
-    
+
     if (questions && questions.length > 0) {
-      const communicationQuestions = questions.filter(q => q.type === 'communication');
-      const clarityScore = communicationQuestions.filter(q => q.clarity === 'high').length;
+      const communicationQuestions = questions.filter(
+        q => q.type === 'communication'
+      );
+      const clarityScore = communicationQuestions.filter(
+        q => q.clarity === 'high'
+      ).length;
       const totalComm = communicationQuestions.length;
-      
+
       if (totalComm > 0) {
         score = (clarityScore / totalComm) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
-  private assessWrittenCommunication(candidate: any, questions?: any[]): number {
+  private assessWrittenCommunication(
+    candidate: any,
+    questions?: any[]
+  ): number {
     let score = 75;
-    
+
     if (questions && questions.length > 0) {
       const writtenQuestions = questions.filter(q => q.type === 'written');
-      const clarityScore = writtenQuestions.filter(q => q.clarity === 'high').length;
+      const clarityScore = writtenQuestions.filter(
+        q => q.clarity === 'high'
+      ).length;
       const totalWritten = writtenQuestions.length;
-      
+
       if (totalWritten > 0) {
         score = (clarityScore / totalWritten) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessPresentationSkills(candidate: any, questions?: any[]): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
-      const presentationQuestions = questions.filter(q => q.type === 'presentation');
-      const confidenceScore = presentationQuestions.filter(q => q.confidence === 'high').length;
+      const presentationQuestions = questions.filter(
+        q => q.type === 'presentation'
+      );
+      const confidenceScore = presentationQuestions.filter(
+        q => q.confidence === 'high'
+      ).length;
       const totalPresentations = presentationQuestions.length;
-      
+
       if (totalPresentations > 0) {
         score = (confidenceScore / totalPresentations) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessListeningSkills(candidate: any, questions?: any[]): number {
     let score = 75;
-    
+
     if (questions && questions.length > 0) {
       const listeningQuestions = questions.filter(q => q.type === 'listening');
-      const comprehensionScore = listeningQuestions.filter(q => q.comprehension === 'high').length;
+      const comprehensionScore = listeningQuestions.filter(
+        q => q.comprehension === 'high'
+      ).length;
       const totalListening = listeningQuestions.length;
-      
+
       if (totalListening > 0) {
         score = (comprehensionScore / totalListening) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   // Leadership assessment methods
   private assessVision(candidate: any, questions?: any[]): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
       const visionQuestions = questions.filter(q => q.type === 'vision');
-      const visionScore = visionQuestions.filter(q => q.vision === 'clear').length;
+      const visionScore = visionQuestions.filter(
+        q => q.vision === 'clear'
+      ).length;
       const totalVision = visionQuestions.length;
-      
+
       if (totalVision > 0) {
         score = (visionScore / totalVision) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessMotivation(candidate: any, questions?: any[]): number {
     let score = 75;
-    
+
     if (questions && questions.length > 0) {
-      const motivationQuestions = questions.filter(q => q.type === 'motivation');
-      const motivationScore = motivationQuestions.filter(q => q.motivation === 'high').length;
+      const motivationQuestions = questions.filter(
+        q => q.type === 'motivation'
+      );
+      const motivationScore = motivationQuestions.filter(
+        q => q.motivation === 'high'
+      ).length;
       const totalMotivation = motivationQuestions.length;
-      
+
       if (totalMotivation > 0) {
         score = (motivationScore / totalMotivation) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessDelegation(candidate: any, questions?: any[]): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
-      const delegationQuestions = questions.filter(q => q.type === 'delegation');
-      const delegationScore = delegationQuestions.filter(q => q.effective === 'yes').length;
+      const delegationQuestions = questions.filter(
+        q => q.type === 'delegation'
+      );
+      const delegationScore = delegationQuestions.filter(
+        q => q.effective === 'yes'
+      ).length;
       const totalDelegation = delegationQuestions.length;
-      
+
       if (totalDelegation > 0) {
         score = (delegationScore / totalDelegation) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessConflictManagement(candidate: any, questions?: any[]): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
       const conflictQuestions = questions.filter(q => q.type === 'conflict');
-      const conflictScore = conflictQuestions.filter(q => q.resolution === 'effective').length;
+      const conflictScore = conflictQuestions.filter(
+        q => q.resolution === 'effective'
+      ).length;
       const totalConflict = conflictQuestions.length;
-      
+
       if (totalConflict > 0) {
         score = (conflictScore / totalConflict) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   // Teamwork and collaboration assessment
   private assessTeamwork(candidate: any, questions?: any[]): number {
     let score = 75;
-    
+
     if (questions && questions.length > 0) {
       const teamworkQuestions = questions.filter(q => q.type === 'teamwork');
-      const teamworkScore = teamworkQuestions.filter(q => q.effective === 'yes').length;
+      const teamworkScore = teamworkQuestions.filter(
+        q => q.effective === 'yes'
+      ).length;
       const totalTeamwork = teamworkQuestions.length;
-      
+
       if (totalTeamwork > 0) {
         score = (teamworkScore / totalTeamwork) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
   private assessCrossFunctional(candidate: any, questions?: any[]): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
-      const crossFuncQuestions = questions.filter(q => q.type === 'cross_functional');
-      const crossFuncScore = crossFuncQuestions.filter(q => q.effective === 'yes').length;
+      const crossFuncQuestions = questions.filter(
+        q => q.type === 'cross_functional'
+      );
+      const crossFuncScore = crossFuncQuestions.filter(
+        q => q.effective === 'yes'
+      ).length;
       const totalCrossFunc = crossFuncQuestions.length;
-      
+
       if (totalCrossFunc > 0) {
         score = (crossFuncScore / totalCrossFunc) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
-  private assessStakeholderManagement(candidate: any, questions?: any[]): number {
+  private assessStakeholderManagement(
+    candidate: any,
+    questions?: any[]
+  ): number {
     let score = 70;
-    
+
     if (questions && questions.length > 0) {
-      const stakeholderQuestions = questions.filter(q => q.type === 'stakeholder');
-      const stakeholderScore = stakeholderQuestions.filter(q => q.effective === 'yes').length;
+      const stakeholderQuestions = questions.filter(
+        q => q.type === 'stakeholder'
+      );
+      const stakeholderScore = stakeholderQuestions.filter(
+        q => q.effective === 'yes'
+      ).length;
       const totalStakeholder = stakeholderQuestions.length;
-      
+
       if (totalStakeholder > 0) {
         score = (stakeholderScore / totalStakeholder) * 100;
       }
     }
-    
+
     return Math.round(score);
   }
 
@@ -712,19 +855,43 @@ export class AdvancedAssessmentEngine {
     codeQuality: string
   ): number {
     const scores = {
-      coding: { beginner: 25, intermediate: 50, advanced: 75, expert: 95 } as const,
-      problemSolving: { basic: 20, analytical: 50, creative: 75, strategic: 90 } as const,
-      systemDesign: { none: 0, basic: 30, intermediate: 60, advanced: 85 } as const,
-      debugging: { basic: 25, methodical: 50, efficient: 75, expert: 90 } as const,
-      codeQuality: { poor: 20, adequate: 45, good: 70, excellent: 90 } as const
+      coding: {
+        beginner: 25,
+        intermediate: 50,
+        advanced: 75,
+        expert: 95,
+      } as const,
+      problemSolving: {
+        basic: 20,
+        analytical: 50,
+        creative: 75,
+        strategic: 90,
+      } as const,
+      systemDesign: {
+        none: 0,
+        basic: 30,
+        intermediate: 60,
+        advanced: 85,
+      } as const,
+      debugging: {
+        basic: 25,
+        methodical: 50,
+        efficient: 75,
+        expert: 90,
+      } as const,
+      codeQuality: { poor: 20, adequate: 45, good: 70, excellent: 90 } as const,
     };
 
-    const total = (scores.coding[coding as keyof typeof scores.coding] || 0) + 
-                  (scores.problemSolving[problemSolving as keyof typeof scores.problemSolving] || 0) + 
-                  (scores.systemDesign[systemDesign as keyof typeof scores.systemDesign] || 0) + 
-                  (scores.debugging[debugging as keyof typeof scores.debugging] || 0) + 
-                  (scores.codeQuality[codeQuality as keyof typeof scores.codeQuality] || 0);
-    
+    const total =
+      (scores.coding[coding as keyof typeof scores.coding] || 0) +
+      (scores.problemSolving[
+        problemSolving as keyof typeof scores.problemSolving
+      ] || 0) +
+      (scores.systemDesign[systemDesign as keyof typeof scores.systemDesign] ||
+        0) +
+      (scores.debugging[debugging as keyof typeof scores.debugging] || 0) +
+      (scores.codeQuality[codeQuality as keyof typeof scores.codeQuality] || 0);
+
     return Math.round(total / 5);
   }
 
@@ -733,15 +900,26 @@ export class AdvancedAssessmentEngine {
     leadership: any,
     collaboration: any
   ): number {
-    const commAvg = (communication.verbal + communication.written + 
-                     communication.presentation + communication.listening) / 4;
-    
-    const leaderAvg = (leadership.vision + leadership.motivation + 
-                       leadership.delegation + leadership.conflictManagement) / 4;
-    
-    const collabAvg = (collaboration.teamwork + collaboration.crossFunctional + 
-                       collaboration.stakeholderManagement) / 3;
-    
+    const commAvg =
+      (communication.verbal +
+        communication.written +
+        communication.presentation +
+        communication.listening) /
+      4;
+
+    const leaderAvg =
+      (leadership.vision +
+        leadership.motivation +
+        leadership.delegation +
+        leadership.conflictManagement) /
+      4;
+
+    const collabAvg =
+      (collaboration.teamwork +
+        collaboration.crossFunctional +
+        collaboration.stakeholderManagement) /
+      3;
+
     return Math.round((commAvg + leaderAvg + collabAvg) / 3);
   }
 
@@ -756,15 +934,17 @@ export class AdvancedAssessmentEngine {
     const softSkillsWeight = 0.25;
     const leadershipWeight = 0.15;
 
-    const behavioralScore = (behavioral.adaptabilityScore + behavioral.emotionalIntelligence) / 2;
+    const behavioralScore =
+      (behavioral.adaptabilityScore + behavioral.emotionalIntelligence) / 2;
     const technicalScore = technical.overallScore;
     const softSkillsScore = softSkills.overallScore;
     const leadershipScore = leadership.confidence;
 
-    const overallScore = (behavioralScore * behavioralWeight) +
-                        (technicalScore * technicalWeight) +
-                        (softSkillsScore * softSkillsWeight) +
-                        (leadershipScore * leadershipWeight);
+    const overallScore =
+      behavioralScore * behavioralWeight +
+      technicalScore * technicalWeight +
+      softSkillsScore * softSkillsWeight +
+      leadershipScore * leadershipWeight;
 
     return Math.round(overallScore);
   }
@@ -775,10 +955,12 @@ export class AdvancedAssessmentEngine {
     technical: TechnicalAssessment,
     softSkills: SoftSkillsAssessment
   ): 'low' | 'medium' | 'high' | 'exceptional' {
-    const leadershipScore = (softSkills.leadership.vision + 
-                            softSkills.leadership.motivation + 
-                            softSkills.leadership.delegation + 
-                            softSkills.leadership.conflictManagement) / 4;
+    const leadershipScore =
+      (softSkills.leadership.vision +
+        softSkills.leadership.motivation +
+        softSkills.leadership.delegation +
+        softSkills.leadership.conflictManagement) /
+      4;
 
     if (leadershipScore >= 90) return 'exceptional';
     if (leadershipScore >= 80) return 'high';
@@ -791,9 +973,11 @@ export class AdvancedAssessmentEngine {
     technical: TechnicalAssessment,
     softSkills: SoftSkillsAssessment
   ): 'not_ready' | 'developing' | 'ready' | 'overdue' {
-    const overallScore = (behavioral.adaptabilityScore + 
-                          technical.overallScore + 
-                          softSkills.overallScore) / 3;
+    const overallScore =
+      (behavioral.adaptabilityScore +
+        technical.overallScore +
+        softSkills.overallScore) /
+      3;
 
     if (overallScore >= 85) return 'ready';
     if (overallScore >= 70) return 'developing';
@@ -806,13 +990,21 @@ export class AdvancedAssessmentEngine {
     technical: TechnicalAssessment,
     softSkills: SoftSkillsAssessment
   ): '6_months' | '1_year' | '2_years' | '3_years' {
-    const readiness = this.assessLeadershipReadiness(behavioral, technical, softSkills);
-    
+    const readiness = this.assessLeadershipReadiness(
+      behavioral,
+      technical,
+      softSkills
+    );
+
     switch (readiness) {
-      case 'ready': return '6_months';
-      case 'developing': return '1_year';
-      case 'not_ready': return '2_years';
-      default: return '3_years';
+      case 'ready':
+        return '6_months';
+      case 'developing':
+        return '1_year';
+      case 'not_ready':
+        return '2_years';
+      default:
+        return '3_years';
     }
   }
 
@@ -821,11 +1013,13 @@ export class AdvancedAssessmentEngine {
     technical: TechnicalAssessment,
     softSkills: SoftSkillsAssessment
   ): number {
-    const behavioralScore = (behavioral.adaptabilityScore + behavioral.emotionalIntelligence) / 2;
+    const behavioralScore =
+      (behavioral.adaptabilityScore + behavioral.emotionalIntelligence) / 2;
     const technicalScore = technical.overallScore;
     const softSkillsScore = softSkills.overallScore;
 
-    const confidence = (behavioralScore * 0.3) + (technicalScore * 0.3) + (softSkillsScore * 0.4);
+    const confidence =
+      behavioralScore * 0.3 + technicalScore * 0.3 + softSkillsScore * 0.4;
     return Math.round(confidence);
   }
 
@@ -874,11 +1068,16 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const strengths: string[] = [];
 
-    if (coding === 'expert' || coding === 'advanced') strengths.push('Strong coding abilities');
-    if (problemSolving === 'strategic' || problemSolving === 'creative') strengths.push('Excellent problem-solving skills');
-    if (systemDesign === 'advanced') strengths.push('Advanced system design capabilities');
-    if (debugging === 'expert' || debugging === 'efficient') strengths.push('Strong debugging skills');
-    if (codeQuality === 'excellent' || codeQuality === 'good') strengths.push('High code quality standards');
+    if (coding === 'expert' || coding === 'advanced')
+      strengths.push('Strong coding abilities');
+    if (problemSolving === 'strategic' || problemSolving === 'creative')
+      strengths.push('Excellent problem-solving skills');
+    if (systemDesign === 'advanced')
+      strengths.push('Advanced system design capabilities');
+    if (debugging === 'expert' || debugging === 'efficient')
+      strengths.push('Strong debugging skills');
+    if (codeQuality === 'excellent' || codeQuality === 'good')
+      strengths.push('High code quality standards');
 
     return strengths;
   }
@@ -892,11 +1091,16 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const weaknesses: string[] = [];
 
-    if (coding === 'beginner') weaknesses.push('Basic coding skills need development');
-    if (problemSolving === 'basic') weaknesses.push('Problem-solving approach needs improvement');
-    if (systemDesign === 'none' || systemDesign === 'basic') weaknesses.push('System design skills require development');
-    if (debugging === 'basic') weaknesses.push('Debugging methodology needs enhancement');
-    if (codeQuality === 'poor' || codeQuality === 'adequate') weaknesses.push('Code quality standards need improvement');
+    if (coding === 'beginner')
+      weaknesses.push('Basic coding skills need development');
+    if (problemSolving === 'basic')
+      weaknesses.push('Problem-solving approach needs improvement');
+    if (systemDesign === 'none' || systemDesign === 'basic')
+      weaknesses.push('System design skills require development');
+    if (debugging === 'basic')
+      weaknesses.push('Debugging methodology needs enhancement');
+    if (codeQuality === 'poor' || codeQuality === 'adequate')
+      weaknesses.push('Code quality standards need improvement');
 
     return weaknesses;
   }
@@ -908,19 +1112,30 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const recommendations: string[] = [];
 
-    if (communication.verbal < 70) recommendations.push('Improve verbal communication clarity');
-    if (communication.written < 70) recommendations.push('Enhance written communication skills');
-    if (communication.presentation < 70) recommendations.push('Develop presentation skills');
-    if (communication.listening < 70) recommendations.push('Practice active listening techniques');
+    if (communication.verbal < 70)
+      recommendations.push('Improve verbal communication clarity');
+    if (communication.written < 70)
+      recommendations.push('Enhance written communication skills');
+    if (communication.presentation < 70)
+      recommendations.push('Develop presentation skills');
+    if (communication.listening < 70)
+      recommendations.push('Practice active listening techniques');
 
-    if (leadership.vision < 70) recommendations.push('Develop strategic vision and planning');
-    if (leadership.motivation < 70) recommendations.push('Enhance team motivation skills');
-    if (leadership.delegation < 70) recommendations.push('Improve delegation and task assignment');
-    if (leadership.conflictManagement < 70) recommendations.push('Develop conflict resolution strategies');
+    if (leadership.vision < 70)
+      recommendations.push('Develop strategic vision and planning');
+    if (leadership.motivation < 70)
+      recommendations.push('Enhance team motivation skills');
+    if (leadership.delegation < 70)
+      recommendations.push('Improve delegation and task assignment');
+    if (leadership.conflictManagement < 70)
+      recommendations.push('Develop conflict resolution strategies');
 
-    if (collaboration.teamwork < 70) recommendations.push('Strengthen teamwork and collaboration');
-    if (collaboration.crossFunctional < 70) recommendations.push('Develop cross-functional collaboration skills');
-    if (collaboration.stakeholderManagement < 70) recommendations.push('Improve stakeholder management');
+    if (collaboration.teamwork < 70)
+      recommendations.push('Strengthen teamwork and collaboration');
+    if (collaboration.crossFunctional < 70)
+      recommendations.push('Develop cross-functional collaboration skills');
+    if (collaboration.stakeholderManagement < 70)
+      recommendations.push('Improve stakeholder management');
 
     return recommendations;
   }
@@ -932,11 +1147,16 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const strengths: string[] = [];
 
-    if (behavioral.adaptabilityScore >= 80) strengths.push('High adaptability to change');
-    if (behavioral.emotionalIntelligence >= 80) strengths.push('Strong emotional intelligence');
-    if (technical.overallScore >= 80) strengths.push('Solid technical foundation');
-    if (softSkills.leadership.vision >= 80) strengths.push('Clear strategic vision');
-    if (softSkills.leadership.motivation >= 80) strengths.push('Strong motivational abilities');
+    if (behavioral.adaptabilityScore >= 80)
+      strengths.push('High adaptability to change');
+    if (behavioral.emotionalIntelligence >= 80)
+      strengths.push('Strong emotional intelligence');
+    if (technical.overallScore >= 80)
+      strengths.push('Solid technical foundation');
+    if (softSkills.leadership.vision >= 80)
+      strengths.push('Clear strategic vision');
+    if (softSkills.leadership.motivation >= 80)
+      strengths.push('Strong motivational abilities');
 
     return strengths;
   }
@@ -948,11 +1168,15 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const areas: string[] = [];
 
-    if (behavioral.adaptabilityScore < 70) areas.push('Adaptability and change management');
-    if (behavioral.emotionalIntelligence < 70) areas.push('Emotional intelligence development');
+    if (behavioral.adaptabilityScore < 70)
+      areas.push('Adaptability and change management');
+    if (behavioral.emotionalIntelligence < 70)
+      areas.push('Emotional intelligence development');
     if (technical.overallScore < 70) areas.push('Technical skill enhancement');
-    if (softSkills.leadership.vision < 70) areas.push('Strategic vision development');
-    if (softSkills.leadership.motivation < 70) areas.push('Team motivation skills');
+    if (softSkills.leadership.vision < 70)
+      areas.push('Strategic vision development');
+    if (softSkills.leadership.motivation < 70)
+      areas.push('Team motivation skills');
 
     return areas;
   }
@@ -967,15 +1191,23 @@ export class AdvancedAssessmentEngine {
     const recommendations: string[] = [];
 
     if (potential === 'high' || potential === 'exceptional') {
-      recommendations.push('High leadership potential - focus on readiness development');
+      recommendations.push(
+        'High leadership potential - focus on readiness development'
+      );
     }
 
     if (readiness === 'ready') {
-      recommendations.push('Ready for leadership role - consider promotion opportunities');
+      recommendations.push(
+        'Ready for leadership role - consider promotion opportunities'
+      );
     } else if (readiness === 'developing') {
-      recommendations.push('Leadership development in progress - continue current path');
+      recommendations.push(
+        'Leadership development in progress - continue current path'
+      );
     } else {
-      recommendations.push('Leadership development needed - create structured development plan');
+      recommendations.push(
+        'Leadership development needed - create structured development plan'
+      );
     }
 
     if (strengths.length > 0) {
@@ -1000,11 +1232,16 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const risks: string[] = [];
 
-    if (behavioral.adaptabilityScore < 60) risks.push('Low adaptability may impact change management');
-    if (behavioral.emotionalIntelligence < 60) risks.push('Low emotional intelligence may affect team dynamics');
-    if (technical.overallScore < 60) risks.push('Technical gaps may impact role performance');
-    if (softSkills.overallScore < 60) risks.push('Soft skills gaps may affect collaboration');
-    if (leadership.confidence < 60) risks.push('Low leadership confidence may limit growth potential');
+    if (behavioral.adaptabilityScore < 60)
+      risks.push('Low adaptability may impact change management');
+    if (behavioral.emotionalIntelligence < 60)
+      risks.push('Low emotional intelligence may affect team dynamics');
+    if (technical.overallScore < 60)
+      risks.push('Technical gaps may impact role performance');
+    if (softSkills.overallScore < 60)
+      risks.push('Soft skills gaps may affect collaboration');
+    if (leadership.confidence < 60)
+      risks.push('Low leadership confidence may limit growth potential');
 
     return risks;
   }
@@ -1017,11 +1254,16 @@ export class AdvancedAssessmentEngine {
   ): string[] {
     const strengths: string[] = [];
 
-    if (behavioral.adaptabilityScore >= 80) strengths.push('Highly adaptable to change');
-    if (behavioral.emotionalIntelligence >= 80) strengths.push('Strong emotional intelligence');
-    if (technical.overallScore >= 80) strengths.push('Excellent technical capabilities');
-    if (softSkills.overallScore >= 80) strengths.push('Outstanding soft skills');
-    if (leadership.confidence >= 80) strengths.push('High leadership potential');
+    if (behavioral.adaptabilityScore >= 80)
+      strengths.push('Highly adaptable to change');
+    if (behavioral.emotionalIntelligence >= 80)
+      strengths.push('Strong emotional intelligence');
+    if (technical.overallScore >= 80)
+      strengths.push('Excellent technical capabilities');
+    if (softSkills.overallScore >= 80)
+      strengths.push('Outstanding soft skills');
+    if (leadership.confidence >= 80)
+      strengths.push('High leadership potential');
 
     return strengths;
   }
@@ -1078,10 +1320,14 @@ export class AdvancedAssessmentEngine {
       nextSteps.push('Candidate is highly qualified - proceed with hiring');
       nextSteps.push('Consider fast-track development opportunities');
     } else if (overallScore >= 70) {
-      nextSteps.push('Candidate shows potential - proceed with development plan');
+      nextSteps.push(
+        'Candidate shows potential - proceed with development plan'
+      );
       nextSteps.push('Implement structured development program');
     } else if (overallScore >= 55) {
-      nextSteps.push('Candidate needs significant development - consider alternative roles');
+      nextSteps.push(
+        'Candidate needs significant development - consider alternative roles'
+      );
       nextSteps.push('Create intensive development program if proceeding');
     } else {
       nextSteps.push('Candidate may not be suitable for this role');
@@ -1110,21 +1356,21 @@ export class AdvancedAssessmentEngine {
       technicalWeight: 0.4,
       softSkillsWeight: 0.3,
       behavioralWeight: 0.2,
-      leadershipWeight: 0.1
+      leadershipWeight: 0.1,
     });
 
     this.assessmentTemplates.set('team_lead', {
       technicalWeight: 0.3,
       softSkillsWeight: 0.3,
       behavioralWeight: 0.2,
-      leadershipWeight: 0.2
+      leadershipWeight: 0.2,
     });
 
     this.assessmentTemplates.set('engineering_manager', {
       technicalWeight: 0.2,
       softSkillsWeight: 0.3,
       behavioralWeight: 0.2,
-      leadershipWeight: 0.3
+      leadershipWeight: 0.3,
     });
   }
 }

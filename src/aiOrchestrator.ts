@@ -19,7 +19,11 @@ export interface OrchestrationConfig {
 }
 
 export interface WorkflowRequest {
-  workflowType: 'comprehensive_assessment' | 'quick_evaluation' | 'leadership_assessment' | 'technical_deep_dive';
+  workflowType:
+    | 'comprehensive_assessment'
+    | 'quick_evaluation'
+    | 'leadership_assessment'
+    | 'technical_deep_dive';
   candidateId: string;
   jobId: string;
   priority: 'low' | 'medium' | 'high' | 'urgent';
@@ -89,13 +93,14 @@ export class AIOrchestrator {
   private predictiveAnalytics!: PredictiveAnalyticsService;
   private advancedAssessment!: AdvancedAssessmentEngine;
   private machineLearning!: MachineLearningService;
-  
+
   private config: OrchestrationConfig;
   private workflows: Map<string, WorkflowResult> = new Map();
   private serviceHealth: Map<string, ServiceHealth> = new Map();
   private performanceMetrics!: PerformanceMetrics;
-  private cache: Map<string, { data: any; timestamp: number; ttl: number }> = new Map();
-  
+  private cache: Map<string, { data: any; timestamp: number; ttl: number }> =
+    new Map();
+
   constructor(config: Partial<OrchestrationConfig> = {}) {
     this.config = {
       enableSemanticSearch: true,
@@ -107,9 +112,9 @@ export class AIOrchestrator {
       maxRetries: 3,
       enableCaching: true,
       cacheTTLMs: 300000, // 5 minutes
-      ...config
+      ...config,
     };
-    
+
     this.initializeServices();
     this.initializePerformanceMetrics();
     this.startHealthMonitoring();
@@ -121,7 +126,7 @@ export class AIOrchestrator {
   async executeWorkflow(request: WorkflowRequest): Promise<WorkflowResult> {
     const workflowId = this.generateWorkflowId();
     const startTime = new Date();
-    
+
     // Create workflow result
     const workflowResult: WorkflowResult = {
       workflowId,
@@ -133,74 +138,106 @@ export class AIOrchestrator {
         confidence: 0,
         riskLevel: 'medium',
         recommendations: [],
-        nextSteps: []
+        nextSteps: [],
       },
       metadata: {
         startTime,
         servicesUsed: [],
-        errors: []
-      }
+        errors: [],
+      },
     };
-    
+
     this.workflows.set(workflowId, workflowResult);
-    
+
     try {
       // Update status to running
       workflowResult.status = 'running';
       workflowResult.progress = 10;
-      
+
       // Get candidate and job data
-      const { candidate, job } = await this.getCandidateAndJob(request.candidateId, request.jobId);
+      const { candidate, job } = await this.getCandidateAndJob(
+        request.candidateId,
+        request.jobId
+      );
       workflowResult.progress = 20;
-      
+
       // Execute workflow based on type
       switch (request.workflowType) {
         case 'comprehensive_assessment':
-          await this.executeComprehensiveAssessment(workflowResult, candidate, job, request.config);
+          await this.executeComprehensiveAssessment(
+            workflowResult,
+            candidate,
+            job,
+            request.config
+          );
           break;
         case 'quick_evaluation':
-          await this.executeQuickEvaluation(workflowResult, candidate, job, request.config);
+          await this.executeQuickEvaluation(
+            workflowResult,
+            candidate,
+            job,
+            request.config
+          );
           break;
         case 'leadership_assessment':
-          await this.executeLeadershipAssessment(workflowResult, candidate, job, request.config);
+          await this.executeLeadershipAssessment(
+            workflowResult,
+            candidate,
+            job,
+            request.config
+          );
           break;
         case 'technical_deep_dive':
-          await this.executeTechnicalDeepDive(workflowResult, candidate, job, request.config);
+          await this.executeTechnicalDeepDive(
+            workflowResult,
+            candidate,
+            job,
+            request.config
+          );
           break;
         default:
           throw new Error(`Unknown workflow type: ${request.workflowType}`);
       }
-      
+
       // Generate summary
       await this.generateWorkflowSummary(workflowResult);
-      
+
       // Mark as completed
       workflowResult.status = 'completed';
       workflowResult.progress = 100;
       workflowResult.metadata.endTime = new Date();
-      workflowResult.metadata.duration = workflowResult.metadata.endTime.getTime() - startTime.getTime();
-      
+      workflowResult.metadata.duration =
+        workflowResult.metadata.endTime.getTime() - startTime.getTime();
+
       // Update performance metrics
-      this.updatePerformanceMetrics(true, workflowResult.metadata.duration || 0);
-      
+      this.updatePerformanceMetrics(
+        true,
+        workflowResult.metadata.duration || 0
+      );
+
       return workflowResult;
-      
     } catch (error) {
       // Handle workflow failure
       workflowResult.status = 'failed';
       workflowResult.metadata.errors = workflowResult.metadata.errors || [];
-      workflowResult.metadata.errors.push(error instanceof Error ? error.message : 'Unknown error');
+      workflowResult.metadata.errors.push(
+        error instanceof Error ? error.message : 'Unknown error'
+      );
       workflowResult.metadata.endTime = new Date();
-      workflowResult.metadata.duration = workflowResult.metadata.endTime.getTime() - startTime.getTime();
-      
+      workflowResult.metadata.duration =
+        workflowResult.metadata.endTime.getTime() - startTime.getTime();
+
       // Update performance metrics
-      this.updatePerformanceMetrics(false, workflowResult.metadata.duration || 0);
-      
+      this.updatePerformanceMetrics(
+        false,
+        workflowResult.metadata.duration || 0
+      );
+
       // Apply fallback strategy
       if (this.config.fallbackStrategy !== 'aggressive') {
         await this.applyFallbackStrategy(workflowResult, request);
       }
-      
+
       return workflowResult;
     }
   }
@@ -223,14 +260,17 @@ export class AIOrchestrator {
     if (!workflow) {
       return { success: false, message: 'Workflow not found' };
     }
-    
+
     if (workflow.status === 'running') {
       workflow.status = 'cancelled';
       workflow.metadata.endTime = new Date();
       return { success: true, message: 'Workflow cancelled successfully' };
     }
-    
-    return { success: false, message: 'Workflow cannot be cancelled in current state' };
+
+    return {
+      success: false,
+      message: 'Workflow cannot be cancelled in current state',
+    };
   }
 
   /**
@@ -258,25 +298,27 @@ export class AIOrchestrator {
     try {
       const previousConfig = { ...this.config };
       this.config = { ...this.config, ...newConfig };
-      
+
       // Reinitialize services if needed
-      if (newConfig.enableSemanticSearch !== undefined || 
-          newConfig.enablePredictiveAnalytics !== undefined ||
-          newConfig.enableAdvancedAssessment !== undefined ||
-          newConfig.enableMachineLearning !== undefined) {
+      if (
+        newConfig.enableSemanticSearch !== undefined ||
+        newConfig.enablePredictiveAnalytics !== undefined ||
+        newConfig.enableAdvancedAssessment !== undefined ||
+        newConfig.enableMachineLearning !== undefined
+      ) {
         this.initializeServices();
       }
-      
+
       return Promise.resolve({
         success: true,
         message: 'Configuration updated successfully',
-        previousConfig
+        previousConfig,
       });
     } catch (error) {
       return Promise.resolve({
         success: false,
         message: `Failed to update configuration: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        previousConfig: this.config
+        previousConfig: this.config,
       });
     }
   }
@@ -292,17 +334,17 @@ export class AIOrchestrator {
     try {
       const clearedEntries = this.cache.size;
       this.cache.clear();
-      
+
       return Promise.resolve({
         success: true,
         message: 'Cache cleared successfully',
-        clearedEntries
+        clearedEntries,
       });
     } catch (error) {
       return Promise.resolve({
         success: false,
         message: `Failed to clear cache: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        clearedEntries: 0
+        clearedEntries: 0,
       });
     }
   }
@@ -315,86 +357,125 @@ export class AIOrchestrator {
     config?: any
   ): Promise<void> {
     const services: Promise<any>[] = [];
-    
+
     // Role alignment
     if (this.config.enableSemanticSearch) {
-      services.push(this.executeWithFallback(
-        () => this.aiAgent.calculateRoleAlignment(candidate, job, config),
-        'roleAlignment'
-      ));
+      services.push(
+        this.executeWithFallback(
+          () => this.aiAgent.calculateRoleAlignment(candidate, job, config),
+          'roleAlignment'
+        )
+      );
     }
-    
+
     // Skills gap analysis
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.analyzeSkillsGap(candidate, job, config),
-      'skillsGap'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () => this.aiAgent.analyzeSkillsGap(candidate, job, config),
+        'skillsGap'
+      )
+    );
+
     // Interview questions
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.generateCategorizedInterviewQuestions(candidate, job, config),
-      'interviewQuestions'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () =>
+          this.aiAgent.generateCategorizedInterviewQuestions(
+            candidate,
+            job,
+            config
+          ),
+        'interviewQuestions'
+      )
+    );
+
     // Cultural fit
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.assessCulturalFit(candidate, job, config),
-      'culturalFit'
-    ));
-    
-          // Semantic analysis
-      if (this.config.enableSemanticSearch) {
-        services.push(this.executeWithFallback(
-          async () => this.semanticSearch.analyzeSkills(candidate.skills || [], job.parsedData?.skills || []),
+    services.push(
+      this.executeWithFallback(
+        () => this.aiAgent.assessCulturalFit(candidate, job, config),
+        'culturalFit'
+      )
+    );
+
+    // Semantic analysis
+    if (this.config.enableSemanticSearch) {
+      services.push(
+        this.executeWithFallback(
+          async () =>
+            this.semanticSearch.analyzeSkills(
+              candidate.skills || [],
+              job.parsedData?.skills || []
+            ),
           'semanticAnalysis'
-        ));
-      }
-      
-      // Predictive analytics
-      if (this.config.enablePredictiveAnalytics) {
-        services.push(this.executeWithFallback(
-          async () => this.predictiveAnalytics.predictCandidateSuccess(candidate, job, {
-            salaryRange: { min: 80000, median: 120000, max: 200000, currency: 'USD' },
-            skillsDemand: [],
-            marketRate: 120000,
-            competitorAnalysis: []
-          }),
+        )
+      );
+    }
+
+    // Predictive analytics
+    if (this.config.enablePredictiveAnalytics) {
+      services.push(
+        this.executeWithFallback(
+          async () =>
+            this.predictiveAnalytics.predictCandidateSuccess(candidate, job, {
+              salaryRange: {
+                min: 80000,
+                median: 120000,
+                max: 200000,
+                currency: 'USD',
+              },
+              skillsDemand: [],
+              marketRate: 120000,
+              competitorAnalysis: [],
+            }),
           'predictiveAnalytics'
-        ));
-      }
-      
-      // Advanced assessment
-      if (this.config.enableAdvancedAssessment) {
-        services.push(this.executeWithFallback(
-          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+        )
+      );
+    }
+
+    // Advanced assessment
+    if (this.config.enableAdvancedAssessment) {
+      services.push(
+        this.executeWithFallback(
+          async () =>
+            this.advancedAssessment.performComprehensiveAssessment(
+              candidate,
+              job
+            ),
           'advancedAssessment'
-        ));
-      }
-    
+        )
+      );
+    }
+
     // Machine learning prediction
     if (this.config.enableMachineLearning) {
-      services.push(this.executeWithFallback(
-        () => this.machineLearning.predictCandidateSuccess(candidate, job),
-        'machineLearning'
-      ));
+      services.push(
+        this.executeWithFallback(
+          () => this.machineLearning.predictCandidateSuccess(candidate, job),
+          'machineLearning'
+        )
+      );
     }
-    
+
     // Execute all services
     const results = await Promise.allSettled(services);
-    
+
     // Process results
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         const serviceName = Object.keys(workflowResult.results)[index];
         if (serviceName) {
-          workflowResult.results[serviceName as keyof typeof workflowResult.results] = result.value;
+          workflowResult.results[
+            serviceName as keyof typeof workflowResult.results
+          ] = result.value;
         }
       } else {
         workflowResult.metadata.errors = workflowResult.metadata.errors || [];
-        workflowResult.metadata.errors.push(`Service ${index} failed: ${result.reason}`);
+        workflowResult.metadata.errors.push(
+          `Service ${index} failed: ${result.reason}`
+        );
       }
     });
-    
+
     workflowResult.progress = 80;
   }
 
@@ -406,32 +487,38 @@ export class AIOrchestrator {
   ): Promise<void> {
     // Quick evaluation focuses on essential assessments
     const services: Promise<any>[] = [];
-    
+
     // Basic role alignment
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.calculateRoleAlignment(candidate, job, config),
-      'roleAlignment'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () => this.aiAgent.calculateRoleAlignment(candidate, job, config),
+        'roleAlignment'
+      )
+    );
+
     // Basic skills gap
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.analyzeSkillsGap(candidate, job, config),
-      'skillsGap'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () => this.aiAgent.analyzeSkillsGap(candidate, job, config),
+        'skillsGap'
+      )
+    );
+
     // Execute services
     const results = await Promise.allSettled(services);
-    
+
     // Process results
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         const serviceName = Object.keys(workflowResult.results)[index];
         if (serviceName) {
-          workflowResult.results[serviceName as keyof typeof workflowResult.results] = result.value;
+          workflowResult.results[
+            serviceName as keyof typeof workflowResult.results
+          ] = result.value;
         }
       }
     });
-    
+
     workflowResult.progress = 80;
   }
 
@@ -443,34 +530,48 @@ export class AIOrchestrator {
   ): Promise<void> {
     // Leadership assessment focuses on leadership potential
     const services: Promise<any>[] = [];
-    
-          // Advanced assessment with leadership focus
-      if (this.config.enableAdvancedAssessment) {
-        services.push(this.executeWithFallback(
-          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+
+    // Advanced assessment with leadership focus
+    if (this.config.enableAdvancedAssessment) {
+      services.push(
+        this.executeWithFallback(
+          async () =>
+            this.advancedAssessment.performComprehensiveAssessment(
+              candidate,
+              job
+            ),
           'advancedAssessment'
-        ));
-      }
-    
+        )
+      );
+    }
+
     // Cultural fit assessment
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.assessCulturalFit(candidate, job, { ...config, focus: 'leadership' }),
-      'culturalFit'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () =>
+          this.aiAgent.assessCulturalFit(candidate, job, {
+            ...config,
+            focus: 'leadership',
+          }),
+        'culturalFit'
+      )
+    );
+
     // Execute services
     const results = await Promise.allSettled(services);
-    
+
     // Process results
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         const serviceName = Object.keys(workflowResult.results)[index];
         if (serviceName) {
-          workflowResult.results[serviceName as keyof typeof workflowResult.results] = result.value;
+          workflowResult.results[
+            serviceName as keyof typeof workflowResult.results
+          ] = result.value;
         }
       }
     });
-    
+
     workflowResult.progress = 80;
   }
 
@@ -482,40 +583,60 @@ export class AIOrchestrator {
   ): Promise<void> {
     // Technical deep dive focuses on technical capabilities
     const services: Promise<any>[] = [];
-    
-          // Advanced technical assessment
-      if (this.config.enableAdvancedAssessment) {
-        services.push(this.executeWithFallback(
-          async () => this.advancedAssessment.performComprehensiveAssessment(candidate, job),
+
+    // Advanced technical assessment
+    if (this.config.enableAdvancedAssessment) {
+      services.push(
+        this.executeWithFallback(
+          async () =>
+            this.advancedAssessment.performComprehensiveAssessment(
+              candidate,
+              job
+            ),
           'advancedAssessment'
-        ));
-      }
-    
+        )
+      );
+    }
+
     // Technical skills gap analysis
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.analyzeSkillsGap(candidate, job, { ...config, focus: 'technical' }),
-      'skillsGap'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () =>
+          this.aiAgent.analyzeSkillsGap(candidate, job, {
+            ...config,
+            focus: 'technical',
+          }),
+        'skillsGap'
+      )
+    );
+
     // Technical interview questions
-    services.push(this.executeWithFallback(
-      () => this.aiAgent.generateInterviewQuestions(candidate, job, { ...config, focus: 'technical' }),
-      'interviewQuestions'
-    ));
-    
+    services.push(
+      this.executeWithFallback(
+        () =>
+          this.aiAgent.generateInterviewQuestions(candidate, job, {
+            ...config,
+            focus: 'technical',
+          }),
+        'interviewQuestions'
+      )
+    );
+
     // Execute services
     const results = await Promise.allSettled(services);
-    
+
     // Process results
     results.forEach((result, index) => {
       if (result.status === 'fulfilled') {
         const serviceName = Object.keys(workflowResult.results)[index];
         if (serviceName) {
-          workflowResult.results[serviceName as keyof typeof workflowResult.results] = result.value;
+          workflowResult.results[
+            serviceName as keyof typeof workflowResult.results
+          ] = result.value;
         }
       }
     });
-    
+
     workflowResult.progress = 80;
   }
 
@@ -526,43 +647,50 @@ export class AIOrchestrator {
     try {
       const result = await Promise.race([
         serviceCall(),
-        new Promise<never>((_, reject) => 
-          setTimeout(() => reject(new Error('Service timeout')), this.config.timeoutMs)
-        )
+        new Promise<never>((_, reject) =>
+          setTimeout(
+            () => reject(new Error('Service timeout')),
+            this.config.timeoutMs
+          )
+        ),
       ]);
-      
+
       // Update service health
       this.updateServiceHealth(serviceName, 'healthy', 0, 0);
-      
+
       return result;
     } catch (error) {
       // Update service health
       this.updateServiceHealth(serviceName, 'degraded', 0, 1);
-      
+
       // Apply fallback based on strategy
       if (this.config.fallbackStrategy === 'conservative') {
         throw error;
       }
-      
+
       // Return fallback data
       return this.getFallbackData(serviceName) as T;
     }
   }
 
-  private async generateWorkflowSummary(workflowResult: WorkflowResult): Promise<void> {
+  private async generateWorkflowSummary(
+    workflowResult: WorkflowResult
+  ): Promise<void> {
     try {
       // Calculate overall score
       const scores: number[] = [];
       let totalConfidence = 0;
       let confidenceCount = 0;
-      
+
       // Extract scores from results
       if (workflowResult.results.roleAlignment?.data?.overallScore) {
         scores.push(workflowResult.results.roleAlignment.data.overallScore);
       }
       if (workflowResult.results.skillsGap?.data) {
         // Calculate skills gap score
-        const skillsScore = this.calculateSkillsGapScore(workflowResult.results.skillsGap.data);
+        const skillsScore = this.calculateSkillsGapScore(
+          workflowResult.results.skillsGap.data
+        );
         scores.push(skillsScore);
       }
       if (workflowResult.results.culturalFit?.data?.fitScore) {
@@ -572,12 +700,17 @@ export class AIOrchestrator {
         scores.push(workflowResult.results.advancedAssessment.overallScore);
       }
       if (workflowResult.results.machineLearning?.successProbability) {
-        scores.push(workflowResult.results.machineLearning.successProbability * 100);
+        scores.push(
+          workflowResult.results.machineLearning.successProbability * 100
+        );
       }
-      
+
       // Calculate overall score
-      const overallScore = scores.length > 0 ? scores.reduce((sum, score) => sum + score, 0) / scores.length : 0;
-      
+      const overallScore =
+        scores.length > 0
+          ? scores.reduce((sum, score) => sum + score, 0) / scores.length
+          : 0;
+
       // Calculate confidence
       if (workflowResult.results.roleAlignment?.confidence) {
         totalConfidence += workflowResult.results.roleAlignment.confidence;
@@ -587,27 +720,36 @@ export class AIOrchestrator {
         totalConfidence += workflowResult.results.machineLearning.confidence;
         confidenceCount++;
       }
-      
-      const averageConfidence = confidenceCount > 0 ? totalConfidence / confidenceCount : 0.5;
-      
+
+      const averageConfidence =
+        confidenceCount > 0 ? totalConfidence / confidenceCount : 0.5;
+
       // Determine risk level
-      const riskLevel = this.determineRiskLevel(overallScore, averageConfidence);
-      
+      const riskLevel = this.determineRiskLevel(
+        overallScore,
+        averageConfidence
+      );
+
       // Generate recommendations
-      const recommendations = this.generateRecommendations(workflowResult.results);
-      
+      const recommendations = this.generateRecommendations(
+        workflowResult.results
+      );
+
       // Generate next steps
-      const nextSteps = this.generateNextSteps(workflowResult.results, overallScore, riskLevel);
-      
+      const nextSteps = this.generateNextSteps(
+        workflowResult.results,
+        overallScore,
+        riskLevel
+      );
+
       // Update summary
       workflowResult.summary = {
         overallScore: Math.round(overallScore),
         confidence: Math.round(averageConfidence * 100),
         riskLevel,
         recommendations,
-        nextSteps
+        nextSteps,
       };
-      
     } catch (error) {
       console.error('Error generating workflow summary:', error);
       // Set default summary
@@ -616,7 +758,7 @@ export class AIOrchestrator {
         confidence: 0,
         riskLevel: 'high',
         recommendations: ['Unable to generate recommendations'],
-        nextSteps: ['Review results manually']
+        nextSteps: ['Review results manually'],
       };
     }
   }
@@ -637,23 +779,32 @@ export class AIOrchestrator {
             experienceScore: 50,
             skillsScore: 50,
             culturalFitScore: 50,
-            detailedBreakdown: 'Fallback analysis due to service unavailability',
-            recommendations: ['Review candidate manually', 'Conduct additional interviews'],
-            interviewQuestions: ['Tell me about your experience', 'What are your career goals?'],
+            detailedBreakdown:
+              'Fallback analysis due to service unavailability',
+            recommendations: [
+              'Review candidate manually',
+              'Conduct additional interviews',
+            ],
+            interviewQuestions: [
+              'Tell me about your experience',
+              'What are your career goals?',
+            ],
             riskFactors: ['Limited AI analysis available'],
-            trainingNeeds: ['Manual assessment required']
-          }
+            trainingNeeds: ['Manual assessment required'],
+          },
         };
-        
+
         workflowResult.summary = {
           overallScore: 50,
           confidence: 30,
           riskLevel: 'high',
           recommendations: ['Use fallback analysis', 'Conduct manual review'],
-          nextSteps: ['Schedule manual interview', 'Review candidate documentation']
+          nextSteps: [
+            'Schedule manual interview',
+            'Review candidate documentation',
+          ],
         };
       }
-      
     } catch (error) {
       console.error('Error applying fallback strategy:', error);
     }
@@ -667,7 +818,7 @@ export class AIOrchestrator {
       this.predictiveAnalytics = new PredictiveAnalyticsService();
       this.advancedAssessment = new AdvancedAssessmentEngine();
       this.machineLearning = new MachineLearningService();
-      
+
       console.log('AI services initialized successfully');
     } catch (error) {
       console.error('Error initializing AI services:', error);
@@ -683,7 +834,7 @@ export class AIOrchestrator {
       throughput: 0,
       errorRate: 0,
       cacheHitRate: 0,
-      serviceUtilization: {}
+      serviceUtilization: {},
     };
   }
 
@@ -700,13 +851,13 @@ export class AIOrchestrator {
       { name: 'semanticSearch', service: this.semanticSearch },
       { name: 'predictiveAnalytics', service: this.predictiveAnalytics },
       { name: 'advancedAssessment', service: this.advancedAssessment },
-      { name: 'machineLearning', service: this.machineLearning }
+      { name: 'machineLearning', service: this.machineLearning },
     ];
-    
+
     for (const { name, service } of services) {
       try {
         const startTime = Date.now();
-        
+
         // Simple health check - try to access a property or method
         if (service && typeof service === 'object') {
           const responseTime = Date.now() - startTime;
@@ -727,7 +878,7 @@ export class AIOrchestrator {
     errorCount: number
   ): void {
     const existing = this.serviceHealth.get(serviceName);
-    
+
     if (existing) {
       existing.status = status;
       existing.responseTime = responseTime;
@@ -740,32 +891,42 @@ export class AIOrchestrator {
         responseTime,
         errorRate: errorCount,
         lastCheck: new Date(),
-        details: `Service ${status}`
+        details: `Service ${status}`,
       });
     }
   }
 
-  private updatePerformanceMetrics(success: boolean, responseTime: number): void {
+  private updatePerformanceMetrics(
+    success: boolean,
+    responseTime: number
+  ): void {
     this.performanceMetrics.totalRequests++;
-    
+
     if (success) {
       this.performanceMetrics.successfulRequests++;
     } else {
       this.performanceMetrics.failedRequests++;
     }
-    
+
     // Update average response time
-    const totalTime = this.performanceMetrics.averageResponseTime * (this.performanceMetrics.totalRequests - 1) + responseTime;
-    this.performanceMetrics.averageResponseTime = totalTime / this.performanceMetrics.totalRequests;
-    
+    const totalTime =
+      this.performanceMetrics.averageResponseTime *
+        (this.performanceMetrics.totalRequests - 1) +
+      responseTime;
+    this.performanceMetrics.averageResponseTime =
+      totalTime / this.performanceMetrics.totalRequests;
+
     // Update error rate
-    this.performanceMetrics.errorRate = this.performanceMetrics.failedRequests / this.performanceMetrics.totalRequests;
-    
+    this.performanceMetrics.errorRate =
+      this.performanceMetrics.failedRequests /
+      this.performanceMetrics.totalRequests;
+
     // Update throughput (requests per minute)
     const now = Date.now();
     const oneMinuteAgo = now - 60000;
-    const recentRequests = Array.from(this.workflows.values())
-      .filter(w => w.metadata.startTime.getTime() > oneMinuteAgo).length;
+    const recentRequests = Array.from(this.workflows.values()).filter(
+      w => w.metadata.startTime.getTime() > oneMinuteAgo
+    ).length;
     this.performanceMetrics.throughput = recentRequests;
   }
 
@@ -773,7 +934,10 @@ export class AIOrchestrator {
     return `workflow_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private async getCandidateAndJob(candidateId: string, jobId: string): Promise<{
+  private async getCandidateAndJob(
+    candidateId: string,
+    jobId: string
+  ): Promise<{
     candidate: any;
     job: any;
   }> {
@@ -785,16 +949,16 @@ export class AIOrchestrator {
         name: 'John Doe',
         skills: ['JavaScript', 'React', 'Node.js'],
         experience: '5 years',
-        location: 'San Francisco'
+        location: 'San Francisco',
       },
       job: {
         id: jobId,
         title: 'Senior Software Engineer',
         parsedData: {
           skills: ['JavaScript', 'React', 'Node.js', 'TypeScript'],
-          seniority: 'Senior'
-        }
-      }
+          seniority: 'Senior',
+        },
+      },
     };
   }
 
@@ -807,50 +971,58 @@ export class AIOrchestrator {
           technicalScore: 50,
           experienceScore: 50,
           skillsScore: 50,
-          culturalFitScore: 50
-        }
+          culturalFitScore: 50,
+        },
       },
       skillsGap: {
         ok: true,
         data: {
           missingSkills: ['Fallback data'],
           skillLevels: {},
-          criticalGaps: ['Fallback data']
-        }
+          criticalGaps: ['Fallback data'],
+        },
       },
       interviewQuestions: {
         ok: true,
-        data: ['Tell me about your experience', 'What are your career goals?']
+        data: ['Tell me about your experience', 'What are your career goals?'],
       },
       culturalFit: {
         ok: true,
         data: {
           fitScore: 50,
           strengths: ['Fallback data'],
-          concerns: ['Limited data available']
-        }
-      }
+          concerns: ['Limited data available'],
+        },
+      },
     };
-    
-    return fallbackData[serviceName] || { ok: false, error: 'No fallback data available' };
+
+    return (
+      fallbackData[serviceName] || {
+        ok: false,
+        error: 'No fallback data available',
+      }
+    );
   }
 
   private calculateSkillsGapScore(skillsGapData: any): number {
     // Calculate score based on missing skills and critical gaps
     let score = 100;
-    
+
     if (skillsGapData.missingSkills) {
       score -= skillsGapData.missingSkills.length * 10;
     }
-    
+
     if (skillsGapData.criticalGaps) {
       score -= skillsGapData.criticalGaps.length * 20;
     }
-    
+
     return Math.max(0, score);
   }
 
-  private determineRiskLevel(overallScore: number, confidence: number): 'low' | 'medium' | 'high' | 'critical' {
+  private determineRiskLevel(
+    overallScore: number,
+    confidence: number
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (overallScore >= 80 && confidence >= 0.8) return 'low';
     if (overallScore >= 60 && confidence >= 0.6) return 'medium';
     if (overallScore >= 40 && confidence >= 0.4) return 'high';
@@ -859,34 +1031,40 @@ export class AIOrchestrator {
 
   private generateRecommendations(results: any): string[] {
     const recommendations: string[] = [];
-    
+
     // Generate recommendations based on results
     if (results.roleAlignment?.data?.overallScore < 70) {
       recommendations.push('Consider additional screening for this candidate');
     }
-    
+
     if (results.skillsGap?.data?.criticalGaps?.length > 0) {
       recommendations.push('Address critical skills gaps before proceeding');
     }
-    
+
     if (results.culturalFit?.data?.fitScore < 60) {
       recommendations.push('Assess cultural fit through additional interviews');
     }
-    
+
     if (results.machineLearning?.successProbability < 0.5) {
-      recommendations.push('Consider alternative candidates or additional assessment');
+      recommendations.push(
+        'Consider alternative candidates or additional assessment'
+      );
     }
-    
+
     if (recommendations.length === 0) {
       recommendations.push('Candidate appears well-qualified for the role');
     }
-    
+
     return recommendations;
   }
 
-  private generateNextSteps(results: any, overallScore: number, riskLevel: string): string[] {
+  private generateNextSteps(
+    results: any,
+    overallScore: number,
+    riskLevel: string
+  ): string[] {
     const nextSteps: string[] = [];
-    
+
     if (riskLevel === 'low') {
       nextSteps.push('Proceed with hiring process');
       nextSteps.push('Schedule onboarding');
@@ -900,16 +1078,16 @@ export class AIOrchestrator {
       nextSteps.push('Reject candidate');
       nextSteps.push('Continue search for better matches');
     }
-    
+
     // Add specific next steps based on results
     if (results.skillsGap?.data?.missingSkills?.length > 0) {
       nextSteps.push('Develop training plan for missing skills');
     }
-    
+
     if (results.advancedAssessment?.leadership?.potential === 'high') {
       nextSteps.push('Consider leadership development opportunities');
     }
-    
+
     return nextSteps;
   }
 
@@ -920,25 +1098,25 @@ export class AIOrchestrator {
 
   private getFromCache(key: string): any | null {
     if (!this.config.enableCaching) return null;
-    
+
     const cached = this.cache.get(key);
     if (!cached) return null;
-    
+
     if (Date.now() - cached.timestamp > cached.ttl) {
       this.cache.delete(key);
       return null;
     }
-    
+
     return cached.data;
   }
 
   private setCache(key: string, data: any, ttl?: number): void {
     if (!this.config.enableCaching) return;
-    
+
     this.cache.set(key, {
       data,
       timestamp: Date.now(),
-      ttl: ttl || this.config.cacheTTLMs
+      ttl: ttl || this.config.cacheTTLMs,
     });
   }
 }

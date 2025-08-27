@@ -6,12 +6,19 @@ import path from 'path';
 async function testDocumentParser() {
   try {
     console.log('🧪 Testing Document Parser...\n');
-    
-    const sampleResumePath = path.join(process.cwd(), 'input', 'sample_resume.txt');
-    
+
+    const sampleResumePath = path.join(
+      process.cwd(),
+      'input',
+      'sample_resume.txt'
+    );
+
     console.log('📄 Parsing sample resume...');
-    const candidate = await documentParser.parseDocument(sampleResumePath, 'sample_resume.txt');
-    
+    const candidate = await documentParser.parseDocument(
+      sampleResumePath,
+      'sample_resume.txt'
+    );
+
     console.log('\n✅ Parsed Candidate Information:');
     console.log('================================');
     console.log(`Name: ${candidate.name}`);
@@ -26,13 +33,12 @@ async function testDocumentParser() {
     console.log(`LinkedIn: ${candidate.linkedin || 'Not found'}`);
     console.log(`GitHub: ${candidate.github || 'Not found'}`);
     console.log(`Portfolio: ${candidate.portfolio || 'Not found'}`);
-    
+
     if (candidate.summary) {
       console.log(`\nSummary: ${candidate.summary}`);
     }
-    
+
     console.log('\n🎉 Document parser test completed successfully!');
-    
   } catch (error) {
     console.error('❌ Error testing document parser:', error);
   }

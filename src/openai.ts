@@ -1,7 +1,7 @@
 // src/openai.ts
 
-import axios from "axios";
-import * as dotenv from "dotenv";
+import axios from 'axios';
+import * as dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -24,25 +24,28 @@ interface Candidate {
   linkedin?: string;
 }
 
-export async function callOpenAI(prompt: string, model: string = "gpt-4"): Promise<string> {
+export async function callOpenAI(
+  prompt: string,
+  model: string = 'gpt-4'
+): Promise<string> {
   const apiKey = process.env.OPENAI_API_KEY;
   const projectId = process.env.OPENAI_PROJECT_ID;
 
-  if (!apiKey) throw new Error("❌ Missing OPENAI_API_KEY in .env");
-  if (!projectId) throw new Error("❌ Missing OPENAI_PROJECT_ID in .env");
+  if (!apiKey) throw new Error('❌ Missing OPENAI_API_KEY in .env');
+  if (!projectId) throw new Error('❌ Missing OPENAI_PROJECT_ID in .env');
 
   const response = await axios.post(
-    "https://api.openai.com/v1/chat/completions",
+    'https://api.openai.com/v1/chat/completions',
     {
       model,
-      messages: [{ role: "user", content: prompt }],
+      messages: [{ role: 'user', content: prompt }],
       temperature: 0.7,
     },
     {
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${apiKey}`,
-        "OpenAI-Project": projectId,
+        'OpenAI-Project': projectId,
       },
     }
   );
@@ -50,7 +53,9 @@ export async function callOpenAI(prompt: string, model: string = "gpt-4"): Promi
   return response.data.choices[0].message.content;
 }
 
-export async function parseJobDescription(description: string): Promise<JobDescription> {
+export async function parseJobDescription(
+  description: string
+): Promise<JobDescription> {
   const promptTemplate = `
 You are an AI recruiter assistant. Parse the following job description and extract structured data for use in automated sourcing.
 
@@ -72,14 +77,17 @@ Return only valid JSON:
   return JSON.parse(result);
 }
 
-export async function generateOutreach(candidate: Candidate, job: JobDescription): Promise<string> {
+export async function generateOutreach(
+  candidate: Candidate,
+  job: JobDescription
+): Promise<string> {
   const outreachTemplate = `
 You are a recruiter writing a friendly, professional outreach message for a potential candidate.
 
 Use the following details:
 - Candidate Name: ${candidate.name}
 - Job Title: ${job.jobTitle}
-- Skills Required: ${job.requiredSkills.join(", ")}
+- Skills Required: ${job.requiredSkills.join(', ')}
 - Seniority Level: ${job.seniorityLevel}
 - Company: YourCompany Inc.
 
@@ -94,12 +102,14 @@ Output:
   return result.trim();
 }
 
-export async function generateCandidateProfile(job: JobDescription): Promise<Partial<Candidate>> {
+export async function generateCandidateProfile(
+  job: JobDescription
+): Promise<Partial<Candidate>> {
   const prompt = `
 Based on this job description, generate a realistic candidate profile that would be a good fit:
 
 Job: ${job.jobTitle}
-Required Skills: ${job.requiredSkills.join(", ")}
+Required Skills: ${job.requiredSkills.join(', ')}
 Seniority: ${job.seniorityLevel}
 Experience: ${job.yearsOfExperience}
 
@@ -119,7 +129,10 @@ Return only valid JSON:
   return JSON.parse(result);
 }
 
-export async function analyzeCandidateFit(candidate: Candidate, job: JobDescription): Promise<{
+export async function analyzeCandidateFit(
+  candidate: Candidate,
+  job: JobDescription
+): Promise<{
   fitScore: number;
   reasoning: string;
   recommendations: string[];
@@ -130,13 +143,13 @@ Analyze the fit between this candidate and job:
 Candidate:
 - Name: ${candidate.name}
 - Current Title: ${candidate.title}
-- Skills: ${candidate.skills.join(", ")}
+- Skills: ${candidate.skills.join(', ')}
 - Experience: ${candidate.experience}
 - Location: ${candidate.location}
 
 Job:
 - Title: ${job.jobTitle}
-- Required Skills: ${job.requiredSkills.join(", ")}
+- Required Skills: ${job.requiredSkills.join(', ')}
 - Seniority: ${job.seniorityLevel}
 - Experience Required: ${job.yearsOfExperience}
 
@@ -152,7 +165,10 @@ Return only valid JSON:
   return JSON.parse(result);
 }
 
-export async function generateFollowUpMessage(originalMessage: string, candidateResponse?: string): Promise<string> {
+export async function generateFollowUpMessage(
+  originalMessage: string,
+  candidateResponse?: string
+): Promise<string> {
   const prompt = `
 Generate a follow-up message based on this context:
 
@@ -172,7 +188,9 @@ Output:
   return result.trim();
 }
 
-export async function generateJobSummary(jobDescription: string): Promise<string> {
+export async function generateJobSummary(
+  jobDescription: string
+): Promise<string> {
   const prompt = `
 Summarize this job description in a clear, concise way that highlights:
 - Key responsibilities

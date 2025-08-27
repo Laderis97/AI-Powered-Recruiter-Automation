@@ -8,11 +8,11 @@ dotenv.config();
 export function requireAuth(req: Request, res: Response, next: NextFunction) {
   // Check if user is authenticated via API key header
   const isAuthenticated = req.headers['x-api-key'] === process.env.API_KEY;
-  
+
   if (!isAuthenticated) {
     return res.status(401).json({ error: 'Authentication required' });
   }
-  
+
   next();
 }
 

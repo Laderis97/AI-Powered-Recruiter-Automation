@@ -38,7 +38,10 @@ export class DocumentParser {
     }
   }
 
-  async parseDocument(filePath: string, originalName: string): Promise<ParsedCandidate> {
+  async parseDocument(
+    filePath: string,
+    originalName: string
+  ): Promise<ParsedCandidate> {
     const fileExtension = path.extname(originalName).toLowerCase();
     let extractedText = '';
 
@@ -55,15 +58,20 @@ export class DocumentParser {
           extractedText = await this.parseTextFile(filePath);
           break;
         default:
-          throw new Error(`Unsupported file type: ${fileExtension}. Supported formats: PDF, TXT, DOCX, DOC`);
+          throw new Error(
+            `Unsupported file type: ${fileExtension}. Supported formats: PDF, TXT, DOCX, DOC`
+          );
       }
 
       // Use AI to extract structured candidate information
-      const candidate = await this.extractCandidateInfo(extractedText, originalName);
-      
+      const candidate = await this.extractCandidateInfo(
+        extractedText,
+        originalName
+      );
+
       // Clean up the uploaded file
       await fs.remove(filePath);
-      
+
       return candidate;
     } catch (error) {
       // Clean up on error
@@ -84,7 +92,9 @@ export class DocumentParser {
       const data = await pdf(dataBuffer);
       return data.text;
     } catch (error) {
-      throw new Error(`Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse PDF: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -93,7 +103,9 @@ export class DocumentParser {
       const result = await mammoth.extractRawText({ path: filePath });
       return result.value;
     } catch (error) {
-      throw new Error(`Failed to parse Word document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse Word document: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
@@ -101,11 +113,16 @@ export class DocumentParser {
     try {
       return await fs.readFile(filePath, 'utf-8');
     } catch (error) {
-      throw new Error(`Failed to parse text file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      throw new Error(
+        `Failed to parse text file: ${error instanceof Error ? error.message : 'Unknown error'}`
+      );
     }
   }
 
-  private async extractCandidateInfo(text: string, fileName: string): Promise<ParsedCandidate> {
+  private async extractCandidateInfo(
+    text: string,
+    fileName: string
+  ): Promise<ParsedCandidate> {
     // Try AI extraction first
     try {
       const prompt = `
@@ -142,7 +159,7 @@ Return only valid JSON. If a field is not found, use null or empty string as app
 
       const result = await callOpenAI(prompt);
       const parsed = JSON.parse(result);
-      
+
       // Ensure required fields exist
       return {
         name: parsed.name || 'Unknown',
@@ -158,17 +175,23 @@ Return only valid JSON. If a field is not found, use null or empty string as app
         linkedin: parsed.linkedin || undefined,
         github: parsed.github || undefined,
         portfolio: parsed.portfolio || undefined,
-        rawText: text
+        rawText: text,
       };
     } catch (error) {
       if (error instanceof Error && error.message.includes('401')) {
-        console.log('⚠️ OpenAI API authentication failed, using fallback text parsing...');
+        console.log(
+          '⚠️ OpenAI API authentication failed, using fallback text parsing...'
+        );
         return this.extractBasicInfo(text);
       } else if (error instanceof Error && error.message.includes('429')) {
-        console.log('⚠️ OpenAI API rate limit exceeded, using fallback text parsing...');
+        console.log(
+          '⚠️ OpenAI API rate limit exceeded, using fallback text parsing...'
+        );
         return this.extractBasicInfo(text);
       } else if (error instanceof Error && error.message.includes('JSON')) {
-        console.log('⚠️ Failed to parse AI response, using fallback text parsing...');
+        console.log(
+          '⚠️ Failed to parse AI response, using fallback text parsing...'
+        );
         return this.extractBasicInfo(text);
       } else {
         // Fallback to basic text extraction
@@ -180,35 +203,42 @@ Return only valid JSON. If a field is not found, use null or empty string as app
 
   private extractBasicInfo(text: string): ParsedCandidate {
     // Enhanced regex-based extraction as fallback
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
-    
+    const lines = text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => line.length > 0);
+
     // Extract name (usually first line or after "Name:" pattern)
     let name = lines[0] || 'Unknown';
     const nameMatch = text.match(/(?:name|full name)[:\s]+([a-zA-Z\s]+)/i);
     if (nameMatch) {
       name = nameMatch[1].trim();
     }
-    
+
     // Extract email
-    const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+    const emailMatch = text.match(
+      /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/
+    );
     const email = emailMatch ? emailMatch[0] : undefined;
-    
+
     // Extract phone
     const phoneMatch = text.match(/\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}/);
     const phone = phoneMatch ? phoneMatch[0] : undefined;
-    
+
     // Extract LinkedIn
     const linkedinMatch = text.match(/linkedin\.com\/in\/[a-zA-Z0-9-]+/);
     const linkedin = linkedinMatch ? `https://${linkedinMatch[0]}` : undefined;
-    
+
     // Extract GitHub
     const githubMatch = text.match(/github\.com\/[a-zA-Z0-9-]+/);
     const github = githubMatch ? `https://${githubMatch[0]}` : undefined;
-    
+
     // Extract portfolio/website
-    const portfolioMatch = text.match(/(?:portfolio|website|personal site)[:\s]+(https?:\/\/[^\s]+)/i);
+    const portfolioMatch = text.match(
+      /(?:portfolio|website|personal site)[:\s]+(https?:\/\/[^\s]+)/i
+    );
     const portfolio = portfolioMatch ? portfolioMatch[1] : undefined;
-    
+
     // Extract title (look for common patterns)
     let title = undefined;
     const titleMatch = text.match(/(?:title|position|role)[:\s]+([^,\n]+)/i);
@@ -217,9 +247,26 @@ Return only valid JSON. If a field is not found, use null or empty string as app
     } else {
       // Look for common job titles in the text
       const commonTitles = [
-        'Software Engineer', 'Developer', 'Programmer', 'Full Stack', 'Frontend', 'Backend',
-        'DevOps', 'Data Scientist', 'Product Manager', 'Designer', 'Architect', 'Lead',
-        'Senior', 'Junior', 'Principal', 'Manager', 'Director', 'VP', 'CTO', 'CEO'
+        'Software Engineer',
+        'Developer',
+        'Programmer',
+        'Full Stack',
+        'Frontend',
+        'Backend',
+        'DevOps',
+        'Data Scientist',
+        'Product Manager',
+        'Designer',
+        'Architect',
+        'Lead',
+        'Senior',
+        'Junior',
+        'Principal',
+        'Manager',
+        'Director',
+        'VP',
+        'CTO',
+        'CEO',
       ];
       for (const jobTitle of commonTitles) {
         if (text.toLowerCase().includes(jobTitle.toLowerCase())) {
@@ -228,48 +275,127 @@ Return only valid JSON. If a field is not found, use null or empty string as app
         }
       }
     }
-    
+
     // If no title found, set a default
     if (!title) {
       title = 'Professional';
     }
-    
+
     // Extract location
     let location = undefined;
-    const locationMatch = text.match(/(?:location|address|city)[:\s]+([^,\n]+)/i);
+    const locationMatch = text.match(
+      /(?:location|address|city)[:\s]+([^,\n]+)/i
+    );
     if (locationMatch) {
       location = locationMatch[1].trim();
     }
-    
+
     // Extract skills (enhanced list)
     const skillKeywords = [
       // Programming Languages
-      'JavaScript', 'TypeScript', 'Python', 'Java', 'C++', 'C#', 'PHP', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Scala',
+      'JavaScript',
+      'TypeScript',
+      'Python',
+      'Java',
+      'C++',
+      'C#',
+      'PHP',
+      'Ruby',
+      'Go',
+      'Rust',
+      'Swift',
+      'Kotlin',
+      'Scala',
       // Web Technologies
-      'React', 'Vue', 'Angular', 'Node.js', 'Express', 'Next.js', 'Nuxt.js', 'jQuery', 'HTML', 'CSS', 'Sass', 'Less',
+      'React',
+      'Vue',
+      'Angular',
+      'Node.js',
+      'Express',
+      'Next.js',
+      'Nuxt.js',
+      'jQuery',
+      'HTML',
+      'CSS',
+      'Sass',
+      'Less',
       // Databases
-      'MongoDB', 'PostgreSQL', 'MySQL', 'SQLite', 'Redis', 'Elasticsearch', 'DynamoDB', 'Cassandra',
+      'MongoDB',
+      'PostgreSQL',
+      'MySQL',
+      'SQLite',
+      'Redis',
+      'Elasticsearch',
+      'DynamoDB',
+      'Cassandra',
       // Cloud & DevOps
-      'AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins', 'GitLab', 'GitHub Actions',
+      'AWS',
+      'Azure',
+      'GCP',
+      'Docker',
+      'Kubernetes',
+      'Terraform',
+      'Jenkins',
+      'GitLab',
+      'GitHub Actions',
       // Frameworks & Libraries
-      'Django', 'Flask', 'Spring', 'Laravel', 'Symfony', 'ASP.NET', 'FastAPI', 'GraphQL', 'REST',
+      'Django',
+      'Flask',
+      'Spring',
+      'Laravel',
+      'Symfony',
+      'ASP.NET',
+      'FastAPI',
+      'GraphQL',
+      'REST',
       // Tools & Methodologies
-      'Git', 'SVN', 'Jira', 'Confluence', 'Agile', 'Scrum', 'Kanban', 'CI/CD', 'TDD', 'BDD',
+      'Git',
+      'SVN',
+      'Jira',
+      'Confluence',
+      'Agile',
+      'Scrum',
+      'Kanban',
+      'CI/CD',
+      'TDD',
+      'BDD',
       // Data & AI
-      'Machine Learning', 'Data Science', 'TensorFlow', 'PyTorch', 'Pandas', 'NumPy', 'Scikit-learn',
+      'Machine Learning',
+      'Data Science',
+      'TensorFlow',
+      'PyTorch',
+      'Pandas',
+      'NumPy',
+      'Scikit-learn',
       // Soft Skills
-      'Leadership', 'Communication', 'Teamwork', 'Problem Solving', 'Project Management', 'Analytical'
+      'Leadership',
+      'Communication',
+      'Teamwork',
+      'Problem Solving',
+      'Project Management',
+      'Analytical',
     ];
-    const skills = skillKeywords.filter(skill => 
+    const skills = skillKeywords.filter(skill =>
       text.toLowerCase().includes(skill.toLowerCase())
     );
-    
+
     // Extract education
-    const educationKeywords = ['Bachelor', 'Master', 'PhD', 'MBA', 'BSc', 'MSc', 'BA', 'MA', 'University', 'College'];
-    const education = educationKeywords.filter(edu => 
+    const educationKeywords = [
+      'Bachelor',
+      'Master',
+      'PhD',
+      'MBA',
+      'BSc',
+      'MSc',
+      'BA',
+      'MA',
+      'University',
+      'College',
+    ];
+    const education = educationKeywords.filter(edu =>
       text.toLowerCase().includes(edu.toLowerCase())
     );
-    
+
     return {
       name,
       email,
@@ -284,23 +410,28 @@ Return only valid JSON. If a field is not found, use null or empty string as app
       linkedin,
       github,
       portfolio,
-      rawText: text
+      rawText: text,
     };
   }
 
-  async parseMultipleDocuments(files: Array<{ path: string; originalname: string }>): Promise<ParsedCandidate[]> {
+  async parseMultipleDocuments(
+    files: Array<{ path: string; originalname: string }>
+  ): Promise<ParsedCandidate[]> {
     const results: ParsedCandidate[] = [];
-    
+
     for (const file of files) {
       try {
-        const candidate = await this.parseDocument(file.path, file.originalname);
+        const candidate = await this.parseDocument(
+          file.path,
+          file.originalname
+        );
         results.push(candidate);
       } catch (error) {
         console.error(`Error parsing ${file.originalname}:`, error);
         // Continue with other files even if one fails
       }
     }
-    
+
     return results;
   }
 

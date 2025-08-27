@@ -59,7 +59,7 @@ function convertJobToJobPosting(job) {
         description: job.description,
         skills: job.skills.join(', '),
         requirements: job.requirements.join(', '),
-        createdAt: job.createdAt
+        createdAt: job.createdAt,
     };
 }
 // Multer configuration for file uploads
@@ -69,14 +69,15 @@ const upload = multer({
             cb(null, documentParser.getUploadDir());
         },
         filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
             cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
-        }
+        },
     }),
     fileFilter: (req, file, cb) => {
         // Allow only specific file types
         if (file.mimetype === 'text/plain' ||
-            file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+            file.mimetype ===
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
             file.mimetype === 'application/msword') {
             cb(null, true);
         }
@@ -85,8 +86,8 @@ const upload = multer({
         }
     },
     limits: {
-        fileSize: 10 * 1024 * 1024 // 10MB limit
-    }
+        fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
 });
 // Routes
 app.get('/', async (req, res) => {
@@ -95,7 +96,7 @@ app.get('/', async (req, res) => {
         res.render('index', {
             jobsCount: analytics.totalJobs,
             candidatesCount: analytics.totalCandidates,
-            campaignsCount: analytics.totalCampaigns
+            campaignsCount: analytics.totalCampaigns,
         });
     }
     catch (error) {
@@ -103,7 +104,7 @@ app.get('/', async (req, res) => {
         res.render('index', {
             jobsCount: 0,
             candidatesCount: 0,
-            campaignsCount: 0
+            campaignsCount: 0,
         });
     }
 });
@@ -128,19 +129,19 @@ app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
             linkedin: candidate.linkedin || '',
             github: candidate.github || '',
             portfolio: candidate.portfolio || '',
-            summary: candidate.summary || ''
+            summary: candidate.summary || '',
         });
         res.json({
             success: true,
             candidate: newCandidate,
-            message: `Resume parsed successfully! Added candidate: ${candidate.name}`
+            message: `Resume parsed successfully! Added candidate: ${candidate.name}`,
         });
     }
     catch (error) {
         console.error('Error parsing resume:', error);
         res.status(500).json({
             error: 'Failed to parse resume',
-            details: error instanceof Error ? error.message : 'Unknown error'
+            details: error instanceof Error ? error.message : 'Unknown error',
         });
     }
 });
@@ -167,7 +168,7 @@ app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req
                     linkedin: candidate.linkedin || '',
                     github: candidate.github || '',
                     portfolio: candidate.portfolio || '',
-                    summary: candidate.summary || ''
+                    summary: candidate.summary || '',
                 });
                 candidates.push(newCandidate);
             }
@@ -179,14 +180,14 @@ app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req
             success: true,
             candidates,
             errors: errors.length > 0 ? errors : undefined,
-            message: `Successfully parsed ${candidates.length} resumes${errors.length > 0 ? ` (${errors.length} failed)` : ''}`
+            message: `Successfully parsed ${candidates.length} resumes${errors.length > 0 ? ` (${errors.length} failed)` : ''}`,
         });
     }
     catch (error) {
         console.error('Error parsing multiple resumes:', error);
         res.status(500).json({
             error: 'Failed to parse resumes',
-            details: error instanceof Error ? error.message : 'Unknown error'
+            details: error instanceof Error ? error.message : 'Unknown error',
         });
     }
 });
@@ -236,7 +237,9 @@ app.post('/api/jobs', async (req, res) => {
     try {
         const { title, description } = req.body;
         if (!title || !description) {
-            return res.status(400).json({ error: 'Title and description are required' });
+            return res
+                .status(400)
+                .json({ error: 'Title and description are required' });
         }
         let parsedData = null;
         // Try to parse job description with AI, but don't fail if it doesn't work
@@ -259,7 +262,7 @@ app.post('/api/jobs', async (req, res) => {
                 industry: 'N/A',
                 companyName: 'N/A',
                 salaryRange: 'N/A',
-                keywords: []
+                keywords: [],
             };
             console.log('   Using fallback job description data.');
         }
@@ -272,7 +275,7 @@ app.post('/api/jobs', async (req, res) => {
             description,
             requirements: ['TBD'],
             skills: ['TBD'],
-            status: 'draft'
+            status: 'draft',
         });
         res.json(job);
     }
@@ -437,13 +440,15 @@ app.get('/api/analytics/funnel-stage/:stage', async (req, res) => {
             success: true,
             data: {
                 ...stageDetails,
-                candidates
-            }
+                candidates,
+            },
         });
     }
     catch (error) {
         console.error('Error fetching stage details:', error);
-        res.status(500).json({ success: false, error: 'Failed to fetch stage details' });
+        res
+            .status(500)
+            .json({ success: false, error: 'Failed to fetch stage details' });
     }
 });
 app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
@@ -451,16 +456,23 @@ app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
         const { stage } = req.params;
         const performanceData = await databaseService.getStagePerformanceOverTime(stage);
         if (!performanceData || performanceData.length === 0) {
-            return res.status(404).json({ success: false, error: 'Stage performance data not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Stage performance data not found' });
         }
         res.json({
             success: true,
-            data: performanceData
+            data: performanceData,
         });
     }
     catch (error) {
         console.error('Error fetching stage performance data:', error);
-        res.status(500).json({ success: false, error: 'Failed to fetch stage performance data' });
+        res
+            .status(500)
+            .json({
+            success: false,
+            error: 'Failed to fetch stage performance data',
+        });
     }
 });
 // Time to hire analytics endpoint
@@ -472,8 +484,10 @@ app.get('/api/analytics/time-to-hire', async (req, res) => {
         // Calculate trend based on recent months vs previous months
         const recentMonths = monthlyHires.slice(-3); // Last 3 months
         const previousMonths = monthlyHires.slice(-6, -3); // 3 months before that
-        const recentAvg = recentMonths.reduce((sum, item) => sum + item.count, 0) / recentMonths.length;
-        const previousAvg = previousMonths.reduce((sum, item) => sum + item.count, 0) / previousMonths.length;
+        const recentAvg = recentMonths.reduce((sum, item) => sum + item.count, 0) /
+            recentMonths.length;
+        const previousAvg = previousMonths.reduce((sum, item) => sum + item.count, 0) /
+            previousMonths.length;
         const trend = recentAvg > previousAvg ? 'improving' : 'declining';
         // Generate additional metrics
         const totalHires = monthlyHires.reduce((sum, item) => sum + item.count, 0);
@@ -490,11 +504,13 @@ app.get('/api/analytics/time-to-hire', async (req, res) => {
                 avgHiresPerMonth: Math.round(avgHiresPerMonth * 10) / 10,
                 bestMonth: bestMonth,
                 worstMonth: worstMonth,
-                yearToDate: monthlyHires.slice(-6).reduce((sum, item) => sum + item.count, 0),
+                yearToDate: monthlyHires
+                    .slice(-6)
+                    .reduce((sum, item) => sum + item.count, 0),
                 conversionRate: '7.3%', // Calculated from funnel data
                 costPerHire: analytics.costPerHire,
-                qualityOfHire: analytics.qualityOfHire
-            }
+                qualityOfHire: analytics.qualityOfHire,
+            },
         });
     }
     catch (error) {
@@ -595,24 +611,33 @@ app.post('/api/role-alignment', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Candidate ID and Job ID are required',
+            });
         }
         const candidate = await databaseService.getCandidateById(candidateId);
         const job = await databaseService.getJobById(jobId);
         if (!candidate || !job) {
-            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Candidate or Job not found' });
         }
         const result = await aiAgent.calculateRoleAlignment(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
                 alignment: result.data,
-                message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`
+                message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`,
             });
         }
         else {
             console.error('Role alignment failed:', result.error);
-            res.status(500).json({ success: false, error: 'Failed to analyze role alignment' });
+            res
+                .status(500)
+                .json({ success: false, error: 'Failed to analyze role alignment' });
         }
     }
     catch (error) {
@@ -625,24 +650,33 @@ app.post('/api/skills-gap', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Candidate ID and Job ID are required',
+            });
         }
         const candidate = await databaseService.getCandidateById(candidateId);
         const job = await databaseService.getJobById(jobId);
         if (!candidate || !job) {
-            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Candidate or Job not found' });
         }
         const result = await aiAgent.analyzeSkillsGap(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
                 skillsGap: result.data,
-                message: 'Skills gap analysis completed'
+                message: 'Skills gap analysis completed',
             });
         }
         else {
             console.error('Skills gap analysis failed:', result.error);
-            res.status(500).json({ success: false, error: 'Failed to analyze skills gap' });
+            res
+                .status(500)
+                .json({ success: false, error: 'Failed to analyze skills gap' });
         }
     }
     catch (error) {
@@ -655,24 +689,36 @@ app.post('/api/interview-questions', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Candidate ID and Job ID are required',
+            });
         }
         const candidate = await databaseService.getCandidateById(candidateId);
         const job = await databaseService.getJobById(jobId);
         if (!candidate || !job) {
-            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Candidate or Job not found' });
         }
         const result = await aiAgent.generateInterviewQuestions(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
                 questions: result.data,
-                message: `${result.data?.length || 0} interview questions generated`
+                message: `${result.data?.length || 0} interview questions generated`,
             });
         }
         else {
             console.error('Interview questions generation failed:', result.error);
-            res.status(500).json({ success: false, error: 'Failed to generate interview questions' });
+            res
+                .status(500)
+                .json({
+                success: false,
+                error: 'Failed to generate interview questions',
+            });
         }
     }
     catch (error) {
@@ -685,12 +731,19 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Candidate ID and Job ID are required',
+            });
         }
         const candidate = await databaseService.getCandidateById(candidateId);
         const job = await databaseService.getJobById(jobId);
         if (!candidate || !job) {
-            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Candidate or Job not found' });
         }
         const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, convertJobToJobPosting(job));
         if (result.ok) {
@@ -704,13 +757,18 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
                     problemSolving: result.data?.problemSolving?.length || 0,
                     leadership: result.data?.leadership?.length || 0,
                     cultural: result.data?.cultural?.length || 0,
-                    total: result.data?.all?.length || 0
-                }
+                    total: result.data?.all?.length || 0,
+                },
             });
         }
         else {
             console.error('Categorized interview questions generation failed:', result.error);
-            res.status(500).json({ success: false, error: 'Failed to generate categorized interview questions' });
+            res
+                .status(500)
+                .json({
+                success: false,
+                error: 'Failed to generate categorized interview questions',
+            });
         }
     }
     catch (error) {
@@ -723,24 +781,33 @@ app.post('/api/cultural-fit', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res.status(400).json({ success: false, error: 'Candidate ID and Job ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Candidate ID and Job ID are required',
+            });
         }
         const candidate = await databaseService.getCandidateById(candidateId);
         const job = await databaseService.getJobById(jobId);
         if (!candidate || !job) {
-            return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'Candidate or Job not found' });
         }
         const result = await aiAgent.assessCulturalFit(candidate, convertJobToJobPosting(job));
         if (result.ok) {
             res.json({
                 success: true,
                 culturalFit: result.data,
-                message: `Cultural fit score: ${result.data?.fitScore || 0}%`
+                message: `Cultural fit score: ${result.data?.fitScore || 0}%`,
             });
         }
         else {
             console.error('Cultural fit assessment failed:', result.error);
-            res.status(500).json({ success: false, error: 'Failed to assess cultural fit' });
+            res
+                .status(500)
+                .json({ success: false, error: 'Failed to assess cultural fit' });
         }
     }
     catch (error) {
@@ -979,30 +1046,30 @@ app.post('/api/ai/machine-learning/predict', async (req, res) => {
 */
 // AI endpoints temporarily disabled
 /*
-const candidate = await databaseService.getCandidate(candidateId);
-const job = await databaseService.getJob(jobId);
+    const candidate = await databaseService.getCandidate(candidateId);
+    const job = await databaseService.getJob(jobId);
 
-if (!candidate || !job) {
-  return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
-}
+    if (!candidate || !job) {
+      return res.status(404).json({ success: false, error: 'Candidate or Job not found' });
+    }
 
-const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-const prediction = await machineLearning.predictCandidateSuccess(candidate, job, assessmentData);
-
-res.json({
-  success: true,
-  prediction,
-  message: 'Machine learning prediction completed'
+    const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
+    const prediction = await machineLearning.predictCandidateSuccess(candidate, job, assessmentData);
+    
+    res.json({
+      success: true,
+      prediction,
+      message: 'Machine learning prediction completed'
+    });
+  } catch (error) {
+    console.error('Machine learning prediction error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error during machine learning prediction'
+    });
+  }
 });
-} catch (error) {
-console.error('Machine learning prediction error:', error);
-res.status(500).json({
-  success: false,
-  error: 'Internal server error during machine learning prediction'
-});
-}
-});
-*/
+    */
 // Machine learning endpoints temporarily disabled
 /*
 app.post('/api/ai/machine-learning/train', async (req, res) => {
@@ -1084,32 +1151,32 @@ app.post('/api/ai/orchestrator/workflow', async (req, res) => {
 */
 // AI endpoints temporarily disabled
 /*
-const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
-const workflowRequest = {
-  workflowType,
-  candidateId,
-  jobId,
-  priority,
-  config,
-  metadata: metadata ? { ...metadata, timestamp: new Date() } : undefined
-};
-
-const workflowResult = await orchestrator.executeWorkflow(workflowRequest);
-
-res.json({
-  success: true,
-  workflow: workflowResult,
-  message: 'AI workflow executed successfully'
+    const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
+    const workflowRequest = {
+      workflowType,
+      candidateId,
+      jobId,
+      priority,
+      config,
+      metadata: metadata ? { ...metadata, timestamp: new Date() } : undefined
+    };
+    
+    const workflowResult = await orchestrator.executeWorkflow(workflowRequest);
+    
+    res.json({
+      success: true,
+      workflow: workflowResult,
+      message: 'AI workflow executed successfully'
+    });
+  } catch (error) {
+    console.error('AI orchestrator workflow error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error during workflow execution'
+    });
+  }
 });
-} catch (error) {
-console.error('AI orchestrator workflow error:', error);
-res.status(500).json({
-  success: false,
-  error: 'Internal server error during workflow execution'
-});
-}
-});
-*/
+    */
 // AI orchestrator endpoints temporarily disabled
 /*
 app.get('/api/ai/orchestrator/workflow/:workflowId', async (req, res) => {
@@ -1192,14 +1259,14 @@ app.get('/api/ai/orchestrator/metrics', async (req, res) => {
         res.json({
             success: true,
             metrics,
-            message: 'Performance metrics retrieved'
+            message: 'Performance metrics retrieved',
         });
     }
     catch (error) {
         console.error('AI orchestrator metrics error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error retrieving performance metrics'
+            error: 'Internal server error retrieving performance metrics',
         });
     }
 });
@@ -1207,21 +1274,23 @@ app.post('/api/ai/orchestrator/config', async (req, res) => {
     try {
         const { config } = req.body;
         if (!config) {
-            return res.status(400).json({ success: false, error: 'Configuration object is required' });
+            return res
+                .status(400)
+                .json({ success: false, error: 'Configuration object is required' });
         }
         const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
         const result = await orchestrator.updateConfig(config);
         res.json({
             success: true,
             result,
-            message: 'Orchestrator configuration updated'
+            message: 'Orchestrator configuration updated',
         });
     }
     catch (error) {
         console.error('AI orchestrator config update error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error updating configuration'
+            error: 'Internal server error updating configuration',
         });
     }
 });
@@ -1232,14 +1301,14 @@ app.post('/api/ai/orchestrator/cache/clear', async (req, res) => {
         res.json({
             success: true,
             result,
-            message: 'Cache cleared successfully'
+            message: 'Cache cleared successfully',
         });
     }
     catch (error) {
         console.error('AI orchestrator cache clear error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error clearing cache'
+            error: 'Internal server error clearing cache',
         });
     }
 });
@@ -1248,21 +1317,23 @@ app.post('/api/ai/ab-test/setup', async (req, res) => {
     try {
         const { testConfig } = req.body;
         if (!testConfig) {
-            return res.status(400).json({ success: false, error: 'Test configuration is required' });
+            return res
+                .status(400)
+                .json({ success: false, error: 'Test configuration is required' });
         }
         const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
         const result = await machineLearning.setupABTest(testConfig);
         res.json({
             success: true,
             result,
-            message: 'A/B test setup completed'
+            message: 'A/B test setup completed',
         });
     }
     catch (error) {
         console.error('A/B test setup error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error during A/B test setup'
+            error: 'Internal server error during A/B test setup',
         });
     }
 });
@@ -1271,24 +1342,31 @@ app.get('/api/ai/ab-test/:testId/variant', async (req, res) => {
         const { testId } = req.params;
         const { candidateId } = req.query;
         if (!testId || !candidateId) {
-            return res.status(400).json({ success: false, error: 'Test ID and candidate ID are required' });
+            return res
+                .status(400)
+                .json({
+                success: false,
+                error: 'Test ID and candidate ID are required',
+            });
         }
         const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
         const variant = machineLearning.getABTestVariant(testId, candidateId);
         if (!variant) {
-            return res.status(404).json({ success: false, error: 'A/B test variant not found' });
+            return res
+                .status(404)
+                .json({ success: false, error: 'A/B test variant not found' });
         }
         res.json({
             success: true,
             variant,
-            message: 'A/B test variant retrieved'
+            message: 'A/B test variant retrieved',
         });
     }
     catch (error) {
         console.error('A/B test variant error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error retrieving A/B test variant'
+            error: 'Internal server error retrieving A/B test variant',
         });
     }
 });
@@ -1299,7 +1377,7 @@ app.post('/api/ai/ab-test/:testId/result', async (req, res) => {
         if (!testId || !variantId || !candidateId || !metrics) {
             return res.status(400).json({
                 success: false,
-                error: 'Test ID, variant ID, candidate ID, and metrics are required'
+                error: 'Test ID, variant ID, candidate ID, and metrics are required',
             });
         }
         const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
@@ -1307,14 +1385,14 @@ app.post('/api/ai/ab-test/:testId/result', async (req, res) => {
         res.json({
             success: true,
             result,
-            message: 'A/B test result recorded'
+            message: 'A/B test result recorded',
         });
     }
     catch (error) {
         console.error('A/B test result recording error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error recording A/B test result'
+            error: 'Internal server error recording A/B test result',
         });
     }
 });
@@ -1322,21 +1400,23 @@ app.get('/api/ai/ab-test/:testId/results', async (req, res) => {
     try {
         const { testId } = req.params;
         if (!testId) {
-            return res.status(400).json({ success: false, error: 'Test ID is required' });
+            return res
+                .status(400)
+                .json({ success: false, error: 'Test ID is required' });
         }
         const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
         const result = await machineLearning.getABTestResults(testId);
         res.json({
             success: true,
             result,
-            message: 'A/B test results retrieved'
+            message: 'A/B test results retrieved',
         });
     }
     catch (error) {
         console.error('A/B test results error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error retrieving A/B test results'
+            error: 'Internal server error retrieving A/B test results',
         });
     }
 });
@@ -1345,21 +1425,23 @@ app.post('/api/ai/feedback', async (req, res) => {
     try {
         const { feedback } = req.body;
         if (!feedback) {
-            return res.status(400).json({ success: false, error: 'Feedback data is required' });
+            return res
+                .status(400)
+                .json({ success: false, error: 'Feedback data is required' });
         }
         const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
         const result = await machineLearning.recordFeedback(feedback);
         res.json({
             success: true,
             result,
-            message: 'Feedback recorded successfully'
+            message: 'Feedback recorded successfully',
         });
     }
     catch (error) {
         console.error('Feedback recording error:', error);
         res.status(500).json({
             success: false,
-            error: 'Internal server error recording feedback'
+            error: 'Internal server error recording feedback',
         });
     }
 });
@@ -1578,14 +1660,20 @@ app.post('/api/campaigns/:id/unarchive', async (req, res) => {
 app.get('/modern', (req, res) => {
     res.render('modern-dashboard');
 });
+// Export app for testing
+export { app };
 // Start server
-app.listen(PORT, () => {
-    console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
-    console.log(`📊 Dashboard available at http://localhost:${PORT}`);
-    console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
-    console.log(`💾 Database service: Supabase`);
-}).on('error', (error) => {
-    console.error('❌ Server failed to start:', error);
-    process.exit(1);
-});
+if (process.env.NODE_ENV !== 'test') {
+    app
+        .listen(PORT, () => {
+        console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
+        console.log(`📊 Dashboard available at http://localhost:${PORT}`);
+        console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+        console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
+        console.log(`💾 Database service: Supabase`);
+    })
+        .on('error', error => {
+        console.error('❌ Server failed to start:', error);
+        process.exit(1);
+    });
+}

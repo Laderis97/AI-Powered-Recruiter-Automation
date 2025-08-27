@@ -53,25 +53,32 @@ export class EmailService {
           auth: {
             user: emailUser,
             pass: emailPass,
-          }
+          },
         };
-        
+
         this.updateConfig(config);
         console.log('✅ Email service configured from environment variables');
       } else {
-        console.log('⚠️ Email service not configured - missing environment variables');
-        console.log('   Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS to enable email sending');
+        console.log(
+          '⚠️ Email service not configured - missing environment variables'
+        );
+        console.log(
+          '   Set EMAIL_HOST, EMAIL_PORT, EMAIL_USER, EMAIL_PASS to enable email sending'
+        );
       }
     } catch (error) {
       console.error('❌ Error initializing email service:', error);
     }
   }
 
-  async sendEmail(message: EmailMessage): Promise<{ success: boolean; error?: string }> {
+  async sendEmail(
+    message: EmailMessage
+  ): Promise<{ success: boolean; error?: string }> {
     if (!this.isConfigured || !this.transporter) {
       return {
         success: false,
-        error: 'Email service not configured. Please set up email environment variables.'
+        error:
+          'Email service not configured. Please set up email environment variables.',
       };
     }
 
@@ -85,26 +92,34 @@ export class EmailService {
       };
 
       const info = await this.transporter.sendMail(mailOptions);
-      console.log(`✅ Email sent successfully to ${message.to}:`, info.messageId);
-      
+      console.log(
+        `✅ Email sent successfully to ${message.to}:`,
+        info.messageId
+      );
+
       return { success: true };
     } catch (error) {
       console.error('❌ Failed to send email:', error);
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       };
     }
   }
 
-  async sendOutreachEmail(candidateEmail: string, candidateName: string, message: string, jobTitle: string): Promise<{ success: boolean; error?: string }> {
+  async sendOutreachEmail(
+    candidateEmail: string,
+    candidateName: string,
+    message: string,
+    jobTitle: string
+  ): Promise<{ success: boolean; error?: string }> {
     const subject = `Exciting Opportunity: ${jobTitle} Position`;
-    
+
     return this.sendEmail({
       to: candidateEmail,
       subject,
       text: message,
-      html: message.replace(/\n/g, '<br>')
+      html: message.replace(/\n/g, '<br>'),
     });
   }
 
@@ -113,32 +128,37 @@ export class EmailService {
   }
 
   getConfigurationStatus(): { configured: boolean; missingVars: string[] } {
-    const requiredVars = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS'];
+    const requiredVars = [
+      'EMAIL_HOST',
+      'EMAIL_PORT',
+      'EMAIL_USER',
+      'EMAIL_PASS',
+    ];
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
-    
+
     return {
       configured: this.isConfigured,
-      missingVars
+      missingVars,
     };
   }
 
   updateConfig(config: EmailConfig): void {
     this.currentConfig = config;
-    
+
     // Create transporter with enhanced TLS configuration
     const transporterConfig = {
       ...config,
       // Add TLS configuration to handle SSL errors
       tls: {
         rejectUnauthorized: false, // Allow self-signed certificates
-        ciphers: 'SSLv3'
+        ciphers: 'SSLv3',
       },
       // Add connection timeout
       connectionTimeout: 60000, // 60 seconds
       greetingTimeout: 30000, // 30 seconds
       socketTimeout: 60000, // 60 seconds
     };
-    
+
     this.transporter = nodemailer.createTransport(transporterConfig);
     this.isConfigured = true;
     console.log('✅ Email configuration updated successfully');

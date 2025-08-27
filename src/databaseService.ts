@@ -22,7 +22,13 @@ interface Candidate {
   createdAt: Date;
   isArchived: boolean;
   matchScore?: number;
-  status: 'active' | 'contacted' | 'interviewed' | 'hired' | 'rejected' | 'archived';
+  status:
+    | 'active'
+    | 'contacted'
+    | 'interviewed'
+    | 'hired'
+    | 'rejected'
+    | 'archived';
   resumeUrl?: string;
   notes?: string;
   stage?: string;
@@ -76,7 +82,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/sarah-johnson.pdf',
     notes: 'Strong React experience, excellent communication skills',
-    stage: 'Interviews'
+    stage: 'Interviews',
   },
   {
     id: '2',
@@ -93,7 +99,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/michael-chen.pdf',
     notes: 'Good Python skills, needs improvement in React',
-    stage: 'Screening'
+    stage: 'Screening',
   },
   {
     id: '3',
@@ -110,7 +116,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/emily-rodriguez.pdf',
     notes: 'Excellent Vue.js skills, great UI/UX sense',
-    stage: 'Finalists'
+    stage: 'Finalists',
   },
   {
     id: '4',
@@ -127,7 +133,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/david-kim.pdf',
     notes: 'Strong DevOps background, AWS certified',
-    stage: 'Offers'
+    stage: 'Offers',
   },
   {
     id: '5',
@@ -144,7 +150,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/lisa-wang.pdf',
     notes: 'Solid Java skills, good system design knowledge',
-    stage: 'Hires'
+    stage: 'Hires',
   },
   {
     id: '6',
@@ -161,7 +167,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/james-wilson.pdf',
     notes: 'Good ML skills, needs more production experience',
-    stage: 'Applications'
+    stage: 'Applications',
   },
   {
     id: '7',
@@ -178,7 +184,7 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/maria-garcia.pdf',
     notes: 'Excellent iOS skills, good React Native experience',
-    stage: 'Interviews'
+    stage: 'Interviews',
   },
   {
     id: '8',
@@ -195,8 +201,8 @@ const dummyCandidates: Candidate[] = [
     isArchived: false,
     resumeUrl: '/resumes/robert-taylor.pdf',
     notes: 'Good testing skills, needs automation experience',
-    stage: 'Screening'
-  }
+    stage: 'Screening',
+  },
 ];
 
 // Dummy jobs data
@@ -208,12 +214,13 @@ const dummyJobs: Job[] = [
     location: 'San Francisco, CA',
     type: 'Full-time',
     salary: '$120,000 - $150,000',
-    description: 'We are looking for a Senior Frontend Developer to join our team...',
+    description:
+      'We are looking for a Senior Frontend Developer to join our team...',
     requirements: ['React', 'TypeScript', '5+ years experience', 'CSS/SCSS'],
     status: 'active',
     createdAt: new Date('2024-01-10'),
     applications: 45,
-    skills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML']
+    skills: ['JavaScript', 'React', 'TypeScript', 'CSS', 'HTML'],
   },
   {
     id: '2',
@@ -227,7 +234,7 @@ const dummyJobs: Job[] = [
     status: 'active',
     createdAt: new Date('2024-01-15'),
     applications: 32,
-    skills: ['Node.js', 'MongoDB', 'Express', 'REST APIs', 'JavaScript']
+    skills: ['Node.js', 'MongoDB', 'Express', 'REST APIs', 'JavaScript'],
   },
   {
     id: '3',
@@ -236,13 +243,14 @@ const dummyJobs: Job[] = [
     location: 'Seattle, WA',
     type: 'Full-time',
     salary: '$110,000 - $140,000',
-    description: 'We need a DevOps Engineer to help us scale our infrastructure...',
+    description:
+      'We need a DevOps Engineer to help us scale our infrastructure...',
     requirements: ['AWS', 'Docker', 'Kubernetes', '4+ years experience'],
     status: 'active',
     createdAt: new Date('2024-01-20'),
     applications: 28,
-    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins']
-  }
+    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Jenkins'],
+  },
 ];
 
 // Dummy analytics data
@@ -259,7 +267,7 @@ const dummyAnalytics: Analytics = {
     { source: 'Indeed', count: 67 },
     { source: 'Referrals', count: 45 },
     { source: 'Company Website', count: 34 },
-    { source: 'Glassdoor', count: 12 }
+    { source: 'Glassdoor', count: 12 },
   ],
   topSkills: [
     { skill: 'JavaScript', count: 156 },
@@ -271,7 +279,7 @@ const dummyAnalytics: Analytics = {
     { skill: 'Docker', count: 42 },
     { skill: 'TypeScript', count: 38 },
     { skill: 'Kubernetes', count: 31 },
-    { skill: 'GraphQL', count: 28 }
+    { skill: 'GraphQL', count: 28 },
   ],
   hiringFunnel: [
     { stage: 'Applications', count: 247 },
@@ -279,7 +287,7 @@ const dummyAnalytics: Analytics = {
     { stage: 'Interviews', count: 89 },
     { stage: 'Finalists', count: 34 },
     { stage: 'Offers', count: 23 },
-    { stage: 'Hires', count: 18 }
+    { stage: 'Hires', count: 18 },
   ],
   monthlyHires: [
     { month: 'Jan', count: 4 },
@@ -293,8 +301,8 @@ const dummyAnalytics: Analytics = {
     { month: 'Sep', count: 10 },
     { month: 'Oct', count: 12 },
     { month: 'Nov', count: 9 },
-    { month: 'Dec', count: 6 }
-  ]
+    { month: 'Dec', count: 6 },
+  ],
 };
 
 // Stage performance over time data
@@ -305,7 +313,7 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 38, conversions: 24, avgTime: 2.7 },
     { week: 'Week 4', candidates: 61, conversions: 39, avgTime: 2.4 },
     { week: 'Week 5', candidates: 47, conversions: 30, avgTime: 2.6 },
-    { week: 'Week 6', candidates: 55, conversions: 35, avgTime: 2.2 }
+    { week: 'Week 6', candidates: 55, conversions: 35, avgTime: 2.2 },
   ],
   Screening: [
     { week: 'Week 1', candidates: 28, conversions: 16, avgTime: 3.0 },
@@ -313,7 +321,7 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 24, conversions: 14, avgTime: 3.5 },
     { week: 'Week 4', candidates: 39, conversions: 22, avgTime: 3.1 },
     { week: 'Week 5', candidates: 30, conversions: 17, avgTime: 3.3 },
-    { week: 'Week 6', candidates: 35, conversions: 20, avgTime: 3.0 }
+    { week: 'Week 6', candidates: 35, conversions: 20, avgTime: 3.0 },
   ],
   Interviews: [
     { week: 'Week 1', candidates: 16, conversions: 6, avgTime: 5.5 },
@@ -321,7 +329,7 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 14, conversions: 5, avgTime: 6.2 },
     { week: 'Week 4', candidates: 22, conversions: 8, avgTime: 5.9 },
     { week: 'Week 5', candidates: 17, conversions: 6, avgTime: 6.1 },
-    { week: 'Week 6', candidates: 20, conversions: 8, avgTime: 5.7 }
+    { week: 'Week 6', candidates: 20, conversions: 8, avgTime: 5.7 },
   ],
   Finalists: [
     { week: 'Week 1', candidates: 6, conversions: 4, avgTime: 4.0 },
@@ -329,7 +337,7 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 5, conversions: 3, avgTime: 4.5 },
     { week: 'Week 4', candidates: 8, conversions: 6, avgTime: 4.1 },
     { week: 'Week 5', candidates: 6, conversions: 4, avgTime: 4.3 },
-    { week: 'Week 6', candidates: 8, conversions: 5, avgTime: 4.0 }
+    { week: 'Week 6', candidates: 8, conversions: 5, avgTime: 4.0 },
   ],
   Offers: [
     { week: 'Week 1', candidates: 4, conversions: 3, avgTime: 2.5 },
@@ -337,7 +345,7 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 3, conversions: 2, avgTime: 3.0 },
     { week: 'Week 4', candidates: 6, conversions: 5, avgTime: 2.7 },
     { week: 'Week 5', candidates: 4, conversions: 3, avgTime: 2.9 },
-    { week: 'Week 6', candidates: 5, conversions: 4, avgTime: 2.6 }
+    { week: 'Week 6', candidates: 5, conversions: 4, avgTime: 2.6 },
   ],
   Hires: [
     { week: 'Week 1', candidates: 3, conversions: 3, avgTime: 1.5 },
@@ -345,8 +353,8 @@ const stagePerformanceOverTime = {
     { week: 'Week 3', candidates: 2, conversions: 2, avgTime: 1.4 },
     { week: 'Week 4', candidates: 5, conversions: 5, avgTime: 1.5 },
     { week: 'Week 5', candidates: 3, conversions: 3, avgTime: 1.7 },
-    { week: 'Week 6', candidates: 4, conversions: 4, avgTime: 1.5 }
-  ]
+    { week: 'Week 6', candidates: 4, conversions: 4, avgTime: 1.5 },
+  ],
 };
 
 // Detailed stage data for expanded funnel view
@@ -359,24 +367,56 @@ const stageDetails = {
     isBottleneck: false,
     efficiency: '85.2%',
     candidates: [
-      { id: '6', name: 'James Wilson', title: 'Data Scientist', status: 'active', daysInStage: 1 },
-      { id: '9', name: 'Alex Thompson', title: 'UX Designer', status: 'active', daysInStage: 2 },
-      { id: '10', name: 'Rachel Green', title: 'Product Manager', status: 'active', daysInStage: 3 },
-      { id: '11', name: 'Tom Anderson', title: 'System Architect', status: 'active', daysInStage: 1 },
-      { id: '12', name: 'Jessica Lee', title: 'QA Lead', status: 'active', daysInStage: 2 }
+      {
+        id: '6',
+        name: 'James Wilson',
+        title: 'Data Scientist',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '9',
+        name: 'Alex Thompson',
+        title: 'UX Designer',
+        status: 'active',
+        daysInStage: 2,
+      },
+      {
+        id: '10',
+        name: 'Rachel Green',
+        title: 'Product Manager',
+        status: 'active',
+        daysInStage: 3,
+      },
+      {
+        id: '11',
+        name: 'Tom Anderson',
+        title: 'System Architect',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '12',
+        name: 'Jessica Lee',
+        title: 'QA Lead',
+        status: 'active',
+        daysInStage: 2,
+      },
     ],
     insights: [
       {
         type: 'success',
         title: 'High Application Quality',
-        description: '78.5% of applications meet basic requirements, indicating good job posting targeting.'
+        description:
+          '78.5% of applications meet basic requirements, indicating good job posting targeting.',
       },
       {
         type: 'warning',
         title: 'Slow Response Time',
-        description: 'Average response time of 2.5 days could be improved to maintain candidate interest.'
-      }
-    ]
+        description:
+          'Average response time of 2.5 days could be improved to maintain candidate interest.',
+      },
+    ],
   },
   Screening: {
     conversionRate: '57.1%',
@@ -386,24 +426,56 @@ const stageDetails = {
     isBottleneck: false,
     efficiency: '72.1%',
     candidates: [
-      { id: '2', name: 'Michael Chen', title: 'Full Stack Developer', status: 'active', daysInStage: 2 },
-      { id: '8', name: 'Robert Taylor', title: 'QA Engineer', status: 'active', daysInStage: 3 },
-      { id: '13', name: 'Kevin Martinez', title: 'Backend Developer', status: 'active', daysInStage: 1 },
-      { id: '14', name: 'Amanda White', title: 'Frontend Developer', status: 'active', daysInStage: 4 },
-      { id: '15', name: 'Daniel Brown', title: 'DevOps Engineer', status: 'active', daysInStage: 2 }
+      {
+        id: '2',
+        name: 'Michael Chen',
+        title: 'Full Stack Developer',
+        status: 'active',
+        daysInStage: 2,
+      },
+      {
+        id: '8',
+        name: 'Robert Taylor',
+        title: 'QA Engineer',
+        status: 'active',
+        daysInStage: 3,
+      },
+      {
+        id: '13',
+        name: 'Kevin Martinez',
+        title: 'Backend Developer',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '14',
+        name: 'Amanda White',
+        title: 'Frontend Developer',
+        status: 'active',
+        daysInStage: 4,
+      },
+      {
+        id: '15',
+        name: 'Daniel Brown',
+        title: 'DevOps Engineer',
+        status: 'active',
+        daysInStage: 2,
+      },
     ],
     insights: [
       {
         type: 'success',
         title: 'Good Technical Assessment',
-        description: '65.3% pass rate indicates effective screening criteria and assessment methods.'
+        description:
+          '65.3% pass rate indicates effective screening criteria and assessment methods.',
       },
       {
         type: 'warning',
         title: 'Screening Bottleneck',
-        description: '3.2 days average time suggests need for more screening resources or streamlined process.'
-      }
-    ]
+        description:
+          '3.2 days average time suggests need for more screening resources or streamlined process.',
+      },
+    ],
   },
   Interviews: {
     conversionRate: '38.2%',
@@ -413,24 +485,56 @@ const stageDetails = {
     isBottleneck: true,
     efficiency: '68.4%',
     candidates: [
-      { id: '1', name: 'Sarah Johnson', title: 'Senior Software Engineer', status: 'active', daysInStage: 4 },
-      { id: '7', name: 'Maria Garcia', title: 'Mobile Developer', status: 'active', daysInStage: 6 },
-      { id: '16', name: 'Chris Davis', title: 'Data Engineer', status: 'active', daysInStage: 3 },
-      { id: '17', name: 'Sophie Turner', title: 'UI/UX Designer', status: 'active', daysInStage: 5 },
-      { id: '18', name: 'Ryan Cooper', title: 'Security Engineer', status: 'active', daysInStage: 7 }
+      {
+        id: '1',
+        name: 'Sarah Johnson',
+        title: 'Senior Software Engineer',
+        status: 'active',
+        daysInStage: 4,
+      },
+      {
+        id: '7',
+        name: 'Maria Garcia',
+        title: 'Mobile Developer',
+        status: 'active',
+        daysInStage: 6,
+      },
+      {
+        id: '16',
+        name: 'Chris Davis',
+        title: 'Data Engineer',
+        status: 'active',
+        daysInStage: 3,
+      },
+      {
+        id: '17',
+        name: 'Sophie Turner',
+        title: 'UI/UX Designer',
+        status: 'active',
+        daysInStage: 5,
+      },
+      {
+        id: '18',
+        name: 'Ryan Cooper',
+        title: 'Security Engineer',
+        status: 'active',
+        daysInStage: 7,
+      },
     ],
     insights: [
       {
         type: 'error',
         title: 'Interview Bottleneck',
-        description: '5.8 days average time and 47.9% dropoff rate indicate significant interview process issues.'
+        description:
+          '5.8 days average time and 47.9% dropoff rate indicate significant interview process issues.',
       },
       {
         type: 'warning',
         title: 'High Dropoff Rate',
-        description: 'Nearly half of candidates drop out during interviews, suggesting process improvements needed.'
-      }
-    ]
+        description:
+          'Nearly half of candidates drop out during interviews, suggesting process improvements needed.',
+      },
+    ],
   },
   Finalists: {
     conversionRate: '67.6%',
@@ -440,23 +544,49 @@ const stageDetails = {
     isBottleneck: false,
     efficiency: '89.7%',
     candidates: [
-      { id: '3', name: 'Emily Rodriguez', title: 'Frontend Developer', status: 'active', daysInStage: 3 },
-      { id: '19', name: 'Mark Johnson', title: 'Senior Backend Engineer', status: 'active', daysInStage: 5 },
-      { id: '20', name: 'Lisa Chen', title: 'Product Designer', status: 'active', daysInStage: 2 },
-      { id: '21', name: 'David Park', title: 'Machine Learning Engineer', status: 'active', daysInStage: 4 }
+      {
+        id: '3',
+        name: 'Emily Rodriguez',
+        title: 'Frontend Developer',
+        status: 'active',
+        daysInStage: 3,
+      },
+      {
+        id: '19',
+        name: 'Mark Johnson',
+        title: 'Senior Backend Engineer',
+        status: 'active',
+        daysInStage: 5,
+      },
+      {
+        id: '20',
+        name: 'Lisa Chen',
+        title: 'Product Designer',
+        status: 'active',
+        daysInStage: 2,
+      },
+      {
+        id: '21',
+        name: 'David Park',
+        title: 'Machine Learning Engineer',
+        status: 'active',
+        daysInStage: 4,
+      },
     ],
     insights: [
       {
         type: 'success',
         title: 'Strong Finalist Quality',
-        description: '82.4% success rate shows excellent candidate selection for final round.'
+        description:
+          '82.4% success rate shows excellent candidate selection for final round.',
       },
       {
         type: 'success',
         title: 'Efficient Process',
-        description: '4.1 days average time indicates well-organized finalist evaluation process.'
-      }
-    ]
+        description:
+          '4.1 days average time indicates well-organized finalist evaluation process.',
+      },
+    ],
   },
   Offers: {
     conversionRate: '78.3%',
@@ -466,23 +596,49 @@ const stageDetails = {
     isBottleneck: false,
     efficiency: '94.2%',
     candidates: [
-      { id: '4', name: 'David Kim', title: 'DevOps Engineer', status: 'active', daysInStage: 2 },
-      { id: '22', name: 'Anna Wilson', title: 'Senior Frontend Developer', status: 'active', daysInStage: 3 },
-      { id: '23', name: 'Mike Thompson', title: 'Backend Lead', status: 'active', daysInStage: 1 },
-      { id: '24', name: 'Sarah Davis', title: 'UX Researcher', status: 'active', daysInStage: 4 }
+      {
+        id: '4',
+        name: 'David Kim',
+        title: 'DevOps Engineer',
+        status: 'active',
+        daysInStage: 2,
+      },
+      {
+        id: '22',
+        name: 'Anna Wilson',
+        title: 'Senior Frontend Developer',
+        status: 'active',
+        daysInStage: 3,
+      },
+      {
+        id: '23',
+        name: 'Mike Thompson',
+        title: 'Backend Lead',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '24',
+        name: 'Sarah Davis',
+        title: 'UX Researcher',
+        status: 'active',
+        daysInStage: 4,
+      },
     ],
     insights: [
       {
         type: 'success',
         title: 'High Offer Acceptance',
-        description: '91.3% acceptance rate indicates competitive compensation and strong candidate experience.'
+        description:
+          '91.3% acceptance rate indicates competitive compensation and strong candidate experience.',
       },
       {
         type: 'success',
         title: 'Quick Decision Making',
-        description: '2.8 days average time shows efficient offer negotiation and decision process.'
-      }
-    ]
+        description:
+          '2.8 days average time shows efficient offer negotiation and decision process.',
+      },
+    ],
   },
   Hires: {
     conversionRate: '100%',
@@ -492,24 +648,50 @@ const stageDetails = {
     isBottleneck: false,
     efficiency: '100%',
     candidates: [
-      { id: '5', name: 'Lisa Wang', title: 'Backend Engineer', status: 'active', daysInStage: 1 },
-      { id: '25', name: 'John Smith', title: 'Full Stack Developer', status: 'active', daysInStage: 2 },
-      { id: '26', name: 'Emma Wilson', title: 'DevOps Engineer', status: 'active', daysInStage: 1 },
-      { id: '27', name: 'Carlos Rodriguez', title: 'Frontend Developer', status: 'active', daysInStage: 1 }
+      {
+        id: '5',
+        name: 'Lisa Wang',
+        title: 'Backend Engineer',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '25',
+        name: 'John Smith',
+        title: 'Full Stack Developer',
+        status: 'active',
+        daysInStage: 2,
+      },
+      {
+        id: '26',
+        name: 'Emma Wilson',
+        title: 'DevOps Engineer',
+        status: 'active',
+        daysInStage: 1,
+      },
+      {
+        id: '27',
+        name: 'Carlos Rodriguez',
+        title: 'Frontend Developer',
+        status: 'active',
+        daysInStage: 1,
+      },
     ],
     insights: [
       {
         type: 'success',
         title: 'Perfect Onboarding',
-        description: '100% success rate and 1.5 days average time indicate excellent onboarding process.'
+        description:
+          '100% success rate and 1.5 days average time indicate excellent onboarding process.',
       },
       {
         type: 'success',
         title: 'Strong Retention',
-        description: 'All hired candidates successfully completed onboarding and started their roles.'
-      }
-    ]
-  }
+        description:
+          'All hired candidates successfully completed onboarding and started their roles.',
+      },
+    ],
+  },
 };
 
 // ===== DATABASE SERVICE CLASS =====
@@ -529,26 +711,34 @@ export class DatabaseService {
     return this.candidates.find(candidate => candidate.id === id) || null;
   }
 
-  async createCandidate(candidateData: Omit<Candidate, 'id' | 'createdAt' | 'isArchived' | 'matchScore' | 'status'>): Promise<Candidate> {
+  async createCandidate(
+    candidateData: Omit<
+      Candidate,
+      'id' | 'createdAt' | 'isArchived' | 'matchScore' | 'status'
+    >
+  ): Promise<Candidate> {
     const newCandidate: Candidate = {
       ...candidateData,
       id: uuidv4(),
       createdAt: new Date(),
       isArchived: false,
       matchScore: Math.floor(Math.random() * 30) + 70, // Random score between 70-100
-      status: 'active'
+      status: 'active',
     };
-    
+
     this.candidates.push(newCandidate);
     this.analytics.totalCandidates++;
-    
+
     return newCandidate;
   }
 
-  async updateCandidate(id: string, updates: Partial<Candidate>): Promise<Candidate | null> {
+  async updateCandidate(
+    id: string,
+    updates: Partial<Candidate>
+  ): Promise<Candidate | null> {
     const index = this.candidates.findIndex(candidate => candidate.id === id);
     if (index === -1) return null;
-    
+
     this.candidates[index] = { ...this.candidates[index], ...updates };
     return this.candidates[index];
   }
@@ -556,7 +746,7 @@ export class DatabaseService {
   async archiveCandidate(id: string): Promise<boolean> {
     const candidate = await this.getCandidateById(id);
     if (!candidate) return false;
-    
+
     candidate.isArchived = true;
     candidate.status = 'archived';
     return true;
@@ -564,13 +754,15 @@ export class DatabaseService {
 
   async searchCandidates(query: string): Promise<Candidate[]> {
     const searchTerm = query.toLowerCase();
-    return this.candidates.filter(candidate => 
-      !candidate.isArchived && (
-        candidate.name.toLowerCase().includes(searchTerm) ||
-        candidate.title.toLowerCase().includes(searchTerm) ||
-        candidate.skills.some(skill => skill.toLowerCase().includes(searchTerm)) ||
-        candidate.location.toLowerCase().includes(searchTerm)
-      )
+    return this.candidates.filter(
+      candidate =>
+        !candidate.isArchived &&
+        (candidate.name.toLowerCase().includes(searchTerm) ||
+          candidate.title.toLowerCase().includes(searchTerm) ||
+          candidate.skills.some(skill =>
+            skill.toLowerCase().includes(searchTerm)
+          ) ||
+          candidate.location.toLowerCase().includes(searchTerm))
     );
   }
 
@@ -584,24 +776,26 @@ export class DatabaseService {
     return this.jobs.find(job => job.id === id) || null;
   }
 
-  async createJob(jobData: Omit<Job, 'id' | 'createdAt' | 'applications'>): Promise<Job> {
+  async createJob(
+    jobData: Omit<Job, 'id' | 'createdAt' | 'applications'>
+  ): Promise<Job> {
     const newJob: Job = {
       ...jobData,
       id: `job-${Date.now()}`,
       createdAt: new Date(),
-      applications: 0
+      applications: 0,
     };
-    
+
     this.jobs.push(newJob);
     this.analytics.totalJobs++;
-    
+
     return newJob;
   }
 
   async updateJob(id: string, updates: Partial<Job>): Promise<Job | null> {
     const index = this.jobs.findIndex(job => job.id === id);
     if (index === -1) return null;
-    
+
     this.jobs[index] = { ...this.jobs[index], ...updates };
     return this.jobs[index];
   }
@@ -609,7 +803,7 @@ export class DatabaseService {
   async deleteJob(id: string): Promise<boolean> {
     const index = this.jobs.findIndex(job => job.id === id);
     if (index === -1) return false;
-    
+
     this.jobs.splice(index, 1);
     this.analytics.totalJobs--;
     return true;
@@ -617,11 +811,12 @@ export class DatabaseService {
 
   async searchJobs(query: string): Promise<Job[]> {
     const searchTerm = query.toLowerCase();
-    return this.jobs.filter(job => 
-      job.title.toLowerCase().includes(searchTerm) ||
-      job.company.toLowerCase().includes(searchTerm) ||
-      job.location.toLowerCase().includes(searchTerm) ||
-      job.skills.some(skill => skill.toLowerCase().includes(searchTerm))
+    return this.jobs.filter(
+      job =>
+        job.title.toLowerCase().includes(searchTerm) ||
+        job.company.toLowerCase().includes(searchTerm) ||
+        job.location.toLowerCase().includes(searchTerm) ||
+        job.skills.some(skill => skill.toLowerCase().includes(searchTerm))
     );
   }
 
@@ -629,14 +824,26 @@ export class DatabaseService {
 
   async getAnalytics(): Promise<Analytics> {
     // Update analytics with real-time data
-    this.analytics.totalCandidates = this.candidates.filter(c => !c.isArchived).length;
+    this.analytics.totalCandidates = this.candidates.filter(
+      c => !c.isArchived
+    ).length;
     this.analytics.totalJobs = this.jobs.length;
-    
+
     // Calculate response rate based on candidate status
-    const contactedCandidates = this.candidates.filter(c => c.status === 'contacted' || c.status === 'interviewed' || c.status === 'hired').length;
-    const totalActiveCandidates = this.candidates.filter(c => !c.isArchived).length;
-    this.analytics.responseRate = totalActiveCandidates > 0 ? `${((contactedCandidates / totalActiveCandidates) * 100).toFixed(1)}%` : '0%';
-    
+    const contactedCandidates = this.candidates.filter(
+      c =>
+        c.status === 'contacted' ||
+        c.status === 'interviewed' ||
+        c.status === 'hired'
+    ).length;
+    const totalActiveCandidates = this.candidates.filter(
+      c => !c.isArchived
+    ).length;
+    this.analytics.responseRate =
+      totalActiveCandidates > 0
+        ? `${((contactedCandidates / totalActiveCandidates) * 100).toFixed(1)}%`
+        : '0%';
+
     return this.analytics;
   }
 
@@ -657,11 +864,17 @@ export class DatabaseService {
   }
 
   async getStagePerformanceOverTime(stage: string): Promise<any[]> {
-    return stagePerformanceOverTime[stage as keyof typeof stagePerformanceOverTime] || [];
+    return (
+      stagePerformanceOverTime[
+        stage as keyof typeof stagePerformanceOverTime
+      ] || []
+    );
   }
 
   async getCandidatesByStage(stage: string): Promise<Candidate[]> {
-    return this.candidates.filter(candidate => candidate.stage === stage && !candidate.isArchived);
+    return this.candidates.filter(
+      candidate => candidate.stage === stage && !candidate.isArchived
+    );
   }
 
   async getMonthlyHires(): Promise<{ month: string; count: number }[]> {
@@ -681,7 +894,7 @@ export class DatabaseService {
       totalCandidates: analytics.totalCandidates,
       totalJobs: analytics.totalJobs,
       totalCampaigns: analytics.totalCampaigns,
-      responseRate: analytics.responseRate
+      responseRate: analytics.responseRate,
     };
   }
 

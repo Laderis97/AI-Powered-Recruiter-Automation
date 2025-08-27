@@ -62,7 +62,7 @@ export class StorageService {
       jobs: [],
       candidates: [],
       campaigns: [],
-      emailConfig: undefined
+      emailConfig: undefined,
     };
     this.initializeStorage();
   }
@@ -71,7 +71,7 @@ export class StorageService {
     try {
       // Ensure data directory exists
       await fs.ensureDir(path.dirname(this.dataPath));
-      
+
       // Load existing data if it exists
       if (await fs.pathExists(this.dataPath)) {
         const fileData = await fs.readJson(this.dataPath);
@@ -79,7 +79,7 @@ export class StorageService {
           jobs: fileData.jobs || [],
           candidates: fileData.candidates || [],
           campaigns: fileData.campaigns || [],
-          emailConfig: fileData.emailConfig || undefined
+          emailConfig: fileData.emailConfig || undefined,
         };
         console.log('✅ Data loaded from storage');
       } else {
@@ -142,7 +142,10 @@ export class StorageService {
   async updateCampaign(id: string, updates: Partial<Campaign>): Promise<void> {
     const campaignIndex = this.data.campaigns.findIndex(c => c.id === id);
     if (campaignIndex !== -1) {
-      this.data.campaigns[campaignIndex] = { ...this.data.campaigns[campaignIndex], ...updates };
+      this.data.campaigns[campaignIndex] = {
+        ...this.data.campaigns[campaignIndex],
+        ...updates,
+      };
       await this.saveData();
     }
   }
@@ -171,10 +174,14 @@ export class StorageService {
     const totalJobs = this.data.jobs.length;
     const totalCandidates = this.data.candidates.length;
     const totalCampaigns = this.data.campaigns.length;
-    
-    const sentCampaigns = this.data.campaigns.filter(c => c.status === 'sent').length;
-    const repliedCampaigns = this.data.campaigns.filter(c => c.status === 'replied').length;
-    
+
+    const sentCampaigns = this.data.campaigns.filter(
+      c => c.status === 'sent'
+    ).length;
+    const repliedCampaigns = this.data.campaigns.filter(
+      c => c.status === 'replied'
+    ).length;
+
     let responseRate = '0%';
     if (sentCampaigns > 0) {
       const rate = (repliedCampaigns / sentCampaigns) * 100;
@@ -185,18 +192,26 @@ export class StorageService {
       totalJobs,
       totalCandidates,
       totalCampaigns,
-      responseRate
+      responseRate,
     };
   }
 
   // Export methods
   async exportCampaignsCSV(): Promise<string> {
-    const headers = ['ID', 'Job Title', 'Candidate Name', 'Status', 'Created', 'Sent', 'Message'];
+    const headers = [
+      'ID',
+      'Job Title',
+      'Candidate Name',
+      'Status',
+      'Created',
+      'Sent',
+      'Message',
+    ];
     const rows = await Promise.all(
-      this.data.campaigns.map(async (campaign) => {
+      this.data.campaigns.map(async campaign => {
         const job = await this.getJob(campaign.jobId);
         const candidate = await this.getCandidate(campaign.candidateId);
-        
+
         return [
           campaign.id,
           job?.title || 'Unknown',
@@ -204,7 +219,7 @@ export class StorageService {
           campaign.status,
           new Date(campaign.createdAt).toISOString(),
           campaign.sentAt ? new Date(campaign.sentAt).toISOString() : '',
-          `"${campaign.message.replace(/"/g, '""')}"` // Escape quotes in CSV
+          `"${campaign.message.replace(/"/g, '""')}"`, // Escape quotes in CSV
         ].join(',');
       })
     );
@@ -214,7 +229,11 @@ export class StorageService {
 
   // Backup and restore methods
   async createBackup(): Promise<string> {
-    const backupPath = path.join(process.cwd(), 'data', `backup-${Date.now()}.json`);
+    const backupPath = path.join(
+      process.cwd(),
+      'data',
+      `backup-${Date.now()}.json`
+    );
     await fs.writeJson(backupPath, this.data, { spaces: 2 });
     return backupPath;
   }

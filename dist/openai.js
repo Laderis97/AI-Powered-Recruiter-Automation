@@ -1,23 +1,23 @@
 // src/openai.ts
-import axios from "axios";
-import * as dotenv from "dotenv";
+import axios from 'axios';
+import * as dotenv from 'dotenv';
 dotenv.config();
-export async function callOpenAI(prompt, model = "gpt-4") {
+export async function callOpenAI(prompt, model = 'gpt-4') {
     const apiKey = process.env.OPENAI_API_KEY;
     const projectId = process.env.OPENAI_PROJECT_ID;
     if (!apiKey)
-        throw new Error("❌ Missing OPENAI_API_KEY in .env");
+        throw new Error('❌ Missing OPENAI_API_KEY in .env');
     if (!projectId)
-        throw new Error("❌ Missing OPENAI_PROJECT_ID in .env");
-    const response = await axios.post("https://api.openai.com/v1/chat/completions", {
+        throw new Error('❌ Missing OPENAI_PROJECT_ID in .env');
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
         model,
-        messages: [{ role: "user", content: prompt }],
+        messages: [{ role: 'user', content: prompt }],
         temperature: 0.7,
     }, {
         headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: `Bearer ${apiKey}`,
-            "OpenAI-Project": projectId,
+            'OpenAI-Project': projectId,
         },
     });
     return response.data.choices[0].message.content;
@@ -49,7 +49,7 @@ You are a recruiter writing a friendly, professional outreach message for a pote
 Use the following details:
 - Candidate Name: ${candidate.name}
 - Job Title: ${job.jobTitle}
-- Skills Required: ${job.requiredSkills.join(", ")}
+- Skills Required: ${job.requiredSkills.join(', ')}
 - Seniority Level: ${job.seniorityLevel}
 - Company: YourCompany Inc.
 
@@ -67,7 +67,7 @@ export async function generateCandidateProfile(job) {
 Based on this job description, generate a realistic candidate profile that would be a good fit:
 
 Job: ${job.jobTitle}
-Required Skills: ${job.requiredSkills.join(", ")}
+Required Skills: ${job.requiredSkills.join(', ')}
 Seniority: ${job.seniorityLevel}
 Experience: ${job.yearsOfExperience}
 
@@ -92,13 +92,13 @@ Analyze the fit between this candidate and job:
 Candidate:
 - Name: ${candidate.name}
 - Current Title: ${candidate.title}
-- Skills: ${candidate.skills.join(", ")}
+- Skills: ${candidate.skills.join(', ')}
 - Experience: ${candidate.experience}
 - Location: ${candidate.location}
 
 Job:
 - Title: ${job.jobTitle}
-- Required Skills: ${job.requiredSkills.join(", ")}
+- Required Skills: ${job.requiredSkills.join(', ')}
 - Seniority: ${job.seniorityLevel}
 - Experience Required: ${job.yearsOfExperience}
 

@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 export const AlignmentScoreSchema = z.object({
   overallScore: z.number().int().min(0).max(100),
@@ -15,7 +15,10 @@ export const AlignmentScoreSchema = z.object({
 
 export const SkillsGapSchema = z.object({
   missingSkills: z.array(z.string()),
-  skillLevels: z.record(z.string(), z.enum(["beginner", "intermediate", "advanced"])),
+  skillLevels: z.record(
+    z.string(),
+    z.enum(['beginner', 'intermediate', 'advanced'])
+  ),
   criticalGaps: z.array(z.string()),
   niceToHave: z.array(z.string()),
 });
@@ -32,4 +35,5 @@ export type SkillsGap = z.infer<typeof SkillsGapSchema>;
 export type CulturalFit = z.infer<typeof CulturalFitSchema>;
 
 // Utility function to clamp numbers between 0-100
-export const clamp = (n: number): number => Math.max(0, Math.min(100, Math.round(n)));
+export const clamp = (n: number): number =>
+  Math.max(0, Math.min(100, Math.round(n)));

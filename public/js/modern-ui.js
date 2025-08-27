@@ -45,13 +45,14 @@ class ModernUI {
   toggleTheme() {
     this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', this.currentTheme);
-    
+
     // Update toggle button icon
     const icon = document.querySelector('.theme-toggle i');
     if (icon) {
-      icon.className = this.currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+      icon.className =
+        this.currentTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
     }
-    
+
     this.saveUserPreferences();
     this.showNotification('Theme changed to ' + this.currentTheme, 'success');
   }
@@ -60,7 +61,7 @@ class ModernUI {
   setupNavigation() {
     const navLinks = document.querySelectorAll('.nav-link');
     navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
+      link.addEventListener('click', e => {
         e.preventDefault();
         const targetId = link.getAttribute('href').substring(1);
         const targetElement = document.getElementById(targetId);
@@ -75,13 +76,13 @@ class ModernUI {
   setupSearch() {
     const searchInput = document.querySelector('.search-input');
     const searchBtn = document.querySelector('.search-btn');
-    
+
     if (searchInput && searchBtn) {
       searchBtn.addEventListener('click', () => {
         this.performSearch(searchInput.value);
       });
-      
-      searchInput.addEventListener('keypress', (e) => {
+
+      searchInput.addEventListener('keypress', e => {
         if (e.key === 'Enter') {
           this.performSearch(searchInput.value);
         }
@@ -94,7 +95,7 @@ class ModernUI {
       this.showNotification('Please enter a search term', 'warning');
       return;
     }
-    
+
     this.showNotification(`Searching for: ${query}`, 'info');
     // TODO: Implement actual search functionality
     console.log('Search query:', query);
@@ -104,11 +105,11 @@ class ModernUI {
   setupEventTracking() {
     const buttons = document.querySelectorAll('button, .btn');
     buttons.forEach(button => {
-      button.addEventListener('click', (e) => {
+      button.addEventListener('click', e => {
         this.trackEvent('button_click', {
           text: button.textContent.trim(),
           class: button.className,
-          id: button.id || 'unknown'
+          id: button.id || 'unknown',
         });
       });
     });
@@ -126,7 +127,7 @@ class ModernUI {
     cards.forEach((card, index) => {
       card.style.opacity = '0';
       card.style.transform = 'translateY(20px)';
-      
+
       setTimeout(() => {
         card.style.transition = 'all 0.6s ease-out';
         card.style.opacity = '1';
@@ -154,26 +155,31 @@ class ModernUI {
 
     // Setup intersection observer for animation
     const statsElements = document.querySelectorAll('.stat-number');
-    
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          this.animateCounter(entry.target);
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.5 });
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            this.animateCounter(entry.target);
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
 
     statsElements.forEach(stat => observer.observe(stat));
   }
 
   updateStatsWithRealData(analytics) {
-    const statElements = document.querySelectorAll('.stat-number[data-analytics]');
-    
+    const statElements = document.querySelectorAll(
+      '.stat-number[data-analytics]'
+    );
+
     statElements.forEach(element => {
       const analyticsKey = element.getAttribute('data-analytics');
       let value = 0;
-      
+
       switch (analyticsKey) {
         case 'totalCandidates':
           value = analytics.totalCandidates || 0;
@@ -190,7 +196,7 @@ class ModernUI {
           value = parseFloat(rateStr.replace('%', '')) || 0;
           break;
       }
-      
+
       element.setAttribute('data-target', value.toString());
     });
   }
@@ -201,14 +207,17 @@ class ModernUI {
       totalCandidates: 156,
       totalJobs: 23,
       totalCampaigns: 89,
-      responseRate: 12
+      responseRate: 12,
     };
-    
+
     this.updateStatsWithRealData(fallbackData);
   }
 
   animateCounter(element) {
-    const target = parseFloat(element.getAttribute('data-target') || element.textContent.replace(/\D/g, ''));
+    const target = parseFloat(
+      element.getAttribute('data-target') ||
+        element.textContent.replace(/\D/g, '')
+    );
     const duration = 2000;
     const start = 0;
     const increment = target / (duration / 16);
@@ -220,7 +229,7 @@ class ModernUI {
         current = target;
         clearInterval(timer);
       }
-      
+
       // Check if this is the response rate (should show as percentage)
       const analyticsKey = element.getAttribute('data-analytics');
       if (analyticsKey === 'responseRate') {
@@ -234,14 +243,14 @@ class ModernUI {
   // === PHASE 2: CARD INTERACTIONS (Medium Complexity) ===
   setupCardInteractions() {
     const cards = document.querySelectorAll('.card, .dashboard-card');
-    
+
     cards.forEach(card => {
       // Enhanced hover effects
       card.addEventListener('mouseenter', () => {
         card.style.transform = 'translateY(-8px) scale(1.02)';
         card.style.boxShadow = 'var(--shadow-xl)';
       });
-      
+
       card.addEventListener('mouseleave', () => {
         card.style.transform = 'translateY(0) scale(1)';
         card.style.boxShadow = 'var(--shadow-md)';
@@ -260,7 +269,7 @@ class ModernUI {
     const size = Math.max(rect.width, rect.height);
     const x = event.clientX - rect.left - size / 2;
     const y = event.clientY - rect.top - size / 2;
-    
+
     ripple.style.cssText = `
       position: absolute;
       width: ${size}px;
@@ -273,10 +282,10 @@ class ModernUI {
       animation: ripple 0.6s linear;
       pointer-events: none;
     `;
-    
+
     element.style.position = 'relative';
     element.appendChild(ripple);
-    
+
     setTimeout(() => ripple.remove(), 600);
   }
 
@@ -307,7 +316,7 @@ class ModernUI {
       </div>
       <button class="notification-close">&times;</button>
     `;
-    
+
     // Add styles
     notification.style.cssText = `
       background: var(--color-background);
@@ -323,21 +332,21 @@ class ModernUI {
       transform: translateX(100%);
       transition: transform 0.3s ease-out;
     `;
-    
+
     const container = document.querySelector('.notification-container');
     container.appendChild(notification);
-    
+
     // Animate in
     setTimeout(() => {
       notification.style.transform = 'translateX(0)';
     }, 100);
-    
+
     // Close button
     const closeBtn = notification.querySelector('.notification-close');
     closeBtn.addEventListener('click', () => {
       this.hideNotification(notification);
     });
-    
+
     // Auto-hide
     setTimeout(() => {
       this.hideNotification(notification);
@@ -358,7 +367,7 @@ class ModernUI {
       success: 'check-circle',
       error: 'exclamation-circle',
       warning: 'exclamation-triangle',
-      info: 'info-circle'
+      info: 'info-circle',
     };
     return icons[type] || 'info-circle';
   }
@@ -377,10 +386,10 @@ class ModernUI {
   showLoadingState(button) {
     const originalText = button.textContent;
     const originalHTML = button.innerHTML;
-    
+
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-    
+
     // Simulate loading (replace with actual async operation)
     setTimeout(() => {
       button.disabled = false;
@@ -398,7 +407,7 @@ class ModernUI {
 
   trackUserBehavior() {
     // Track user interactions
-    document.addEventListener('click', (e) => {
+    document.addEventListener('click', e => {
       const element = e.target.closest('[data-track]');
       if (element) {
         const trackData = element.dataset.track;
@@ -411,7 +420,10 @@ class ModernUI {
     window.addEventListener('scroll', () => {
       clearTimeout(scrollTimeout);
       scrollTimeout = setTimeout(() => {
-        this.userBehavior.scrollDepth = Math.round((window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100);
+        this.userBehavior.scrollDepth = Math.round(
+          (window.scrollY / (document.body.scrollHeight - window.innerHeight)) *
+            100
+        );
       }, 100);
     });
 
@@ -426,7 +438,7 @@ class ModernUI {
     if (this.userBehavior.timeSpent > 60) {
       this.showAdvancedFeatures();
     }
-    
+
     if (this.userBehavior.scrollDepth > 80) {
       this.showExpertFeatures();
     }
@@ -477,10 +489,10 @@ class ModernUI {
 
   setupParallax() {
     const parallaxElements = document.querySelectorAll('[data-parallax]');
-    
+
     window.addEventListener('scroll', () => {
       const scrolled = window.pageYOffset;
-      
+
       parallaxElements.forEach(element => {
         const speed = parseFloat(element.dataset.parallax) || 0.5;
         const yPos = -(scrolled * speed);
@@ -491,11 +503,11 @@ class ModernUI {
 
   setupStaggerAnimations() {
     const staggerElements = document.querySelectorAll('[data-stagger]');
-    
+
     staggerElements.forEach((element, index) => {
       element.style.opacity = '0';
       element.style.transform = 'translateY(30px)';
-      
+
       setTimeout(() => {
         element.style.transition = 'all 0.6s ease-out';
         element.style.opacity = '1';
@@ -506,13 +518,13 @@ class ModernUI {
 
   setupMorphingElements() {
     const morphElements = document.querySelectorAll('[data-morph]');
-    
+
     morphElements.forEach(element => {
       element.addEventListener('mouseenter', () => {
         element.style.transform = 'scale(1.05) rotate(2deg)';
         element.style.filter = 'brightness(1.1)';
       });
-      
+
       element.addEventListener('mouseleave', () => {
         element.style.transform = 'scale(1) rotate(0deg)';
         element.style.filter = 'brightness(1)';
@@ -523,10 +535,10 @@ class ModernUI {
   setupIntersectionObserver() {
     const observerOptions = {
       threshold: 0.1,
-      rootMargin: '0px 0px -50px 0px'
+      rootMargin: '0px 0px -50px 0px',
     };
 
-    const observer = new IntersectionObserver((entries) => {
+    const observer = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('animate-in');
@@ -536,9 +548,13 @@ class ModernUI {
     }, observerOptions);
 
     // Observe elements for animation
-    document.querySelectorAll('.card, .section-header, .ai-tool-card, .candidate-card').forEach(el => {
-      observer.observe(el);
-    });
+    document
+      .querySelectorAll(
+        '.card, .section-header, .ai-tool-card, .candidate-card'
+      )
+      .forEach(el => {
+        observer.observe(el);
+      });
   }
 
   // === PHASE 3: REAL-TIME DATA UPDATES (Higher Complexity) ===
@@ -567,7 +583,7 @@ class ModernUI {
       const currentValue = parseInt(stat.textContent.replace(/\D/g, ''));
       const variation = Math.floor(Math.random() * 5) - 2; // -2 to +2
       const newValue = Math.max(0, currentValue + variation);
-      
+
       if (newValue !== currentValue) {
         stat.textContent = newValue;
         stat.classList.add('updated');
@@ -588,14 +604,14 @@ class ModernUI {
           <div class="activity-time">Just now</div>
         </div>
       `;
-      
+
       activityList.insertBefore(newActivity, activityList.firstChild);
-      
+
       // Remove old activities if too many
       if (activityList.children.length > 5) {
         activityList.removeChild(activityList.lastChild);
       }
-      
+
       // Animate new activity
       setTimeout(() => newActivity.classList.remove('new-activity'), 2000);
     }
@@ -607,7 +623,7 @@ class ModernUI {
       const currentCount = parseInt(notificationBadge.textContent);
       const newCount = currentCount + Math.floor(Math.random() * 2);
       notificationBadge.textContent = newCount;
-      
+
       if (newCount > currentCount) {
         notificationBadge.classList.add('pulse');
         setTimeout(() => notificationBadge.classList.remove('pulse'), 1000);
@@ -631,7 +647,7 @@ class ModernUI {
   setupSearchSuggestions() {
     const searchInput = document.querySelector('.search-input');
     if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
+      searchInput.addEventListener('input', e => {
         const query = e.target.value;
         if (query.length >= 2) {
           this.showSearchSuggestions(query);
@@ -644,14 +660,14 @@ class ModernUI {
 
   showSearchSuggestions(query) {
     this.hideSearchSuggestions();
-    
+
     const suggestions = this.generateSearchSuggestions(query);
     if (suggestions.length === 0) return;
-    
+
     const searchContainer = document.querySelector('.search-container');
     const suggestionsDiv = document.createElement('div');
     suggestionsDiv.className = 'search-suggestions';
-    
+
     suggestions.forEach(suggestion => {
       const item = document.createElement('div');
       item.className = 'search-suggestion-item';
@@ -660,16 +676,16 @@ class ModernUI {
         <span>${suggestion.text}</span>
         <span class="suggestion-type">${suggestion.type}</span>
       `;
-      
+
       item.addEventListener('click', () => {
         document.querySelector('.search-input').value = suggestion.text;
         this.performSearch(suggestion.text);
         this.hideSearchSuggestions();
       });
-      
+
       suggestionsDiv.appendChild(item);
     });
-    
+
     searchContainer.appendChild(suggestionsDiv);
   }
 
@@ -686,10 +702,10 @@ class ModernUI {
       { text: 'Python Engineer', type: 'Skill', icon: 'python' },
       { text: 'Product Manager', type: 'Role', icon: 'user-tie' },
       { text: 'Machine Learning', type: 'Skill', icon: 'brain' },
-      { text: 'React Developer', type: 'Skill', icon: 'react' }
+      { text: 'React Developer', type: 'Skill', icon: 'react' },
     ];
-    
-    return suggestions.filter(suggestion => 
+
+    return suggestions.filter(suggestion =>
       suggestion.text.toLowerCase().includes(query.toLowerCase())
     );
   }
@@ -706,18 +722,21 @@ class ModernUI {
         <button class="filter-btn" data-filter="analytics">Analytics</button>
       </div>
     `;
-    
+
     const dashboardSection = document.querySelector('#dashboard');
     if (dashboardSection) {
-      dashboardSection.insertBefore(filterContainer, dashboardSection.firstChild);
+      dashboardSection.insertBefore(
+        filterContainer,
+        dashboardSection.firstChild
+      );
     }
-    
+
     // Add filter functionality
     const filterBtns = document.querySelectorAll('.filter-btn');
     filterBtns.forEach(btn => {
       btn.addEventListener('click', () => {
         this.applyFilter(btn.dataset.filter);
-        
+
         // Update active state
         filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -727,7 +746,7 @@ class ModernUI {
 
   applyFilter(filter) {
     const sections = document.querySelectorAll('section');
-    
+
     sections.forEach(section => {
       if (filter === 'all' || section.id === filter) {
         section.style.display = 'block';
@@ -749,17 +768,17 @@ class ModernUI {
         <option value="match">Sort by Match %</option>
       </select>
     `;
-    
+
     const candidatesSection = document.querySelector('#candidates');
     if (candidatesSection) {
       const sectionHeader = candidatesSection.querySelector('.section-header');
       sectionHeader.appendChild(sortContainer);
     }
-    
+
     // Add sort functionality
     const sortSelect = document.querySelector('.sort-select');
     if (sortSelect) {
-      sortSelect.addEventListener('change', (e) => {
+      sortSelect.addEventListener('change', e => {
         this.sortCandidates(e.target.value);
       });
     }
@@ -768,10 +787,10 @@ class ModernUI {
   sortCandidates(sortBy) {
     const candidatesGrid = document.querySelector('.candidates-grid');
     const candidates = Array.from(candidatesGrid.children);
-    
+
     candidates.sort((a, b) => {
       let aValue, bValue;
-      
+
       switch (sortBy) {
         case 'name':
           aValue = a.querySelector('.candidate-name').textContent;
@@ -789,12 +808,12 @@ class ModernUI {
           return 0;
       }
     });
-    
+
     // Reorder candidates
     candidates.forEach(candidate => {
       candidatesGrid.appendChild(candidate);
     });
-    
+
     // Animate reordering
     candidates.forEach((candidate, index) => {
       setTimeout(() => {
@@ -879,7 +898,7 @@ function resetUploadForm() {
   const progressBar = document.querySelector('.progress-fill');
   const progressText = document.querySelector('.progress-text');
   const resultsContent = document.getElementById('resultsContent');
-  
+
   if (fileList) fileList.innerHTML = '';
   if (progressBar) progressBar.style.width = '0%';
   if (progressText) progressText.textContent = 'Ready to upload';
@@ -890,7 +909,7 @@ function resetUploadForm() {
 function initializeResumeUpload() {
   const uploadZone = document.getElementById('uploadZone');
   const fileInput = document.getElementById('resumeFileInput');
-  
+
   if (uploadZone) {
     // Drag and drop functionality
     uploadZone.addEventListener('dragover', handleDragOver);
@@ -898,13 +917,15 @@ function initializeResumeUpload() {
     uploadZone.addEventListener('drop', handleDrop);
     uploadZone.addEventListener('click', () => fileInput.click());
   }
-  
+
   if (fileInput) {
     fileInput.addEventListener('change', handleFileSelect);
   }
-  
+
   // Add event listener for the "Upload Resume" button
-  const uploadResumeBtn = document.querySelector('[data-track="quick-upload-resume"]');
+  const uploadResumeBtn = document.querySelector(
+    '[data-track="quick-upload-resume"]'
+  );
   if (uploadResumeBtn) {
     uploadResumeBtn.addEventListener('click', openResumeUploadModal);
   }
@@ -933,7 +954,7 @@ function handleDrop(e) {
   if (uploadZone) {
     uploadZone.classList.remove('dragover');
   }
-  
+
   const files = Array.from(e.dataTransfer.files);
   addFilesToQueue(files);
 }
@@ -949,28 +970,36 @@ function addFilesToQueue(files) {
     const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
     return validTypes.includes(fileExtension);
   });
-  
+
   if (validFiles.length === 0) {
-    showNotification('No valid files selected. Supported formats: PDF, DOCX, DOC, TXT', 'error');
+    showNotification(
+      'No valid files selected. Supported formats: PDF, DOCX, DOC, TXT',
+      'error'
+    );
     return;
   }
-  
+
   selectedFiles = [...selectedFiles, ...validFiles];
   updateFileList();
   showProcessButton();
-  
+
   if (validFiles.length !== files.length) {
-    showNotification(`${files.length - validFiles.length} files were skipped (unsupported format)`, 'warning');
+    showNotification(
+      `${files.length - validFiles.length} files were skipped (unsupported format)`,
+      'warning'
+    );
   }
 }
 
 function updateFileList() {
   const resultsContent = document.getElementById('resultsContent');
   if (!resultsContent) return;
-  
+
   resultsContent.innerHTML = `
     <div class="file-list">
-      ${selectedFiles.map((file, index) => `
+      ${selectedFiles
+        .map(
+          (file, index) => `
         <div class="file-item" data-file-index="${index}">
           <div class="file-icon">
             <i class="fas fa-file-alt"></i>
@@ -981,7 +1010,9 @@ function updateFileList() {
           </div>
           <div class="file-status pending">Pending</div>
         </div>
-      `).join('')}
+      `
+        )
+        .join('')}
     </div>
   `;
 }
@@ -1000,11 +1031,11 @@ function processUploads() {
     showNotification('No files selected for upload', 'error');
     return;
   }
-  
+
   hideProcessButton();
   showProgress();
   updateProgress(0, 'Preparing files...');
-  
+
   // Process files sequentially to avoid overwhelming the server
   processFilesSequentially(selectedFiles, 0);
 }
@@ -1017,17 +1048,20 @@ async function processFilesSequentially(files, index) {
       hideProgress();
       displayParsedResults();
       showResults();
-      showNotification(`${files.length} resume(s) processed successfully!`, 'success');
+      showNotification(
+        `${files.length} resume(s) processed successfully!`,
+        'success'
+      );
       // Refresh candidates list to show newly uploaded candidates
       loadCandidates();
     }, 1000);
     return;
   }
-  
+
   const file = files[index];
   const progress = Math.round((index / files.length) * 100);
   updateProgress(progress, `Processing ${file.name}...`);
-  
+
   try {
     const result = await uploadSingleFile(file, index);
     updateFileStatus(index, 'success', 'Processed successfully');
@@ -1036,7 +1070,7 @@ async function processFilesSequentially(files, index) {
     console.error('Error processing file:', error);
     updateFileStatus(index, 'error', error.message || 'Processing failed');
   }
-  
+
   // Process next file
   setTimeout(() => {
     processFilesSequentially(files, index + 1);
@@ -1046,17 +1080,17 @@ async function processFilesSequentially(files, index) {
 async function uploadSingleFile(file, index) {
   const formData = new FormData();
   formData.append('resume', file);
-  
+
   const response = await fetch('/api/upload-resume', {
     method: 'POST',
-    body: formData
+    body: formData,
   });
-  
+
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.error || 'Upload failed');
   }
-  
+
   const result = await response.json();
   return result;
 }
@@ -1065,11 +1099,11 @@ async function uploadSingleFile(file, index) {
 function updateProgress(percentage, text) {
   const progressFill = document.getElementById('progressFill');
   const progressText = document.getElementById('progressText');
-  
+
   if (progressFill) {
     progressFill.style.width = `${percentage}%`;
   }
-  
+
   if (progressText) {
     progressText.textContent = text;
   }
@@ -1146,18 +1180,24 @@ function clearResults() {
 function displayParsedResults() {
   const resultsContent = document.getElementById('resultsContent');
   if (!resultsContent || parsedResults.length === 0) return;
-  
+
   let resultsHTML = '<h4>Parsed Candidates</h4>';
-  
+
   parsedResults.forEach((candidate, index) => {
-    const skillsList = candidate.skills && candidate.skills.length > 0 
-      ? candidate.skills.map(skill => `<span class="skill-tag">${skill}</span>`).join(' ')
-      : '<em>No skills detected</em>';
-    
-    const educationList = candidate.education && candidate.education.length > 0
-      ? candidate.education.map(edu => `<span class="skill-tag">${edu}</span>`).join(' ')
-      : '<em>No education detected</em>';
-    
+    const skillsList =
+      candidate.skills && candidate.skills.length > 0
+        ? candidate.skills
+            .map(skill => `<span class="skill-tag">${skill}</span>`)
+            .join(' ')
+        : '<em>No skills detected</em>';
+
+    const educationList =
+      candidate.education && candidate.education.length > 0
+        ? candidate.education
+            .map(edu => `<span class="skill-tag">${edu}</span>`)
+            .join(' ')
+        : '<em>No education detected</em>';
+
     resultsHTML += `
       <div class="result-item success">
         <div class="result-icon">✓</div>
@@ -1181,7 +1221,7 @@ function displayParsedResults() {
       </div>
     `;
   });
-  
+
   resultsContent.innerHTML = resultsHTML;
 }
 
@@ -1206,10 +1246,10 @@ function showNotification(message, type = 'info') {
       <i class="fas fa-times"></i>
     </button>
   `;
-  
+
   // Add to page
   document.body.appendChild(notification);
-  
+
   // Auto-remove after 5 seconds
   setTimeout(() => {
     if (notification.parentElement) {
@@ -1220,60 +1260,64 @@ function showNotification(message, type = 'info') {
 
 function getNotificationIcon(type) {
   switch (type) {
-    case 'success': return 'check-circle';
-    case 'error': return 'exclamation-circle';
-    case 'warning': return 'exclamation-triangle';
-    default: return 'info-circle';
+    case 'success':
+      return 'check-circle';
+    case 'error':
+      return 'exclamation-circle';
+    case 'warning':
+      return 'exclamation-triangle';
+    default:
+      return 'info-circle';
   }
 }
 
 // Initialize resume upload when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   console.log('DOMContentLoaded: Starting initialization...');
-  
+
   // Initialize ModernUI
   const modernUI = new ModernUI();
-  
+
   // Initialize resume upload functionality
   initializeResumeUpload();
-  
+
   // Initialize job management functionality
   initializeJobManagement();
-  
+
   // Initialize candidate management functionality
   initializeCandidateManagement();
-  
+
   // Initialize AI tools
   initializeAITools();
-  
+
   // Initialize analytics
   initializeAnalytics();
-  
+
   // Test candidate data after a short delay
   setTimeout(() => {
     console.log('DOMContentLoaded: Testing candidate data after delay...');
     console.log('candidatesData at test time:', candidatesData);
     console.log('candidatesData length at test time:', candidatesData.length);
-    
+
     // Force a re-render to see if that helps
     if (candidatesData.length > 0) {
       console.log('DOMContentLoaded: Forcing re-render of candidates...');
       renderCandidates();
     }
   }, 2000);
-  
+
   // Close modal when clicking outside
   const modal = document.getElementById('resumeUploadModal');
   if (modal) {
-    modal.addEventListener('click', function(e) {
+    modal.addEventListener('click', function (e) {
       if (e.target === modal) {
         closeResumeUploadModal();
       }
     });
   }
-  
+
   // Close modal with Escape key
-  document.addEventListener('keydown', function(e) {
+  document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       closeResumeUploadModal();
     }
@@ -1539,11 +1583,16 @@ function getJobFormData() {
     benefits: formData.get('benefits') || '',
     perks: formData.get('perks') || '',
     startDate: formData.get('startDate') || '',
-    status: formData.get('status') || 'draft'
+    status: formData.get('status') || 'draft',
   };
 
   // Validate required fields
-  if (!jobData.title || !jobData.location || !jobData.employmentType || !jobData.description) {
+  if (
+    !jobData.title ||
+    !jobData.location ||
+    !jobData.employmentType ||
+    !jobData.description
+  ) {
     showNotification('Please fill in all required fields.', 'error');
     return null;
   }
@@ -1555,13 +1604,13 @@ function getJobFormData() {
 async function submitJob(jobData, successMessage) {
   try {
     showNotification('Saving job...', 'info');
-    
+
     const response = await fetch('/api/jobs', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(jobData)
+      body: JSON.stringify(jobData),
     });
 
     if (response.ok) {
@@ -1635,9 +1684,15 @@ function createJobCard(job) {
   card.setAttribute('data-job-id', job.id);
 
   // Handle skills as array (new format) or string (old format)
-  const skillsArray = Array.isArray(job.skills) ? job.skills : (job.skills ? job.skills.split(',') : []);
+  const skillsArray = Array.isArray(job.skills)
+    ? job.skills
+    : job.skills
+      ? job.skills.split(',')
+      : [];
   const skills = skillsArray.slice(0, 3);
-  const skillsDisplay = skills.map(skill => `<span class="skill-tag">${skill.trim()}</span>`).join('');
+  const skillsDisplay = skills
+    .map(skill => `<span class="skill-tag">${skill.trim()}</span>`)
+    .join('');
   const moreSkills = skillsArray.length - 3;
 
   card.innerHTML = `
@@ -1716,14 +1771,20 @@ function populateJobForm(job) {
   form.querySelector('[name="location"]').value = job.location || '';
   form.querySelector('[name="employmentType"]').value = job.type || '';
   form.querySelector('[name="salary"]').value = job.salary || '';
-  form.querySelector('[name="experienceLevel"]').value = job.experienceLevel || '';
+  form.querySelector('[name="experienceLevel"]').value =
+    job.experienceLevel || '';
   form.querySelector('[name="description"]').value = job.description || '';
-  form.querySelector('[name="responsibilities"]').value = job.responsibilities || '';
-  
+  form.querySelector('[name="responsibilities"]').value =
+    job.responsibilities || '';
+
   // Handle requirements and skills as arrays
-  const requirements = Array.isArray(job.requirements) ? job.requirements.join(', ') : job.requirements || '';
-  const skills = Array.isArray(job.skills) ? job.skills.join(', ') : job.skills || '';
-  
+  const requirements = Array.isArray(job.requirements)
+    ? job.requirements.join(', ')
+    : job.requirements || '';
+  const skills = Array.isArray(job.skills)
+    ? job.skills.join(', ')
+    : job.skills || '';
+
   form.querySelector('[name="requirements"]').value = requirements;
   form.querySelector('[name="skills"]').value = skills;
   form.querySelector('[name="niceToHave"]').value = job.niceToHave || '';
@@ -1747,9 +1808,13 @@ function showJobOptions(jobId) {
 
 // Function to filter jobs
 function filterJobs() {
-  const statusFilter = document.querySelector('[data-track="job-status-filter"]').value;
-  const typeFilter = document.querySelector('[data-track="job-type-filter"]').value;
-  
+  const statusFilter = document.querySelector(
+    '[data-track="job-status-filter"]'
+  ).value;
+  const typeFilter = document.querySelector(
+    '[data-track="job-type-filter"]'
+  ).value;
+
   const filteredJobs = jobsData.filter(job => {
     const statusMatch = statusFilter === 'all' || job.status === statusFilter;
     const typeMatch = typeFilter === 'all' || job.employmentType === typeFilter;
@@ -1774,13 +1839,15 @@ function renderFilteredJobs(filteredJobs) {
 // Initialize job management functionality
 function initializeJobManagement() {
   // Add event listeners for job filters
-  const statusFilter = document.querySelector('[data-track="job-status-filter"]');
+  const statusFilter = document.querySelector(
+    '[data-track="job-status-filter"]'
+  );
   const typeFilter = document.querySelector('[data-track="job-type-filter"]');
-  
+
   if (statusFilter) {
     statusFilter.addEventListener('change', filterJobs);
   }
-  
+
   if (typeFilter) {
     typeFilter.addEventListener('change', filterJobs);
   }
@@ -1796,23 +1863,32 @@ async function loadCandidates() {
   try {
     console.log('loadCandidates: Starting to fetch candidates...');
     showCandidatesLoading();
-    
+
     const response = await fetch('/api/candidates');
     console.log('loadCandidates: Response status:', response.status);
-    
+
     if (response.ok) {
       const data = await response.json();
       console.log('loadCandidates: Raw data received:', data);
       console.log('loadCandidates: Data type:', typeof data);
-      console.log('loadCandidates: Data length:', Array.isArray(data) ? data.length : 'Not an array');
-      
+      console.log(
+        'loadCandidates: Data length:',
+        Array.isArray(data) ? data.length : 'Not an array'
+      );
+
       candidatesData = data || [];
       console.log('loadCandidates: Processed candidatesData:', candidatesData);
-      console.log('loadCandidates: candidatesData length:', candidatesData.length);
-      
+      console.log(
+        'loadCandidates: candidatesData length:',
+        candidatesData.length
+      );
+
       renderCandidates();
     } else {
-      console.error('loadCandidates: Failed to load candidates, status:', response.status);
+      console.error(
+        'loadCandidates: Failed to load candidates, status:',
+        response.status
+      );
       showCandidatesEmpty();
     }
   } catch (error) {
@@ -1824,61 +1900,70 @@ async function loadCandidates() {
 // Function to render candidates in the grid
 function renderCandidates() {
   console.log('renderCandidates called with data:', candidatesData);
-  
+
   const candidatesGrid = document.getElementById('candidatesGrid');
   const loadingState = document.getElementById('candidatesLoading');
   const emptyState = document.getElementById('candidatesEmpty');
-  
+
   console.log('DOM elements found:', {
     candidatesGrid: !!candidatesGrid,
     loadingState: !!loadingState,
-    emptyState: !!emptyState
+    emptyState: !!emptyState,
   });
-  
+
   if (!candidatesGrid) {
     console.error('candidatesGrid element not found!');
     return;
   }
-  
-     // Hide loading and empty states
-   if (loadingState) {
-     loadingState.style.display = 'none';
-     console.log('Hidden loading state');
-   }
-   if (emptyState) {
-     emptyState.style.display = 'none';
-     console.log('Hidden empty state');
-   }
-  
-     // Clear existing content
-   candidatesGrid.innerHTML = '';
-   console.log('Cleared candidates grid');
-   
-   // Ensure candidates grid is visible
-   candidatesGrid.style.display = 'grid';
-   console.log('Set candidates grid display to grid');
-  
+
+  // Hide loading and empty states
+  if (loadingState) {
+    loadingState.style.display = 'none';
+    console.log('Hidden loading state');
+  }
+  if (emptyState) {
+    emptyState.style.display = 'none';
+    console.log('Hidden empty state');
+  }
+
+  // Clear existing content
+  candidatesGrid.innerHTML = '';
+  console.log('Cleared candidates grid');
+
+  // Ensure candidates grid is visible
+  candidatesGrid.style.display = 'grid';
+  console.log('Set candidates grid display to grid');
+
   console.log('candidatesData length:', candidatesData.length);
-  
+
   if (candidatesData.length === 0) {
     console.log('No candidates data, showing empty state');
     showCandidatesEmpty();
     return;
   }
-  
-  console.log('Creating candidate cards for', candidatesData.length, 'candidates');
+
+  console.log(
+    'Creating candidate cards for',
+    candidatesData.length,
+    'candidates'
+  );
   candidatesData.forEach((candidate, index) => {
     console.log(`Creating card ${index + 1}:`, candidate);
     const candidateCard = createCandidateCard(candidate);
-         if (candidateCard) {
-       candidatesGrid.appendChild(candidateCard);
-       console.log(`Card ${index + 1} added to grid`);
-       console.log(`Grid now has ${candidatesGrid.children.length} children`);
-       console.log(`Grid display style: ${candidatesGrid.style.display}`);
-       console.log(`Grid computed display: ${window.getComputedStyle(candidatesGrid).display}`);
-     } else {
-       console.error(`Failed to create card for candidate ${index + 1}:`, candidate);
-     }
+    if (candidateCard) {
+      candidatesGrid.appendChild(candidateCard);
+      console.log(`Card ${index + 1} added to grid`);
+      console.log(`Grid now has ${candidatesGrid.children.length} children`);
+      console.log(`Grid display style: ${candidatesGrid.style.display}`);
+      console.log(
+        `Grid computed display: ${window.getComputedStyle(candidatesGrid).display}`
+      );
+    } else {
+      console.error(
+        `Failed to create card for candidate ${index + 1}:`,
+        candidate
+      );
+    }
   });
 }
 
@@ -1890,39 +1975,54 @@ function createCandidateCard(candidate) {
     card.setAttribute('data-stagger', '');
     card.setAttribute('data-track', 'candidate-card');
     card.setAttribute('data-candidate-id', candidate.id || 'unknown');
-    
+
     // Make the entire card clickable
     card.style.cursor = 'pointer';
-    card.addEventListener('click', (e) => {
+    card.addEventListener('click', e => {
       // Don't trigger if clicking on action buttons
       if (e.target.closest('.candidate-actions')) {
         return;
       }
       viewCandidateDetails(candidate.id || 'unknown');
     });
-    
+
     // Generate initials for avatar
-    const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
-    
+    const initials = candidate.name
+      ? candidate.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')
+          .toUpperCase()
+      : '?';
+
     // Display skills (limit to 3) - handle both array and string formats
     let skills = '<em>No skills detected</em>';
     if (candidate.skills) {
       if (Array.isArray(candidate.skills)) {
-        skills = candidate.skills.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+        skills = candidate.skills
+          .slice(0, 3)
+          .map(skill => `<span class="skill-tag">${skill}</span>`)
+          .join('');
       } else if (typeof candidate.skills === 'string') {
         // Handle case where skills might be a comma-separated string
-        const skillsArray = candidate.skills.split(',').map(s => s.trim()).filter(s => s.length > 0);
-        skills = skillsArray.slice(0, 3).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+        const skillsArray = candidate.skills
+          .split(',')
+          .map(s => s.trim())
+          .filter(s => s.length > 0);
+        skills = skillsArray
+          .slice(0, 3)
+          .map(skill => `<span class="skill-tag">${skill}</span>`)
+          .join('');
       }
     }
-    
+
     // Clean up title - if it contains too much info, extract just the job title part
     let displayTitle = candidate.title || 'No title specified';
     if (displayTitle.length > 50) {
       // If title is very long, it might contain concatenated data
       displayTitle = displayTitle.substring(0, 50) + '...';
     }
-    
+
     const cardHTML = `
       <div class="candidate-avatar" data-morph>${initials}</div>
       <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
@@ -1946,10 +2046,10 @@ function createCandidateCard(candidate) {
         </button>
       </div>
     `;
-    
+
     console.log('Generated card HTML:', cardHTML);
     card.innerHTML = cardHTML;
-    
+
     return card;
   } catch (error) {
     console.error('Error creating candidate card:', error, candidate);
@@ -1976,7 +2076,7 @@ function showCandidatesLoading() {
   const loadingState = document.getElementById('candidatesLoading');
   const emptyState = document.getElementById('candidatesEmpty');
   const candidatesGrid = document.getElementById('candidatesGrid');
-  
+
   if (loadingState) loadingState.style.display = 'block';
   if (emptyState) emptyState.style.display = 'none';
   if (candidatesGrid) candidatesGrid.innerHTML = '';
@@ -1987,7 +2087,7 @@ function showCandidatesEmpty() {
   const loadingState = document.getElementById('candidatesLoading');
   const emptyState = document.getElementById('candidatesEmpty');
   const candidatesGrid = document.getElementById('candidatesGrid');
-  
+
   if (loadingState) loadingState.style.display = 'none';
   if (emptyState) emptyState.style.display = 'block';
   if (candidatesGrid) candidatesGrid.innerHTML = '';
@@ -2000,7 +2100,7 @@ function viewCandidateDetails(candidateId) {
     showNotification('Candidate not found', 'error');
     return;
   }
-  
+
   console.log('Opening candidate details for:', candidate);
   openCandidateDetailModal(candidate);
 }
@@ -2009,7 +2109,7 @@ function viewCandidateDetails(candidateId) {
 function contactCandidate(candidateId) {
   const candidate = candidatesData.find(c => c.id === candidateId);
   if (!candidate) return;
-  
+
   showNotification(`Opening contact form for ${candidate.name}`, 'info');
   // TODO: Implement contact form
 }
@@ -2018,7 +2118,7 @@ function contactCandidate(candidateId) {
 function archiveCandidate(candidateId) {
   const candidate = candidatesData.find(c => c.id === candidateId);
   if (!candidate) return;
-  
+
   if (confirm(`Are you sure you want to archive ${candidate.name}?`)) {
     showNotification(`Archiving ${candidate.name}...`, 'info');
     // TODO: Implement archive functionality
@@ -2027,18 +2127,26 @@ function archiveCandidate(candidateId) {
 
 // Function to filter candidates
 function filterCandidates() {
-  const statusFilter = document.querySelector('[data-track="candidate-status-filter"]').value;
-  const sortFilter = document.querySelector('[data-track="candidate-sort"]').value;
-  
+  const statusFilter = document.querySelector(
+    '[data-track="candidate-status-filter"]'
+  ).value;
+  const sortFilter = document.querySelector(
+    '[data-track="candidate-sort"]'
+  ).value;
+
   let filteredCandidates = [...candidatesData];
-  
+
   // Apply status filter
   if (statusFilter === 'active') {
-    filteredCandidates = filteredCandidates.filter(candidate => !candidate.isArchived);
+    filteredCandidates = filteredCandidates.filter(
+      candidate => !candidate.isArchived
+    );
   } else if (statusFilter === 'archived') {
-    filteredCandidates = filteredCandidates.filter(candidate => candidate.isArchived);
+    filteredCandidates = filteredCandidates.filter(
+      candidate => candidate.isArchived
+    );
   }
-  
+
   // Apply sorting
   filteredCandidates.sort((a, b) => {
     switch (sortFilter) {
@@ -2052,7 +2160,7 @@ function filterCandidates() {
         return 0;
     }
   });
-  
+
   renderFilteredCandidates(filteredCandidates);
 }
 
@@ -2060,9 +2168,9 @@ function filterCandidates() {
 function renderFilteredCandidates(filteredCandidates) {
   const candidatesGrid = document.getElementById('candidatesGrid');
   if (!candidatesGrid) return;
-  
+
   candidatesGrid.innerHTML = '';
-  
+
   if (filteredCandidates.length === 0) {
     candidatesGrid.innerHTML = `
       <div class="empty-state" style="grid-column: 1 / -1;">
@@ -2075,7 +2183,7 @@ function renderFilteredCandidates(filteredCandidates) {
     `;
     return;
   }
-  
+
   filteredCandidates.forEach(candidate => {
     const candidateCard = createCandidateCard(candidate);
     candidatesGrid.appendChild(candidateCard);
@@ -2085,20 +2193,22 @@ function renderFilteredCandidates(filteredCandidates) {
 // Initialize candidate management functionality
 function initializeCandidateManagement() {
   console.log('initializeCandidateManagement: Starting initialization...');
-  
+
   // Add event listeners for candidate filters
-  const statusFilter = document.querySelector('[data-track="candidate-status-filter"]');
+  const statusFilter = document.querySelector(
+    '[data-track="candidate-status-filter"]'
+  );
   const sortFilter = document.querySelector('[data-track="candidate-sort"]');
-  
+
   console.log('initializeCandidateManagement: Found filters:', {
     statusFilter: !!statusFilter,
-    sortFilter: !!sortFilter
+    sortFilter: !!sortFilter,
   });
-  
+
   if (statusFilter) {
     statusFilter.addEventListener('change', filterCandidates);
   }
-  
+
   if (sortFilter) {
     sortFilter.addEventListener('change', filterCandidates);
   }
@@ -2113,13 +2223,13 @@ function initializeCandidateManagement() {
 // Initialize AI tools functionality
 function initializeAITools() {
   console.log('🧠 Initializing AI Tools...');
-  
+
   // Add event listeners for AI tool buttons
   const aiToolButtons = document.querySelectorAll('.ai-tool-btn');
   aiToolButtons.forEach(button => {
     button.addEventListener('click', handleAIToolClick);
   });
-  
+
   console.log(`✅ AI Tools initialized with ${aiToolButtons.length} buttons`);
 }
 
@@ -2127,12 +2237,12 @@ function initializeAITools() {
 function handleAIToolClick(event) {
   const button = event.currentTarget;
   const toolType = button.getAttribute('data-track')?.replace('use-ai-', '');
-  
+
   if (!toolType) {
     showNotification('Unknown AI tool', 'error');
     return;
   }
-  
+
   // Show candidate and job selection modal
   showAISelectionModal(toolType);
 }
@@ -2174,17 +2284,17 @@ function showAISelectionModal(toolType) {
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
 }
 
 // Get display name for AI tool
 function getToolDisplayName(toolType) {
   const toolNames = {
-    'matching': 'Smart Candidate Matching',
-    'skills': 'Skills Gap Analysis',
-    'interview': 'Interview Question Generator',
-    'cultural': 'Cultural Fit Assessment'
+    matching: 'Smart Candidate Matching',
+    skills: 'Skills Gap Analysis',
+    interview: 'Interview Question Generator',
+    cultural: 'Cultural Fit Assessment',
   };
   return toolNames[toolType] || toolType;
 }
@@ -2193,67 +2303,66 @@ function getToolDisplayName(toolType) {
 async function runAIAnalysis(toolType) {
   const candidateId = document.getElementById('ai-candidate-select').value;
   const jobId = document.getElementById('ai-job-select').value;
-  
+
   if (!candidateId || !jobId) {
     showNotification('Please select both a candidate and a job', 'error');
     return;
   }
-  
+
   // Close the modal
   document.querySelector('.modal-overlay').remove();
-  
+
   // Show loading state
   showNotification(`Running ${getToolDisplayName(toolType)}...`, 'info');
-  
+
   try {
     let result;
     const requestBody = { candidateId, jobId };
-    
+
     switch (toolType) {
       case 'matching':
         result = await fetch('/api/role-alignment', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
         break;
-        
+
       case 'skills':
         result = await fetch('/api/skills-gap', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
         break;
-        
+
       case 'interview':
         result = await fetch('/api/interview-questions/categorized', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
         break;
-        
+
       case 'cultural':
         result = await fetch('/api/cultural-fit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(requestBody)
+          body: JSON.stringify(requestBody),
         });
         break;
-        
+
       default:
         throw new Error('Unknown AI tool type');
     }
-    
+
     const data = await result.json();
-    
+
     if (data.success) {
       showAIAnalysisResults(toolType, data);
     } else {
       showNotification(`Analysis failed: ${data.error}`, 'error');
     }
-    
   } catch (error) {
     console.error('AI analysis error:', error);
     showNotification('Analysis failed. Please try again.', 'error');
@@ -2264,9 +2373,9 @@ async function runAIAnalysis(toolType) {
 function showAIAnalysisResults(toolType, data) {
   const modal = document.createElement('div');
   modal.className = 'modal-overlay';
-  
+
   let content = '';
-  
+
   switch (toolType) {
     case 'matching':
       content = `
@@ -2302,7 +2411,7 @@ function showAIAnalysisResults(toolType, data) {
         </div>
       `;
       break;
-      
+
     case 'skills':
       content = `
         <div class="modal-header">
@@ -2335,7 +2444,7 @@ function showAIAnalysisResults(toolType, data) {
         </div>
       `;
       break;
-      
+
     case 'interview':
       content = `
         <div class="modal-header">
@@ -2374,7 +2483,7 @@ function showAIAnalysisResults(toolType, data) {
         </div>
       `;
       break;
-      
+
     case 'cultural':
       content = `
         <div class="modal-header">
@@ -2410,7 +2519,7 @@ function showAIAnalysisResults(toolType, data) {
       `;
       break;
   }
-  
+
   modal.innerHTML = `
     <div class="modal-content ai-results-modal">
       ${content}
@@ -2423,7 +2532,7 @@ function showAIAnalysisResults(toolType, data) {
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
 }
 
@@ -2431,10 +2540,12 @@ function showAIAnalysisResults(toolType, data) {
 function exportAIResults(toolType, data) {
   const timestamp = new Date().toISOString().split('T')[0];
   const filename = `${toolType}-analysis-${timestamp}.json`;
-  
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: 'application/json',
+  });
   const url = URL.createObjectURL(blob);
-  
+
   const a = document.createElement('a');
   a.href = url;
   a.download = filename;
@@ -2442,7 +2553,7 @@ function exportAIResults(toolType, data) {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-  
+
   showNotification('Results exported successfully!', 'success');
 }
 
@@ -2451,13 +2562,13 @@ function exportAIResults(toolType, data) {
 // Initialize analytics charts
 function initializeAnalytics() {
   console.log('📊 Initializing Analytics...');
-  
+
   // Load hiring funnel chart
   loadHiringFunnel();
-  
+
   // Load time to hire chart
   loadTimeToHire();
-  
+
   console.log('✅ Analytics initialized');
 }
 
@@ -2470,10 +2581,16 @@ async function loadHiringFunnel() {
       if (result.success) {
         renderHiringFunnelChart(result.data);
       } else {
-        showAnalyticsError('hiringFunnelChart', 'Failed to load hiring funnel data');
+        showAnalyticsError(
+          'hiringFunnelChart',
+          'Failed to load hiring funnel data'
+        );
       }
     } else {
-      showAnalyticsError('hiringFunnelChart', 'Failed to fetch hiring funnel data');
+      showAnalyticsError(
+        'hiringFunnelChart',
+        'Failed to fetch hiring funnel data'
+      );
     }
   } catch (error) {
     console.error('Error loading hiring funnel:', error);
@@ -2483,25 +2600,30 @@ async function loadHiringFunnel() {
 
 // Render hiring funnel chart
 function renderHiringFunnelChart(data) {
-  console.log('🔍 renderHiringFunnelChart: Rendering funnel chart with data:', data);
+  console.log(
+    '🔍 renderHiringFunnelChart: Rendering funnel chart with data:',
+    data
+  );
   const chartContainer = document.getElementById('hiringFunnelChart');
   if (!chartContainer) {
     console.error('❌ renderHiringFunnelChart: Chart container not found');
     return;
   }
-  
+
   // Calculate total for percentages
   const total = data.reduce((sum, item) => sum + item.count, 0);
   console.log('📊 renderHiringFunnelChart: Total count:', total);
-  
+
   // Create funnel chart HTML
   const chartHTML = `
     <div class="funnel-chart">
-      ${data.map((item, index) => {
-        const percentage = total > 0 ? Math.round((item.count / total) * 100) : 0;
-        const width = Math.max(20, 100 - (index * 15)); // Decreasing width for funnel effect
-        
-        return `
+      ${data
+        .map((item, index) => {
+          const percentage =
+            total > 0 ? Math.round((item.count / total) * 100) : 0;
+          const width = Math.max(20, 100 - index * 15); // Decreasing width for funnel effect
+
+          return `
           <div class="funnel-stage clickable" style="width: ${width}%" onclick="openFunnelStageModal('${item.stage}')">
             <div class="funnel-bar">
               <div class="funnel-fill" style="width: 100%; background: var(--color-primary-${Math.max(100, 500 - index * 100)})"></div>
@@ -2513,12 +2635,15 @@ function renderHiringFunnelChart(data) {
             </div>
           </div>
         `;
-      }).join('')}
+        })
+        .join('')}
     </div>
   `;
-  
+
   chartContainer.innerHTML = chartHTML;
-  console.log('✅ renderHiringFunnelChart: Funnel chart rendered with clickable stages');
+  console.log(
+    '✅ renderHiringFunnelChart: Funnel chart rendered with clickable stages'
+  );
 }
 
 // Load time to hire data and render chart
@@ -2527,13 +2652,15 @@ async function loadTimeToHire() {
   try {
     const response = await fetch('/api/analytics/time-to-hire');
     console.log('📡 loadTimeToHire: Response status:', response.status);
-    
+
     if (response.ok) {
       const result = await response.json();
       console.log('📊 loadTimeToHire: API response:', result);
-      
+
       if (result.success) {
-        console.log('✅ loadTimeToHire: Data loaded successfully, calling renderTimeToHireChart');
+        console.log(
+          '✅ loadTimeToHire: Data loaded successfully, calling renderTimeToHireChart'
+        );
         renderTimeToHireChart(result.data, 8);
       } else {
         console.error('❌ loadTimeToHire: API returned success: false');
@@ -2558,7 +2685,10 @@ function renderTimeToHireChart(apiData, sla = 8) {
   const values = monthly.map(m => m.value ?? m.days ?? m.count ?? 0);
 
   const el = document.getElementById('tthChart');
-  if (!el) { console.warn('tthChart canvas not found'); return; }
+  if (!el) {
+    console.warn('tthChart canvas not found');
+    return;
+  }
   const ctx = el.getContext('2d');
 
   if (tthChart) tthChart.destroy();
@@ -2567,20 +2697,27 @@ function renderTimeToHireChart(apiData, sla = 8) {
   const slaLine = {
     id: 'slaLine',
     afterDraw(chart, _args, opts) {
-      const {ctx, chartArea:{top, bottom, left, right}, scales:{y}} = chart;
+      const {
+        ctx,
+        chartArea: { top, bottom, left, right },
+        scales: { y },
+      } = chart;
       if (!y) return;
       const yPos = y.getPixelForValue(opts.sla);
       ctx.save();
-      ctx.setLineDash([6,6]);
+      ctx.setLineDash([6, 6]);
       ctx.strokeStyle = 'rgba(239,68,68,0.95)';
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(left, yPos);
+      ctx.lineTo(right, yPos);
+      ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = 'rgba(239,68,68,0.95)';
       ctx.font = '12px system-ui, sans-serif';
       ctx.fillText(`SLA ${opts.sla}d`, right - 64, yPos - 6);
       ctx.restore();
-    }
+    },
   };
   Chart.register(slaLine);
 
@@ -2588,29 +2725,43 @@ function renderTimeToHireChart(apiData, sla = 8) {
     type: 'bar',
     data: {
       labels,
-      datasets: [{ label: 'Time to Hire (days)', data: values, borderRadius: 6, barThickness: 'flex', maxBarThickness: 42 }]
+      datasets: [
+        {
+          label: 'Time to Hire (days)',
+          data: values,
+          borderRadius: 6,
+          barThickness: 'flex',
+          maxBarThickness: 42,
+        },
+      ],
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       layout: { padding: { top: 12, right: 8, bottom: 24, left: 8 } },
       scales: {
-        y: { beginAtZero: true, grace: '15%', title: { display: true, text: 'Days' }, grid: { color: 'rgba(148,163,184,0.2)' } },
-        x: { grid: { display: false } }
+        y: {
+          beginAtZero: true,
+          grace: '15%',
+          title: { display: true, text: 'Days' },
+          grid: { color: 'rgba(148,163,184,0.2)' },
+        },
+        x: { grid: { display: false } },
       },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: (c) => `${c.parsed.y} days` } },
-        slaLine: { sla }
-      }
+        tooltip: { callbacks: { label: c => `${c.parsed.y} days` } },
+        slaLine: { sla },
+      },
     },
-    plugins: [slaLine]
+    plugins: [slaLine],
   });
 
-  console.log('Chart.js: chart created', { labelsCount: labels.length, valuesMax: Math.max(...values) });
+  console.log('Chart.js: chart created', {
+    labelsCount: labels.length,
+    valuesMax: Math.max(...values),
+  });
 }
-
-
 
 // Refresh functions for analytics
 function refreshHiringFunnel() {
@@ -2666,13 +2817,17 @@ window.exportStageData = exportStageData;
 async function openFunnelStageModal(stage) {
   console.log('🔍 openFunnelStageModal: Opening modal for stage:', stage);
   try {
-    const response = await fetch(`/api/analytics/funnel-stage/${encodeURIComponent(stage)}`);
+    const response = await fetch(
+      `/api/analytics/funnel-stage/${encodeURIComponent(stage)}`
+    );
     console.log('📡 openFunnelStageModal: Response status:', response.status);
     if (response.ok) {
       const result = await response.json();
       console.log('📊 openFunnelStageModal: API response:', result);
       if (result.success) {
-        console.log('✅ openFunnelStageModal: Data loaded successfully, populating modal');
+        console.log(
+          '✅ openFunnelStageModal: Data loaded successfully, populating modal'
+        );
         populateFunnelModal(stage, result.data);
         const modal = document.getElementById('hiringFunnelModal');
         if (modal) {
@@ -2682,7 +2837,10 @@ async function openFunnelStageModal(stage) {
           console.error('❌ openFunnelStageModal: Modal element not found');
         }
       } else {
-        console.error('❌ openFunnelStageModal: API returned success: false:', result.error);
+        console.error(
+          '❌ openFunnelStageModal: API returned success: false:',
+          result.error
+        );
       }
     } else {
       console.error('❌ openFunnelStageModal: HTTP error:', response.status);
@@ -2700,30 +2858,32 @@ let currentStage = null;
 function populateFunnelModal(stage, data) {
   // Set current stage
   currentStage = stage;
-  
+
   // Update modal title
   document.getElementById('funnelStageName').textContent = stage;
-  
+
   // Update stage metrics
   document.getElementById('stageCount').textContent = data.candidates.length;
   document.getElementById('stagePercentage').textContent = data.conversionRate;
   document.getElementById('stageAvgTime').textContent = data.avgTimeInStage;
   document.getElementById('stageSuccessRate').textContent = data.successRate;
-  
+
   // Update analytics tab metrics
   document.getElementById('stageDropoffRate').textContent = data.dropoffRate;
-  document.getElementById('stageBottleneck').textContent = data.isBottleneck ? 'Yes' : 'No';
+  document.getElementById('stageBottleneck').textContent = data.isBottleneck
+    ? 'Yes'
+    : 'No';
   document.getElementById('stageEfficiency').textContent = data.efficiency;
-  
+
   // Populate candidates tab
   populateCandidatesTab(data.candidates);
-  
+
   // Populate insights tab
   populateInsightsTab(data.insights);
-  
+
   // Load stage performance chart data
   loadStagePerformanceChart(stage);
-  
+
   // Set active tab to candidates
   switchFunnelTab('candidates', null);
 }
@@ -2731,7 +2891,7 @@ function populateFunnelModal(stage, data) {
 // Populate candidates tab
 function populateCandidatesTab(candidates) {
   const candidatesList = document.getElementById('stageCandidatesList');
-  
+
   if (candidates.length === 0) {
     candidatesList.innerHTML = `
       <div class="empty-state">
@@ -2741,11 +2901,16 @@ function populateCandidatesTab(candidates) {
     `;
     return;
   }
-  
-  const candidatesHTML = candidates.map(candidate => `
+
+  const candidatesHTML = candidates
+    .map(
+      candidate => `
     <div class="candidate-item">
       <div class="candidate-avatar">
-        ${candidate.name.split(' ').map(n => n[0]).join('')}
+        ${candidate.name
+          .split(' ')
+          .map(n => n[0])
+          .join('')}
       </div>
       <div class="candidate-info">
         <div class="candidate-name">${candidate.name}</div>
@@ -2757,16 +2922,20 @@ function populateCandidatesTab(candidates) {
       </div>
       <div class="candidate-status ${candidate.status}">${candidate.status}</div>
     </div>
-  `).join('');
-  
+  `
+    )
+    .join('');
+
   candidatesList.innerHTML = candidatesHTML;
 }
 
 // Populate insights tab
 function populateInsightsTab(insights) {
   const insightsContainer = document.getElementById('stageInsights');
-  
-  const insightsHTML = insights.map(insight => `
+
+  const insightsHTML = insights
+    .map(
+      insight => `
     <div class="insight-card ${insight.type}">
       <div class="insight-header">
         <div class="insight-icon">
@@ -2776,31 +2945,49 @@ function populateInsightsTab(insights) {
       </div>
       <div class="insight-description">${insight.description}</div>
     </div>
-  `).join('');
-  
+  `
+    )
+    .join('');
+
   insightsContainer.innerHTML = insightsHTML;
 }
 
 // Load stage performance chart data
 async function loadStagePerformanceChart(stage) {
   try {
-    console.log('🔍 loadStagePerformanceChart: Loading performance data for stage:', stage);
-    const response = await fetch(`/api/analytics/stage-performance/${encodeURIComponent(stage)}`);
-    console.log('📡 loadStagePerformanceChart: Response status:', response.status);
-    
+    console.log(
+      '🔍 loadStagePerformanceChart: Loading performance data for stage:',
+      stage
+    );
+    const response = await fetch(
+      `/api/analytics/stage-performance/${encodeURIComponent(stage)}`
+    );
+    console.log(
+      '📡 loadStagePerformanceChart: Response status:',
+      response.status
+    );
+
     if (response.ok) {
       const result = await response.json();
       console.log('📊 loadStagePerformanceChart: API response:', result);
-      
+
       if (result.success) {
-        console.log('✅ loadStagePerformanceChart: Data loaded successfully, calling renderStagePerformanceChart');
+        console.log(
+          '✅ loadStagePerformanceChart: Data loaded successfully, calling renderStagePerformanceChart'
+        );
         renderStagePerformanceChart(result.data, stage);
       } else {
-        console.error('❌ loadStagePerformanceChart: API returned success: false:', result.error);
+        console.error(
+          '❌ loadStagePerformanceChart: API returned success: false:',
+          result.error
+        );
         showStagePerformanceError('Failed to load stage performance data');
       }
     } else {
-      console.error('❌ loadStagePerformanceChart: HTTP error:', response.status);
+      console.error(
+        '❌ loadStagePerformanceChart: HTTP error:',
+        response.status
+      );
       showStagePerformanceError('Failed to fetch stage performance data');
     }
   } catch (error) {
@@ -2811,31 +2998,38 @@ async function loadStagePerformanceChart(stage) {
 
 // Render stage performance chart using Chart.js
 function renderStagePerformanceChart(data, stage) {
-  console.log('🔍 renderStagePerformanceChart: Rendering chart for stage:', stage, 'with data:', data);
-  
+  console.log(
+    '🔍 renderStagePerformanceChart: Rendering chart for stage:',
+    stage,
+    'with data:',
+    data
+  );
+
   // Destroy existing chart if it exists
   if (stagePerformanceChart) {
     stagePerformanceChart.destroy();
     stagePerformanceChart = null;
   }
-  
+
   const ctx = document.getElementById('stagePerformanceChart');
   if (!ctx) {
     console.error('❌ renderStagePerformanceChart: Canvas element not found');
     return;
   }
-  
+
   // Prepare data for Chart.js
   const labels = data.map(item => item.week);
   const candidatesData = data.map(item => item.candidates);
   const conversionsData = data.map(item => item.conversions);
   const avgTimeData = data.map(item => item.avgTime);
-  
+
   // Calculate conversion rates
-  const conversionRates = data.map(item => 
-    item.candidates > 0 ? ((item.conversions / item.candidates) * 100).toFixed(1) : 0
+  const conversionRates = data.map(item =>
+    item.candidates > 0
+      ? ((item.conversions / item.candidates) * 100).toFixed(1)
+      : 0
   );
-  
+
   stagePerformanceChart = new Chart(ctx, {
     type: 'line',
     data: {
@@ -2849,7 +3043,7 @@ function renderStagePerformanceChart(data, stage) {
           borderWidth: 2,
           fill: true,
           tension: 0.4,
-          yAxisID: 'y'
+          yAxisID: 'y',
         },
         {
           label: 'Conversions',
@@ -2859,7 +3053,7 @@ function renderStagePerformanceChart(data, stage) {
           borderWidth: 2,
           fill: true,
           tension: 0.4,
-          yAxisID: 'y'
+          yAxisID: 'y',
         },
         {
           label: 'Conversion Rate (%)',
@@ -2869,7 +3063,7 @@ function renderStagePerformanceChart(data, stage) {
           borderWidth: 2,
           fill: false,
           tension: 0.4,
-          yAxisID: 'y1'
+          yAxisID: 'y1',
         },
         {
           label: 'Avg Time (days)',
@@ -2879,9 +3073,9 @@ function renderStagePerformanceChart(data, stage) {
           borderWidth: 2,
           fill: false,
           tension: 0.4,
-          yAxisID: 'y2'
-        }
-      ]
+          yAxisID: 'y2',
+        },
+      ],
     },
     options: {
       responsive: true,
@@ -2896,16 +3090,16 @@ function renderStagePerformanceChart(data, stage) {
           text: `${stage} Performance Over Time`,
           font: {
             size: 16,
-            weight: 'bold'
-          }
+            weight: 'bold',
+          },
         },
         legend: {
           display: true,
-          position: 'top'
+          position: 'top',
         },
         tooltip: {
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const label = context.dataset.label || '';
               const value = context.parsed.y;
               if (label.includes('Rate')) {
@@ -2915,17 +3109,17 @@ function renderStagePerformanceChart(data, stage) {
               } else {
                 return `${label}: ${value}`;
               }
-            }
-          }
-        }
+            },
+          },
+        },
       },
       scales: {
         x: {
           display: true,
           title: {
             display: true,
-            text: 'Week'
-          }
+            text: 'Week',
+          },
         },
         y: {
           type: 'linear',
@@ -2933,9 +3127,9 @@ function renderStagePerformanceChart(data, stage) {
           position: 'left',
           title: {
             display: true,
-            text: 'Count'
+            text: 'Count',
           },
-          beginAtZero: true
+          beginAtZero: true,
         },
         y1: {
           type: 'linear',
@@ -2943,7 +3137,7 @@ function renderStagePerformanceChart(data, stage) {
           position: 'right',
           title: {
             display: true,
-            text: 'Conversion Rate (%)'
+            text: 'Conversion Rate (%)',
           },
           beginAtZero: true,
           max: 100,
@@ -2957,17 +3151,17 @@ function renderStagePerformanceChart(data, stage) {
           position: 'right',
           title: {
             display: true,
-            text: 'Avg Time (days)'
+            text: 'Avg Time (days)',
           },
           beginAtZero: true,
           grid: {
             drawOnChartArea: false,
           },
-        }
-      }
-    }
+        },
+      },
+    },
   });
-  
+
   console.log('✅ renderStagePerformanceChart: Chart rendered successfully');
 }
 
@@ -2996,56 +3190,79 @@ let currentCandidate = null;
 // Open candidate detail modal
 function openCandidateDetailModal(candidate) {
   currentCandidate = candidate;
-  
+
   // Generate initials for avatar
-  const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
-  
+  const initials = candidate.name
+    ? candidate.name
+        .split(' ')
+        .map(n => n[0])
+        .join('')
+        .toUpperCase()
+    : '?';
+
   // Update modal header
-  document.getElementById('candidateDetailTitle').textContent = `Candidate Details - ${candidate.name}`;
+  document.getElementById('candidateDetailTitle').textContent =
+    `Candidate Details - ${candidate.name}`;
   document.getElementById('candidateDetailInitials').textContent = initials;
   document.getElementById('candidateDetailName').textContent = candidate.name;
   document.getElementById('candidateDetailTitle').textContent = candidate.title;
-  
+
   // Update basic info
-  document.getElementById('candidateDetailLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}`;
-  document.getElementById('candidateDetailExperience').innerHTML = `<i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}`;
-  document.getElementById('candidateDetailStatus').innerHTML = `<i class="fas fa-circle"></i> ${candidate.status || 'Active'}`;
-  
+  document.getElementById('candidateDetailLocation').innerHTML =
+    `<i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}`;
+  document.getElementById('candidateDetailExperience').innerHTML =
+    `<i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}`;
+  document.getElementById('candidateDetailStatus').innerHTML =
+    `<i class="fas fa-circle"></i> ${candidate.status || 'Active'}`;
+
   // Update match score
-  const matchScoreElement = document.getElementById('candidateDetailMatchScore');
+  const matchScoreElement = document.getElementById(
+    'candidateDetailMatchScore'
+  );
   const matchScore = candidate.matchScore || 0;
   matchScoreElement.innerHTML = `
     <span class="match-score-number">${matchScore}</span>
     <span class="match-score-percent">%</span>
   `;
-  
+
   // Update stage
   const stageElement = document.getElementById('candidateDetailStage');
   stageElement.innerHTML = `<span class="stage-badge">${candidate.stage || 'Applications'}</span>`;
-  
+
   // Update skills summary
-  const skillsSummaryElement = document.getElementById('candidateDetailSkillsSummary');
+  const skillsSummaryElement = document.getElementById(
+    'candidateDetailSkillsSummary'
+  );
   if (candidate.skills && candidate.skills.length > 0) {
-    const skillsList = Array.isArray(candidate.skills) ? candidate.skills : candidate.skills.split(',').map(s => s.trim());
-    skillsSummaryElement.innerHTML = skillsList.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+    const skillsList = Array.isArray(candidate.skills)
+      ? candidate.skills
+      : candidate.skills.split(',').map(s => s.trim());
+    skillsSummaryElement.innerHTML = skillsList
+      .slice(0, 5)
+      .map(skill => `<span class="skill-tag">${skill}</span>`)
+      .join('');
   } else {
     skillsSummaryElement.innerHTML = '<em>No skills listed</em>';
   }
-  
+
   // Update contact info
-  document.getElementById('candidateDetailEmail').textContent = candidate.email || 'No email provided';
-  document.getElementById('candidateDetailPhone').textContent = candidate.phone || 'No phone provided';
-  
+  document.getElementById('candidateDetailEmail').textContent =
+    candidate.email || 'No email provided';
+  document.getElementById('candidateDetailPhone').textContent =
+    candidate.phone || 'No phone provided';
+
   // Update professional links
   updateProfessionalLinks(candidate);
-  
+
   // Update notes
   const notesElement = document.getElementById('candidateDetailNotes');
-  notesElement.innerHTML = candidate.notes ? `<p>${candidate.notes}</p>` : '<p><em>No notes available</em></p>';
-  
+  notesElement.innerHTML = candidate.notes
+    ? `<p>${candidate.notes}</p>`
+    : '<p><em>No notes available</em></p>';
+
   // Show modal
   document.getElementById('candidateDetailModal').style.display = 'flex';
-  
+
   // Set active tab to overview
   switchCandidateTab('overview', null);
 }
@@ -3055,21 +3272,21 @@ function updateProfessionalLinks(candidate) {
   const linkedInElement = document.getElementById('candidateDetailLinkedIn');
   const githubElement = document.getElementById('candidateDetailGithub');
   const portfolioElement = document.getElementById('candidateDetailPortfolio');
-  
+
   if (candidate.linkedin) {
     linkedInElement.style.display = 'flex';
     linkedInElement.querySelector('a').href = candidate.linkedin;
   } else {
     linkedInElement.style.display = 'none';
   }
-  
+
   if (candidate.github) {
     githubElement.style.display = 'flex';
     githubElement.querySelector('a').href = candidate.github;
   } else {
     githubElement.style.display = 'none';
   }
-  
+
   if (candidate.portfolio) {
     portfolioElement.style.display = 'flex';
     portfolioElement.querySelector('a').href = candidate.portfolio;
@@ -3087,19 +3304,23 @@ function closeCandidateDetailModal() {
 // Switch candidate detail tabs
 function switchCandidateTab(tabName, event) {
   // Remove active class from all tabs and panes
-  document.querySelectorAll('.candidate-detail-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
-  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
-  
+  document
+    .querySelectorAll('.candidate-detail-tabs .tab-btn')
+    .forEach(btn => btn.classList.remove('active'));
+  document
+    .querySelectorAll('.tab-pane')
+    .forEach(pane => pane.classList.remove('active'));
+
   // Add active class to clicked tab
   if (event) {
     event.target.closest('.tab-btn').classList.add('active');
   } else {
     document.querySelector(`[onclick*="${tabName}"]`).classList.add('active');
   }
-  
+
   // Show corresponding pane
   document.getElementById(`${tabName}-tab`).classList.add('active');
-  
+
   // Load tab-specific content
   loadTabContent(tabName);
 }
@@ -3107,7 +3328,7 @@ function switchCandidateTab(tabName, event) {
 // Load tab-specific content
 function loadTabContent(tabName) {
   if (!currentCandidate) return;
-  
+
   switch (tabName) {
     case 'skills':
       loadSkillsTab();
@@ -3124,16 +3345,22 @@ function loadTabContent(tabName) {
 // Load skills tab content
 function loadSkillsTab() {
   const skillsElement = document.getElementById('candidateDetailSkills');
-  const experienceElement = document.getElementById('candidateDetailExperienceSummary');
-  
+  const experienceElement = document.getElementById(
+    'candidateDetailExperienceSummary'
+  );
+
   // Load skills
   if (currentCandidate.skills && currentCandidate.skills.length > 0) {
-    const skillsList = Array.isArray(currentCandidate.skills) ? currentCandidate.skills : currentCandidate.skills.split(',').map(s => s.trim());
-    skillsElement.innerHTML = skillsList.map(skill => `<span class="skill-tag skill-tag-large">${skill}</span>`).join('');
+    const skillsList = Array.isArray(currentCandidate.skills)
+      ? currentCandidate.skills
+      : currentCandidate.skills.split(',').map(s => s.trim());
+    skillsElement.innerHTML = skillsList
+      .map(skill => `<span class="skill-tag skill-tag-large">${skill}</span>`)
+      .join('');
   } else {
     skillsElement.innerHTML = '<p><em>No skills listed</em></p>';
   }
-  
+
   // Load experience summary
   experienceElement.innerHTML = `
     <div class="experience-item">
@@ -3142,12 +3369,16 @@ function loadSkillsTab() {
       <p>${currentCandidate.experience} of experience</p>
       ${currentCandidate.currentCompany ? `<p>at ${currentCandidate.currentCompany}</p>` : ''}
     </div>
-    ${currentCandidate.education ? `
+    ${
+      currentCandidate.education
+        ? `
     <div class="experience-item">
       <h5>Education</h5>
       ${currentCandidate.education.map(edu => `<p>${edu}</p>`).join('')}
     </div>
-    ` : ''}
+    `
+        : ''
+    }
   `;
 }
 
@@ -3202,13 +3433,13 @@ function archiveCandidateFromModal() {
 
 function addCandidateNote() {
   if (!currentCandidate) return;
-  
+
   const noteText = document.getElementById('newCandidateNote').value.trim();
   if (!noteText) {
     showNotification('Please enter a note', 'warning');
     return;
   }
-  
+
   // Add note to the notes section
   const notesElement = document.getElementById('candidateDetailNotes');
   const newNote = document.createElement('div');
@@ -3219,10 +3450,10 @@ function addCandidateNote() {
     </div>
     <p>${noteText}</p>
   `;
-  
+
   notesElement.appendChild(newNote);
   document.getElementById('newCandidateNote').value = '';
-  
+
   showNotification('Note added successfully', 'success');
 }
 
@@ -3235,13 +3466,13 @@ function switchFunnelTab(tabName, event) {
   if (event && event.target) {
     event.target.classList.add('active');
   }
-  
+
   // Update tab panes
   document.querySelectorAll('.tab-pane').forEach(pane => {
     pane.classList.remove('active');
   });
   document.getElementById(`${tabName}-tab`).classList.add('active');
-  
+
   // If switching to analytics tab, resize the chart
   if (tabName === 'analytics' && stagePerformanceChart) {
     setTimeout(() => {
@@ -3265,11 +3496,13 @@ function exportStageData() {
       count: document.getElementById('stageCount').textContent,
       conversionRate: document.getElementById('stagePercentage').textContent,
       avgTime: document.getElementById('stageAvgTime').textContent,
-      successRate: document.getElementById('stageSuccessRate').textContent
-    }
+      successRate: document.getElementById('stageSuccessRate').textContent,
+    },
   };
-  
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: 'application/json',
+  });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
@@ -3287,7 +3520,7 @@ function openTimeToHireModal() {
   if (modal) {
     modal.style.display = 'flex';
     loadTimeToHireModalData();
-    
+
     // Trigger modal opened event for chart resize
     document.dispatchEvent(new CustomEvent('timeToHireModal:opened'));
   } else {
@@ -3312,15 +3545,22 @@ async function loadTimeToHireModalData() {
   console.log('🔄 loadTimeToHireModalData: Loading data for modal...');
   try {
     const response = await fetch('/api/analytics/time-to-hire');
-    console.log('📡 loadTimeToHireModalData: Response status:', response.status);
+    console.log(
+      '📡 loadTimeToHireModalData: Response status:',
+      response.status
+    );
     if (response.ok) {
       const result = await response.json();
       console.log('📊 loadTimeToHireModalData: API response:', result);
       if (result.success) {
-        console.log('✅ loadTimeToHireModalData: Data loaded successfully, populating modal');
+        console.log(
+          '✅ loadTimeToHireModalData: Data loaded successfully, populating modal'
+        );
         populateTimeToHireModal(result.data);
       } else {
-        console.error('❌ loadTimeToHireModalData: API returned success: false');
+        console.error(
+          '❌ loadTimeToHireModalData: API returned success: false'
+        );
         showModalError('Failed to load time to hire data');
       }
     } else {
@@ -3342,18 +3582,31 @@ function populateTimeToHireModal(data) {
   }
 
   // Calculate additional metrics
-  const totalHires = data.monthlyHires.reduce((sum, month) => sum + month.count, 0);
+  const totalHires = data.monthlyHires.reduce(
+    (sum, month) => sum + month.count,
+    0
+  );
   const avgHiresPerMonth = totalHires / data.monthlyHires.length;
   const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
   const minHires = Math.min(...data.monthlyHires.map(m => m.count));
-  
+
   // Calculate trends
   const recentMonths = data.monthlyHires.slice(-3);
   const previousMonths = data.monthlyHires.slice(-6, -3);
-  const recentAvg = recentMonths.reduce((sum, m) => sum + m.count, 0) / recentMonths.length;
-  const previousAvg = previousMonths.reduce((sum, m) => sum + m.count, 0) / previousMonths.length;
-  const trend = recentAvg > previousAvg ? 'positive' : recentAvg < previousAvg ? 'negative' : 'neutral';
-  const trendPercentage = previousAvg > 0 ? ((recentAvg - previousAvg) / previousAvg * 100).toFixed(1) : 0;
+  const recentAvg =
+    recentMonths.reduce((sum, m) => sum + m.count, 0) / recentMonths.length;
+  const previousAvg =
+    previousMonths.reduce((sum, m) => sum + m.count, 0) / previousMonths.length;
+  const trend =
+    recentAvg > previousAvg
+      ? 'positive'
+      : recentAvg < previousAvg
+        ? 'negative'
+        : 'neutral';
+  const trendPercentage =
+    previousAvg > 0
+      ? (((recentAvg - previousAvg) / previousAvg) * 100).toFixed(1)
+      : 0;
 
   const modalHTML = `
     <div class="time-to-hire-metrics">
@@ -3416,26 +3669,45 @@ function populateTimeToHireModal(data) {
       <div class="time-to-hire-insight-card">
         <div class="time-to-hire-insight-title">Hiring Efficiency</div>
         <div class="time-to-hire-insight-description">
-          ${data.averageTimeToHire <= 30 ? 'Your hiring process is highly efficient with an average time to hire of ' + data.averageTimeToHire + ' days. This is well below industry standards.' : 
-            data.averageTimeToHire <= 45 ? 'Your hiring process is performing well with an average time to hire of ' + data.averageTimeToHire + ' days. Consider optimizing bottlenecks to improve further.' : 
-            'Your hiring process could benefit from optimization. The current average of ' + data.averageTimeToHire + ' days suggests potential bottlenecks in the recruitment funnel.'}
+          ${
+            data.averageTimeToHire <= 30
+              ? 'Your hiring process is highly efficient with an average time to hire of ' +
+                data.averageTimeToHire +
+                ' days. This is well below industry standards.'
+              : data.averageTimeToHire <= 45
+                ? 'Your hiring process is performing well with an average time to hire of ' +
+                  data.averageTimeToHire +
+                  ' days. Consider optimizing bottlenecks to improve further.'
+                : 'Your hiring process could benefit from optimization. The current average of ' +
+                  data.averageTimeToHire +
+                  ' days suggests potential bottlenecks in the recruitment funnel.'
+          }
         </div>
       </div>
       
       <div class="time-to-hire-insight-card">
         <div class="time-to-hire-insight-title">Seasonal Patterns</div>
         <div class="time-to-hire-insight-description">
-          ${maxHires > avgHiresPerMonth * 1.5 ? 'There are clear seasonal hiring patterns with ' + data.monthlyHires.find(m => m.count === maxHires)?.month + ' being the peak hiring month. Consider planning recruitment campaigns around these periods.' : 
-            'Hiring appears to be relatively consistent throughout the year with no major seasonal spikes. This suggests stable recruitment needs.'}
+          ${
+            maxHires > avgHiresPerMonth * 1.5
+              ? 'There are clear seasonal hiring patterns with ' +
+                data.monthlyHires.find(m => m.count === maxHires)?.month +
+                ' being the peak hiring month. Consider planning recruitment campaigns around these periods.'
+              : 'Hiring appears to be relatively consistent throughout the year with no major seasonal spikes. This suggests stable recruitment needs.'
+          }
         </div>
       </div>
       
       <div class="time-to-hire-insight-card">
         <div class="time-to-hire-insight-title">Growth Opportunities</div>
         <div class="time-to-hire-insight-description">
-          ${trend === 'positive' ? 'Your hiring is trending upward, indicating growing business needs and effective recruitment strategies. Consider scaling your recruitment team to maintain this momentum.' : 
-            trend === 'negative' ? 'Hiring has decreased recently. This could indicate market conditions, business strategy changes, or recruitment challenges that need attention.' : 
-            'Hiring has remained stable. This consistency suggests well-established recruitment processes and predictable business growth.'}
+          ${
+            trend === 'positive'
+              ? 'Your hiring is trending upward, indicating growing business needs and effective recruitment strategies. Consider scaling your recruitment team to maintain this momentum.'
+              : trend === 'negative'
+                ? 'Hiring has decreased recently. This could indicate market conditions, business strategy changes, or recruitment challenges that need attention.'
+                : 'Hiring has remained stable. This consistency suggests well-established recruitment processes and predictable business growth.'
+          }
         </div>
       </div>
     </div>
@@ -3444,31 +3716,38 @@ function populateTimeToHireModal(data) {
   console.log('📝 Generated modal HTML length:', modalHTML.length);
   modalContent.innerHTML = modalHTML;
   console.log('✅ Modal populated successfully');
-  
+
   // Initialize Chart.js for modal after DOM is ready
   setTimeout(() => {
     const canvas = document.getElementById('tthModalChart');
     if (canvas) {
       const ctx = canvas.getContext('2d');
-      
+
       // dashed SLA line
       const slaLine = {
         id: 'slaLine',
         afterDraw(chart, _args, opts) {
-          const {ctx, chartArea:{top, bottom, left, right}, scales:{y}} = chart;
+          const {
+            ctx,
+            chartArea: { top, bottom, left, right },
+            scales: { y },
+          } = chart;
           if (!y) return;
           const yPos = y.getPixelForValue(8); // Default SLA of 8 days
           ctx.save();
-          ctx.setLineDash([6,6]);
+          ctx.setLineDash([6, 6]);
           ctx.strokeStyle = 'rgba(239,68,68,0.95)';
           ctx.lineWidth = 1;
-          ctx.beginPath(); ctx.moveTo(left, yPos); ctx.lineTo(right, yPos); ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(left, yPos);
+          ctx.lineTo(right, yPos);
+          ctx.stroke();
           ctx.setLineDash([]);
           ctx.fillStyle = 'rgba(239,68,68,0.95)';
           ctx.font = '12px system-ui, sans-serif';
           ctx.fillText('SLA 8d', right - 64, yPos - 6);
           ctx.restore();
-        }
+        },
       };
       Chart.register(slaLine);
 
@@ -3476,23 +3755,36 @@ function populateTimeToHireModal(data) {
         type: 'bar',
         data: {
           labels: data.monthlyHires.map(item => item.month),
-          datasets: [{ label: 'Hires', data: data.monthlyHires.map(item => item.count), borderRadius: 6, barThickness: 'flex', maxBarThickness: 42 }]
+          datasets: [
+            {
+              label: 'Hires',
+              data: data.monthlyHires.map(item => item.count),
+              borderRadius: 6,
+              barThickness: 'flex',
+              maxBarThickness: 42,
+            },
+          ],
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           layout: { padding: { top: 12, right: 8, bottom: 24, left: 8 } },
           scales: {
-            y: { beginAtZero: true, grace: '15%', title: { display: true, text: 'Days' }, grid: { color: 'rgba(148,163,184,0.2)' } },
-            x: { grid: { display: false } }
+            y: {
+              beginAtZero: true,
+              grace: '15%',
+              title: { display: true, text: 'Days' },
+              grid: { color: 'rgba(148,163,184,0.2)' },
+            },
+            x: { grid: { display: false } },
           },
           plugins: {
             legend: { display: false },
-            tooltip: { callbacks: { label: (c) => `${c.parsed.y} days` } },
-            slaLine: { sla: 8 }
-          }
+            tooltip: { callbacks: { label: c => `${c.parsed.y} days` } },
+            slaLine: { sla: 8 },
+          },
         },
-        plugins: [slaLine]
+        plugins: [slaLine],
       });
     }
   }, 100);
@@ -3527,16 +3819,16 @@ document.addEventListener('timeToHireModal:opened', () => {
 // Debug function for chart container styles - run in console
 function debugChartContainer() {
   console.log('🔍 Debugging chart container styles...');
-  
+
   // Try different selectors to find the chart
   const selectors = [
     '.time-to-hire-chart',
     '.time-to-hire-chart-section',
     '.monthly-chart',
     '.chart-bars',
-    '#timeToHireChart'
+    '#timeToHireChart',
   ];
-  
+
   let chartElement = null;
   for (const selector of selectors) {
     chartElement = document.querySelector(selector);
@@ -3545,16 +3837,16 @@ function debugChartContainer() {
       break;
     }
   }
-  
+
   if (!chartElement) {
     console.log('❌ No chart element found with any selector');
     return;
   }
-  
+
   // Debug the element hierarchy
   let n = chartElement;
   let level = 0;
-  
+
   while (n && level < 10) {
     const cs = getComputedStyle(n);
     console.log(`Level ${level}:`, n.tagName, n.className, {
@@ -3568,25 +3860,26 @@ function debugChartContainer() {
       paddingTop: cs.paddingTop,
       display: cs.display,
       visibility: cs.visibility,
-      opacity: cs.opacity
+      opacity: cs.opacity,
     });
-    
+
     n = n.parentElement;
     level++;
   }
-  
+
   // Also check for any conflicting CSS rules
   console.log('🔍 Checking for potential CSS conflicts...');
   const allCharts = document.querySelectorAll('[class*="chart"]');
   console.log(`Found ${allCharts.length} elements with "chart" in class name`);
-  
+
   allCharts.forEach((el, index) => {
-    if (index < 5) { // Limit output
+    if (index < 5) {
+      // Limit output
       const cs = getComputedStyle(el);
       console.log(`Chart element ${index}:`, el.className, {
         overflow: cs.overflow,
         height: cs.height,
-        minHeight: cs.minHeight
+        minHeight: cs.minHeight,
       });
     }
   });

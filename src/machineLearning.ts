@@ -91,7 +91,7 @@ export class MachineLearningService {
   private feedbackLoops: FeedbackLoop[] = [];
   private abTests: Map<string, ABTestConfig> = new Map();
   private modelVersions: Map<string, string> = new Map();
-  
+
   constructor() {
     this.initializeModels();
   }
@@ -107,25 +107,25 @@ export class MachineLearningService {
   }> {
     try {
       this.trainingData = [...this.trainingData, ...trainingData];
-      
+
       // Prepare features and labels
       const features = this.extractFeatures(trainingData);
       const labels = this.extractLabels(trainingData);
-      
+
       // Train different model types
       const models = await this.trainModelTypes(features, labels);
-      
+
       // Evaluate models
       const metrics = await this.evaluateModels(models, features, labels);
-      
+
       // Update model versions
       this.updateModelVersions(models);
-      
+
       return {
         success: true,
         models: Object.keys(models),
         metrics,
-        message: `Successfully trained ${Object.keys(models).length} models`
+        message: `Successfully trained ${Object.keys(models).length} models`,
       };
     } catch (error) {
       console.error('Model training failed:', error);
@@ -133,7 +133,7 @@ export class MachineLearningService {
         success: false,
         models: [],
         metrics: {},
-        message: `Model training failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Model training failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       };
     }
   }
@@ -148,27 +148,37 @@ export class MachineLearningService {
   ): Promise<PredictionResult> {
     try {
       // Extract features for prediction
-      const features = this.extractCandidateFeatures(candidate, job, assessmentData);
-      
+      const features = this.extractCandidateFeatures(
+        candidate,
+        job,
+        assessmentData
+      );
+
       // Get predictions from all models
       const predictions = await this.getModelPredictions(features);
-      
+
       // Ensemble the predictions
       const ensemblePrediction = this.ensemblePredictions(predictions);
-      
+
       // Identify risk factors
-      const riskFactors = this.identifyRiskFactors(features, ensemblePrediction);
-      
+      const riskFactors = this.identifyRiskFactors(
+        features,
+        ensemblePrediction
+      );
+
       // Generate recommendations
-      const recommendations = this.generateRecommendations(features, ensemblePrediction);
-      
+      const recommendations = this.generateRecommendations(
+        features,
+        ensemblePrediction
+      );
+
       return {
         successProbability: ensemblePrediction.probability,
         confidence: ensemblePrediction.confidence,
         riskFactors,
         recommendations,
         modelVersion: this.getCurrentModelVersion(),
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     } catch (error) {
       console.error('Prediction failed:', error);
@@ -179,7 +189,7 @@ export class MachineLearningService {
         riskFactors: ['Prediction model unavailable'],
         recommendations: ['Use traditional assessment methods'],
         modelVersion: 'fallback',
-        timestamp: new Date()
+        timestamp: new Date(),
       };
     }
   }
@@ -197,24 +207,24 @@ export class MachineLearningService {
       if (!this.validateABTestConfig(config)) {
         throw new Error('Invalid A/B test configuration');
       }
-      
+
       // Store test configuration
       this.abTests.set(config.testId, config);
-      
+
       // Initialize test tracking
       this.initializeABTestTracking(config);
-      
+
       return Promise.resolve({
         success: true,
         testId: config.testId,
-        message: 'A/B test setup successfully'
+        message: 'A/B test setup successfully',
       });
     } catch (error) {
       console.error('A/B test setup failed:', error);
       return Promise.resolve({
         success: false,
         testId: '',
-        message: `A/B test setup failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `A/B test setup failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   }
@@ -222,7 +232,10 @@ export class MachineLearningService {
   /**
    * Get A/B test variant for a candidate
    */
-  getABTestVariant(testId: string, candidateId: string): {
+  getABTestVariant(
+    testId: string,
+    candidateId: string
+  ): {
     variantId: string;
     config: any;
     testInfo: ABTestConfig;
@@ -232,11 +245,11 @@ export class MachineLearningService {
       if (!test || test.status !== 'active') {
         return null;
       }
-      
+
       // Deterministic variant selection based on candidate ID
       const hash = this.hashString(candidateId);
       const normalizedHash = hash / Math.pow(2, 32); // Normalize to 0-1
-      
+
       let cumulativeWeight = 0;
       for (const variant of test.variants) {
         cumulativeWeight += variant.weight;
@@ -244,16 +257,16 @@ export class MachineLearningService {
           return {
             variantId: variant.id,
             config: variant.config,
-            testInfo: test
+            testInfo: test,
           };
         }
       }
-      
+
       // Fallback to first variant
       return {
         variantId: test.variants[0].id,
         config: test.variants[0].config,
-        testInfo: test
+        testInfo: test,
       };
     } catch (error) {
       console.error('Error getting A/B test variant:', error);
@@ -278,24 +291,24 @@ export class MachineLearningService {
       if (!test) {
         throw new Error('A/B test not found');
       }
-      
+
       // Store test results
       this.storeABTestResult(testId, variantId, candidateId, metrics);
-      
+
       // Check if test should be completed
       if (this.shouldCompleteABTest(testId)) {
         this.completeABTest(testId);
       }
-      
+
       return Promise.resolve({
         success: true,
-        message: 'A/B test result recorded successfully'
+        message: 'A/B test result recorded successfully',
       });
     } catch (error) {
       console.error('Error recording A/B test result:', error);
       return Promise.resolve({
         success: false,
-        message: `Failed to record A/B test result: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to record A/B test result: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   }
@@ -318,18 +331,18 @@ export class MachineLearningService {
       if (!test) {
         throw new Error('A/B test not found');
       }
-      
+
       // Get results for all variants
       const results = this.getABTestResultsForTest(testId);
-      
+
       // Analyze results
       const analysis = this.analyzeABTestResults(results);
-      
+
       return Promise.resolve({
         success: true,
         results,
         analysis,
-        message: 'A/B test results retrieved successfully'
+        message: 'A/B test results retrieved successfully',
       });
     } catch (error) {
       console.error('Error getting A/B test results:', error);
@@ -337,7 +350,7 @@ export class MachineLearningService {
         success: false,
         results: [],
         analysis: { winner: null, confidence: 0, recommendations: [] },
-        message: `Failed to get A/B test results: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to get A/B test results: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   }
@@ -353,26 +366,26 @@ export class MachineLearningService {
     try {
       // Store feedback
       this.feedbackLoops.push(feedback);
-      
+
       // Check if model update is needed
       const modelUpdateRequired = this.shouldUpdateModel();
-      
+
       // If update is needed, trigger retraining
       if (modelUpdateRequired) {
         this.triggerModelRetraining();
       }
-      
+
       return Promise.resolve({
         success: true,
         message: 'Feedback recorded successfully',
-        modelUpdateRequired
+        modelUpdateRequired,
       });
     } catch (error) {
       console.error('Error recording feedback:', error);
       return Promise.resolve({
         success: false,
         message: `Failed to record feedback: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        modelUpdateRequired: false
+        modelUpdateRequired: false,
       });
     }
   }
@@ -397,29 +410,34 @@ export class MachineLearningService {
     try {
       // Calculate overall metrics
       const overallMetrics = this.calculateOverallMetrics();
-      
+
       // Calculate metrics by model
       const byModelMetrics = this.calculateModelSpecificMetrics();
-      
+
       // Calculate feedback metrics
       const feedbackMetrics = this.calculateFeedbackMetrics();
-      
+
       return Promise.resolve({
         success: true,
         metrics: {
           overall: overallMetrics,
-          byModel: byModelMetrics
+          byModel: byModelMetrics,
         },
         feedback: feedbackMetrics,
-        message: 'Model performance metrics retrieved successfully'
+        message: 'Model performance metrics retrieved successfully',
       });
     } catch (error) {
       console.error('Error getting model performance:', error);
       return Promise.resolve({
         success: false,
         metrics: { overall: this.getDefaultMetrics(), byModel: {} },
-        feedback: { totalFeedback: 0, averageAccuracy: 0, recentAccuracy: 0, improvement: 0 },
-        message: `Failed to get model performance: ${error instanceof Error ? error.message : 'Unknown error'}`
+        feedback: {
+          totalFeedback: 0,
+          averageAccuracy: 0,
+          recentAccuracy: 0,
+          improvement: 0,
+        },
+        message: `Failed to get model performance: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   }
@@ -457,25 +475,25 @@ export class MachineLearningService {
     try {
       // Analyze data quality
       const dataQuality = this.analyzeDataQuality();
-      
+
       // Detect model drift
       const modelDrift = this.detectModelDrift();
-      
+
       // Analyze feature importance
       const featureImportance = this.analyzeFeatureImportance();
-      
+
       // Detect bias
       const biasDetection = this.detectBias();
-      
+
       return Promise.resolve({
         success: true,
         insights: {
           dataQuality,
           modelDrift,
           featureImportance,
-          biasDetection
+          biasDetection,
         },
-        message: 'Continuous learning insights retrieved successfully'
+        message: 'Continuous learning insights retrieved successfully',
       });
     } catch (error) {
       console.error('Error getting continuous learning insights:', error);
@@ -483,11 +501,20 @@ export class MachineLearningService {
         success: false,
         insights: {
           dataQuality: { score: 0, issues: [], recommendations: [] },
-          modelDrift: { detected: false, severity: 'low', description: '', recommendations: [] },
-          featureImportance: { topFeatures: [], emergingFeatures: [], decliningFeatures: [] },
-          biasDetection: { detected: false, description: '', mitigation: [] }
+          modelDrift: {
+            detected: false,
+            severity: 'low',
+            description: '',
+            recommendations: [],
+          },
+          featureImportance: {
+            topFeatures: [],
+            emergingFeatures: [],
+            decliningFeatures: [],
+          },
+          biasDetection: { detected: false, description: '', mitigation: [] },
         },
-        message: `Failed to get insights: ${error instanceof Error ? error.message : 'Unknown error'}`
+        message: `Failed to get insights: ${error instanceof Error ? error.message : 'Unknown error'}`,
       });
     }
   }
@@ -499,28 +526,28 @@ export class MachineLearningService {
       type: 'logistic_regression',
       trained: false,
       parameters: {},
-      performance: {}
+      performance: {},
     });
-    
+
     this.models.set('random_forest', {
       type: 'random_forest',
       trained: false,
       parameters: {},
-      performance: {}
+      performance: {},
     });
-    
+
     this.models.set('gradient_boosting', {
       type: 'gradient_boosting',
       trained: false,
       parameters: {},
-      performance: {}
+      performance: {},
     });
-    
+
     this.models.set('neural_network', {
       type: 'neural_network',
       trained: false,
       parameters: {},
-      performance: {}
+      performance: {},
     });
   }
 
@@ -535,15 +562,19 @@ export class MachineLearningService {
       data.features.technicalScore,
       data.features.softSkillsScore,
       data.features.behavioralScore,
-      data.features.interviewScore
+      data.features.interviewScore,
     ]);
   }
 
   private extractLabels(trainingData: TrainingData[]): number[] {
-    return trainingData.map(data => data.outcome.success ? 1 : 0);
+    return trainingData.map(data => (data.outcome.success ? 1 : 0));
   }
 
-  private extractCandidateFeatures(candidate: any, job: any, assessmentData?: any): number[] {
+  private extractCandidateFeatures(
+    candidate: any,
+    job: any,
+    assessmentData?: any
+  ): number[] {
     return [
       candidate.skills?.length || 0,
       this.extractYearsFromExperience(candidate.experience),
@@ -554,66 +585,90 @@ export class MachineLearningService {
       assessmentData?.technicalScore || 70,
       assessmentData?.softSkillsScore || 70,
       assessmentData?.behavioralScore || 70,
-      assessmentData?.interviewScore || 70
+      assessmentData?.interviewScore || 70,
     ];
   }
 
-  private async trainModelTypes(features: number[][], labels: number[]): Promise<{ [modelName: string]: any }> {
+  private async trainModelTypes(
+    features: number[][],
+    labels: number[]
+  ): Promise<{ [modelName: string]: any }> {
     const trainedModels: { [modelName: string]: any } = {};
-    
+
     // Train logistic regression
-    trainedModels.logistic_regression = await this.trainLogisticRegression(features, labels);
-    
+    trainedModels.logistic_regression = await this.trainLogisticRegression(
+      features,
+      labels
+    );
+
     // Train random forest
-    trainedModels.random_forest = await this.trainRandomForest(features, labels);
-    
+    trainedModels.random_forest = await this.trainRandomForest(
+      features,
+      labels
+    );
+
     // Train gradient boosting
-    trainedModels.gradient_boosting = await this.trainGradientBoosting(features, labels);
-    
+    trainedModels.gradient_boosting = await this.trainGradientBoosting(
+      features,
+      labels
+    );
+
     // Train neural network
-    trainedModels.neural_network = await this.trainNeuralNetwork(features, labels);
-    
+    trainedModels.neural_network = await this.trainNeuralNetwork(
+      features,
+      labels
+    );
+
     return trainedModels;
   }
 
-  private async trainLogisticRegression(features: number[][], labels: number[]): Promise<any> {
+  private async trainLogisticRegression(
+    features: number[][],
+    labels: number[]
+  ): Promise<any> {
     // Simplified logistic regression training
     // In production, this would use a proper ML library like TensorFlow.js or ML5.js
-    
+
     const model = {
       type: 'logistic_regression',
       trained: true,
       parameters: {
         weights: this.generateRandomWeights(features[0].length),
-        bias: Math.random() - 0.5
+        bias: Math.random() - 0.5,
       },
-      performance: {}
+      performance: {},
     };
-    
+
     // Simulate training iterations
     for (let epoch = 0; epoch < 100; epoch++) {
       this.updateLogisticRegressionWeights(model, features, labels);
     }
-    
+
     return model;
   }
 
-  private async trainRandomForest(features: number[][], labels: number[]): Promise<any> {
+  private async trainRandomForest(
+    features: number[][],
+    labels: number[]
+  ): Promise<any> {
     // Simplified random forest training
     const model = {
       type: 'random_forest',
       trained: true,
       parameters: {
         trees: this.generateRandomForestTrees(features, labels),
-        nEstimators: 100
+        nEstimators: 100,
       },
-      performance: {}
+      performance: {},
     };
-    
+
     return model;
   }
 
-  private async trainGradientBoosting(features: number[][], labels: number[]): Promise<any> {
+  private async trainGradientBoosting(
+    features: number[][],
+    labels: number[]
+  ): Promise<any> {
     // Simplified gradient boosting training
     const model = {
       type: 'gradient_boosting',
@@ -621,15 +676,18 @@ export class MachineLearningService {
       parameters: {
         estimators: this.generateGradientBoostingEstimators(features, labels),
         learningRate: 0.1,
-        nEstimators: 100
+        nEstimators: 100,
       },
-      performance: {}
+      performance: {},
     };
-    
+
     return model;
   }
 
-  private async trainNeuralNetwork(features: number[][], labels: number[]): Promise<any> {
+  private async trainNeuralNetwork(
+    features: number[][],
+    labels: number[]
+  ): Promise<any> {
     // Simplified neural network training
     const model = {
       type: 'neural_network',
@@ -637,11 +695,11 @@ export class MachineLearningService {
       parameters: {
         layers: this.generateNeuralNetworkLayers(features[0].length),
         weights: this.generateNeuralNetworkWeights(features[0].length),
-        biases: this.generateNeuralNetworkBiases()
+        biases: this.generateNeuralNetworkBiases(),
       },
-      performance: {}
+      performance: {},
     };
-    
+
     return model;
   }
 
@@ -651,45 +709,53 @@ export class MachineLearningService {
     labels: number[]
   ): Promise<{ [modelName: string]: ModelMetrics }> {
     const metrics: { [modelName: string]: ModelMetrics } = {};
-    
+
     for (const [modelName, model] of Object.entries(models)) {
       metrics[modelName] = await this.evaluateModel(model, features, labels);
     }
-    
+
     return metrics;
   }
 
-  private async evaluateModel(model: any, features: number[][], labels: number[]): Promise<ModelMetrics> {
+  private async evaluateModel(
+    model: any,
+    features: number[][],
+    labels: number[]
+  ): Promise<ModelMetrics> {
     // Simplified model evaluation
     // In production, this would use proper evaluation metrics
-    
-    const predictions = features.map(feature => this.predictWithModel(model, feature));
+
+    const predictions = features.map(feature =>
+      this.predictWithModel(model, feature)
+    );
     const accuracy = this.calculateAccuracy(predictions, labels);
     const precision = this.calculatePrecision(predictions, labels);
     const recall = this.calculateRecall(predictions, labels);
     const f1Score = this.calculateF1Score(precision, recall);
     const auc = this.calculateAUC(predictions, labels);
     const confusionMatrix = this.calculateConfusionMatrix(predictions, labels);
-    
+
     return {
       accuracy,
       precision,
       recall,
       f1Score,
       auc,
-      confusionMatrix
+      confusionMatrix,
     };
   }
 
-  private async getModelPredictions(features: number[]): Promise<{ [modelName: string]: number }> {
+  private async getModelPredictions(
+    features: number[]
+  ): Promise<{ [modelName: string]: number }> {
     const predictions: { [modelName: string]: number } = {};
-    
+
     for (const [modelName, model] of this.models.entries()) {
       if (model.trained) {
         predictions[modelName] = this.predictWithModel(model, features);
       }
     }
-    
+
     return predictions;
   }
 
@@ -698,56 +764,77 @@ export class MachineLearningService {
     confidence: number;
   } {
     const values = Object.values(predictions);
-    const probability = values.reduce((sum, val) => sum + val, 0) / values.length;
-    
+    const probability =
+      values.reduce((sum, val) => sum + val, 0) / values.length;
+
     // Calculate confidence based on prediction variance
-    const variance = values.reduce((sum, val) => sum + Math.pow(val - probability, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, val) => sum + Math.pow(val - probability, 2), 0) /
+      values.length;
     const confidence = Math.max(0.1, 1 - Math.sqrt(variance));
-    
+
     return { probability, confidence };
   }
 
   private identifyRiskFactors(features: number[], prediction: any): string[] {
     const riskFactors: string[] = [];
-    
+
     if (features[1] < 2) riskFactors.push('Limited experience');
     if (features[5] < 0.5) riskFactors.push('Low seniority level');
     if (features[6] < 60) riskFactors.push('Low technical score');
     if (features[7] < 60) riskFactors.push('Low soft skills score');
     if (features[8] < 60) riskFactors.push('Low behavioral score');
     if (features[9] < 60) riskFactors.push('Low interview score');
-    
-    if (prediction.probability < 0.4) riskFactors.push('Low success probability');
-    if (prediction.confidence < 0.5) riskFactors.push('Low prediction confidence');
-    
+
+    if (prediction.probability < 0.4)
+      riskFactors.push('Low success probability');
+    if (prediction.confidence < 0.5)
+      riskFactors.push('Low prediction confidence');
+
     return riskFactors;
   }
 
-  private generateRecommendations(features: number[], prediction: any): string[] {
+  private generateRecommendations(
+    features: number[],
+    prediction: any
+  ): string[] {
     const recommendations: string[] = [];
-    
-    if (features[1] < 3) recommendations.push('Consider candidates with more experience');
-    if (features[6] < 70) recommendations.push('Provide technical skills training');
-    if (features[7] < 70) recommendations.push('Focus on soft skills development');
+
+    if (features[1] < 3)
+      recommendations.push('Consider candidates with more experience');
+    if (features[6] < 70)
+      recommendations.push('Provide technical skills training');
+    if (features[7] < 70)
+      recommendations.push('Focus on soft skills development');
     if (features[8] < 70) recommendations.push('Address behavioral concerns');
     if (features[9] < 70) recommendations.push('Improve interview performance');
-    
-    if (prediction.probability < 0.5) recommendations.push('Consider alternative candidates');
-    if (prediction.confidence < 0.6) recommendations.push('Gather more assessment data');
-    
+
+    if (prediction.probability < 0.5)
+      recommendations.push('Consider alternative candidates');
+    if (prediction.confidence < 0.6)
+      recommendations.push('Gather more assessment data');
+
     return recommendations;
   }
 
   private validateABTestConfig(config: ABTestConfig): boolean {
-    if (!config.testId || !config.name || !config.variants || config.variants.length < 2) {
+    if (
+      !config.testId ||
+      !config.name ||
+      !config.variants ||
+      config.variants.length < 2
+    ) {
       return false;
     }
-    
-    const totalWeight = config.variants.reduce((sum, variant) => sum + variant.weight, 0);
+
+    const totalWeight = config.variants.reduce(
+      (sum, variant) => sum + variant.weight,
+      0
+    );
     if (Math.abs(totalWeight - 1) > 0.01) {
       return false;
     }
-    
+
     return true;
   }
 
@@ -757,10 +844,17 @@ export class MachineLearningService {
     console.log(`A/B test ${config.testId} tracking initialized`);
   }
 
-  private storeABTestResult(testId: string, variantId: string, candidateId: string, metrics: { [key: string]: number }) {
+  private storeABTestResult(
+    testId: string,
+    variantId: string,
+    candidateId: string,
+    metrics: { [key: string]: number }
+  ) {
     // Store A/B test results
     // In production, this would store in a database
-    console.log(`A/B test result stored: ${testId}, ${variantId}, ${candidateId}`);
+    console.log(
+      `A/B test result stored: ${testId}, ${variantId}, ${candidateId}`
+    );
   }
 
   private shouldCompleteABTest(testId: string): boolean {
@@ -794,7 +888,7 @@ export class MachineLearningService {
     return {
       winner: null,
       confidence: 0,
-      recommendations: []
+      recommendations: [],
     };
   }
 
@@ -815,7 +909,9 @@ export class MachineLearningService {
     return this.getDefaultMetrics();
   }
 
-  private calculateModelSpecificMetrics(): { [modelName: string]: ModelMetrics } {
+  private calculateModelSpecificMetrics(): {
+    [modelName: string]: ModelMetrics;
+  } {
     // Calculate metrics for each specific model
     return {};
   }
@@ -827,20 +923,24 @@ export class MachineLearningService {
     improvement: number;
   } {
     const totalFeedback = this.feedbackLoops.length;
-    const averageAccuracy = this.feedbackLoops.reduce((sum, feedback) => sum + feedback.accuracy, 0) / totalFeedback;
-    
+    const averageAccuracy =
+      this.feedbackLoops.reduce((sum, feedback) => sum + feedback.accuracy, 0) /
+      totalFeedback;
+
     // Calculate recent accuracy (last 20 feedbacks)
     const recentFeedback = this.feedbackLoops.slice(-20);
-    const recentAccuracy = recentFeedback.reduce((sum, feedback) => sum + feedback.accuracy, 0) / recentFeedback.length;
-    
+    const recentAccuracy =
+      recentFeedback.reduce((sum, feedback) => sum + feedback.accuracy, 0) /
+      recentFeedback.length;
+
     // Calculate improvement
     const improvement = recentAccuracy - averageAccuracy;
-    
+
     return {
       totalFeedback,
       averageAccuracy: averageAccuracy || 0,
       recentAccuracy: recentAccuracy || 0,
-      improvement: improvement || 0
+      improvement: improvement || 0,
     };
   }
 
@@ -852,19 +952,19 @@ export class MachineLearningService {
     // Analyze data quality
     const issues: string[] = [];
     const recommendations: string[] = [];
-    
+
     if (this.trainingData.length < 100) {
       issues.push('Insufficient training data');
       recommendations.push('Collect more hiring outcome data');
     }
-    
+
     if (this.feedbackLoops.length < 50) {
       issues.push('Limited feedback data');
       recommendations.push('Implement feedback collection system');
     }
-    
-    const score = Math.max(0, 100 - (issues.length * 20));
-    
+
+    const score = Math.max(0, 100 - issues.length * 20);
+
     return { score, issues, recommendations };
   }
 
@@ -880,7 +980,7 @@ export class MachineLearningService {
       detected: false,
       severity: 'low',
       description: 'No significant model drift detected',
-      recommendations: ['Continue monitoring model performance']
+      recommendations: ['Continue monitoring model performance'],
     };
   }
 
@@ -894,7 +994,7 @@ export class MachineLearningService {
     return {
       topFeatures: ['technicalScore', 'experience', 'softSkillsScore'],
       emergingFeatures: ['behavioralScore', 'interviewScore'],
-      decliningFeatures: ['location', 'education']
+      decliningFeatures: ['location', 'education'],
     };
   }
 
@@ -908,7 +1008,10 @@ export class MachineLearningService {
     return {
       detected: false,
       description: 'No significant bias detected',
-      mitigation: ['Continue monitoring for bias', 'Ensure diverse training data']
+      mitigation: [
+        'Continue monitoring for bias',
+        'Ensure diverse training data',
+      ],
     };
   }
 
@@ -917,15 +1020,19 @@ export class MachineLearningService {
     return Array.from({ length: size }, () => Math.random() - 0.5);
   }
 
-  private updateLogisticRegressionWeights(model: any, features: number[][], labels: number[]) {
+  private updateLogisticRegressionWeights(
+    model: any,
+    features: number[][],
+    labels: number[]
+  ) {
     // Simplified weight update for logistic regression
     // In production, this would use proper gradient descent
     const learningRate = 0.01;
-    
+
     for (let i = 0; i < features.length; i++) {
       const prediction = this.predictWithModel(model, features[i]);
       const error = labels[i] - prediction;
-      
+
       for (let j = 0; j < model.parameters.weights.length; j++) {
         model.parameters.weights[j] += learningRate * error * features[i][j];
       }
@@ -933,19 +1040,25 @@ export class MachineLearningService {
     }
   }
 
-  private generateRandomForestTrees(features: number[][], labels: number[]): any[] {
+  private generateRandomForestTrees(
+    features: number[][],
+    labels: number[]
+  ): any[] {
     // Simplified random forest tree generation
     return Array.from({ length: 10 }, () => ({
       root: { feature: 0, threshold: 0.5, left: null, right: null },
-      prediction: Math.random()
+      prediction: Math.random(),
     }));
   }
 
-  private generateGradientBoostingEstimators(features: number[][], labels: number[]): any[] {
+  private generateGradientBoostingEstimators(
+    features: number[][],
+    labels: number[]
+  ): any[] {
     // Simplified gradient boosting estimator generation
     return Array.from({ length: 10 }, () => ({
       weights: this.generateRandomWeights(features[0].length),
-      prediction: Math.random()
+      prediction: Math.random(),
     }));
   }
 
@@ -956,21 +1069,25 @@ export class MachineLearningService {
   private generateNeuralNetworkWeights(inputSize: number): number[][][] {
     const layers = this.generateNeuralNetworkLayers(inputSize);
     const weights: number[][][] = [];
-    
+
     for (let i = 0; i < layers.length - 1; i++) {
       const layerWeights: number[][] = [];
       for (let j = 0; j < layers[i + 1]; j++) {
-        layerWeights.push(Array.from({ length: layers[i] }, () => Math.random() - 0.5));
+        layerWeights.push(
+          Array.from({ length: layers[i] }, () => Math.random() - 0.5)
+        );
       }
       weights.push(layerWeights);
     }
-    
+
     return weights;
   }
 
   private generateNeuralNetworkBiases(): number[][] {
     const layers = this.generateNeuralNetworkLayers(0);
-    return layers.slice(1).map(size => Array.from({ length: size }, () => Math.random() - 0.5));
+    return layers
+      .slice(1)
+      .map(size => Array.from({ length: size }, () => Math.random() - 0.5));
   }
 
   private predictWithModel(model: any, features: number[]): number {
@@ -997,8 +1114,13 @@ export class MachineLearningService {
   }
 
   private predictRandomForest(model: any, features: number[]): number {
-    const predictions = model.parameters.trees.map((tree: any) => tree.prediction);
-    return predictions.reduce((sum: number, pred: number) => sum + pred, 0) / predictions.length;
+    const predictions = model.parameters.trees.map(
+      (tree: any) => tree.prediction
+    );
+    return (
+      predictions.reduce((sum: number, pred: number) => sum + pred, 0) /
+      predictions.length
+    );
   }
 
   private predictGradientBoosting(model: any, features: number[]): number {
@@ -1009,47 +1131,74 @@ export class MachineLearningService {
       }
       return pred;
     });
-    return predictions.reduce((sum: number, pred: number) => sum + pred, 0) / predictions.length;
+    return (
+      predictions.reduce((sum: number, pred: number) => sum + pred, 0) /
+      predictions.length
+    );
   }
 
   private predictNeuralNetwork(model: any, features: number[]): number {
     let activations = features;
-    
+
     for (let layer = 0; layer < model.parameters.weights.length; layer++) {
       const newActivations: number[] = [];
-      for (let neuron = 0; neuron < model.parameters.weights[layer].length; neuron++) {
+      for (
+        let neuron = 0;
+        neuron < model.parameters.weights[layer].length;
+        neuron++
+      ) {
         let sum = model.parameters.biases[layer][neuron];
         for (let input = 0; input < activations.length; input++) {
-          sum += model.parameters.weights[layer][neuron][input] * activations[input];
+          sum +=
+            model.parameters.weights[layer][neuron][input] * activations[input];
         }
         newActivations.push(1 / (1 + Math.exp(-sum))); // Sigmoid activation
       }
       activations = newActivations;
     }
-    
+
     return activations[0];
   }
 
   // Utility methods for metrics calculation
   private calculateAccuracy(predictions: number[], labels: number[]): number {
-    const correct = predictions.reduce((sum, pred, i) => sum + (Math.round(pred) === labels[i] ? 1 : 0), 0);
+    const correct = predictions.reduce(
+      (sum, pred, i) => sum + (Math.round(pred) === labels[i] ? 1 : 0),
+      0
+    );
     return correct / predictions.length;
   }
 
   private calculatePrecision(predictions: number[], labels: number[]): number {
-    const truePositives = predictions.reduce((sum, pred, i) => sum + (Math.round(pred) === 1 && labels[i] === 1 ? 1 : 0), 0);
-    const predictedPositives = predictions.reduce((sum, pred) => sum + (Math.round(pred) === 1 ? 1 : 0), 0);
+    const truePositives = predictions.reduce(
+      (sum, pred, i) =>
+        sum + (Math.round(pred) === 1 && labels[i] === 1 ? 1 : 0),
+      0
+    );
+    const predictedPositives = predictions.reduce(
+      (sum, pred) => sum + (Math.round(pred) === 1 ? 1 : 0),
+      0
+    );
     return predictedPositives > 0 ? truePositives / predictedPositives : 0;
   }
 
   private calculateRecall(predictions: number[], labels: number[]): number {
-    const truePositives = predictions.reduce((sum, pred, i) => sum + (Math.round(pred) === 1 && labels[i] === 1 ? 1 : 0), 0);
-    const actualPositives = labels.reduce((sum, label) => sum + (label === 1 ? 1 : 0), 0);
+    const truePositives = predictions.reduce(
+      (sum, pred, i) =>
+        sum + (Math.round(pred) === 1 && labels[i] === 1 ? 1 : 0),
+      0
+    );
+    const actualPositives = labels.reduce(
+      (sum, label) => sum + (label === 1 ? 1 : 0),
+      0
+    );
     return actualPositives > 0 ? truePositives / actualPositives : 0;
   }
 
   private calculateF1Score(precision: number, recall: number): number {
-    return precision + recall > 0 ? 2 * (precision * recall) / (precision + recall) : 0;
+    return precision + recall > 0
+      ? (2 * (precision * recall)) / (precision + recall)
+      : 0;
   }
 
   private calculateAUC(predictions: number[], labels: number[]): number {
@@ -1058,26 +1207,35 @@ export class MachineLearningService {
     return 0.75;
   }
 
-  private calculateConfusionMatrix(predictions: number[], labels: number[]): number[][] {
-    const matrix = [[0, 0], [0, 0]];
-    
+  private calculateConfusionMatrix(
+    predictions: number[],
+    labels: number[]
+  ): number[][] {
+    const matrix = [
+      [0, 0],
+      [0, 0],
+    ];
+
     for (let i = 0; i < predictions.length; i++) {
       const pred = Math.round(predictions[i]);
       const actual = labels[i];
       matrix[actual][pred]++;
     }
-    
+
     return matrix;
   }
 
   private getDefaultMetrics(): ModelMetrics {
     return {
       accuracy: 0.75,
-      precision: 0.70,
-      recall: 0.80,
+      precision: 0.7,
+      recall: 0.8,
       f1Score: 0.75,
       auc: 0.75,
-      confusionMatrix: [[50, 20], [15, 15]]
+      confusionMatrix: [
+        [50, 20],
+        [15, 15],
+      ],
     };
   }
 
@@ -1095,45 +1253,45 @@ export class MachineLearningService {
   // Encoding methods for categorical features
   private encodeEducation(education: string): number {
     const encodings: { [key: string]: number } = {
-      'high_school': 0.2,
-      'bachelor': 0.6,
-      'master': 0.8,
-      'phd': 1.0,
-      'unknown': 0.5
+      high_school: 0.2,
+      bachelor: 0.6,
+      master: 0.8,
+      phd: 1.0,
+      unknown: 0.5,
     };
     return encodings[education.toLowerCase()] || 0.5;
   }
 
   private encodeLocation(location: string): number {
     const encodings: { [key: string]: number } = {
-      'remote': 0.8,
-      'san_francisco': 1.0,
-      'new_york': 0.95,
-      'seattle': 0.9,
-      'austin': 0.85,
-      'unknown': 0.7
+      remote: 0.8,
+      san_francisco: 1.0,
+      new_york: 0.95,
+      seattle: 0.9,
+      austin: 0.85,
+      unknown: 0.7,
     };
     return encodings[location.toLowerCase()] || 0.7;
   }
 
   private encodeIndustry(industry: string): number {
     const encodings: { [key: string]: number } = {
-      'technology': 1.0,
-      'finance': 0.9,
-      'healthcare': 0.8,
-      'retail': 0.6,
-      'unknown': 0.7
+      technology: 1.0,
+      finance: 0.9,
+      healthcare: 0.8,
+      retail: 0.6,
+      unknown: 0.7,
     };
     return encodings[industry.toLowerCase()] || 0.7;
   }
 
   private encodeSeniority(seniority: string): number {
     const encodings: { [key: string]: number } = {
-      'ic': 0.3,
-      'senior': 0.6,
-      'lead': 0.8,
-      'manager': 0.9,
-      'unknown': 0.5
+      ic: 0.3,
+      senior: 0.6,
+      lead: 0.8,
+      manager: 0.9,
+      unknown: 0.5,
     };
     return encodings[seniority.toLowerCase()] || 0.5;
   }
@@ -1147,7 +1305,7 @@ export class MachineLearningService {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       const char = str.charCodeAt(i);
-      hash = ((hash << 5) - hash) + char;
+      hash = (hash << 5) - hash + char;
       hash = hash & hash; // Convert to 32-bit integer
     }
     return Math.abs(hash);

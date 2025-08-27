@@ -9,7 +9,9 @@ const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in your .env file.');
+  throw new Error(
+    'Missing Supabase environment variables. Please set SUPABASE_URL and SUPABASE_ANON_KEY in your .env file.'
+  );
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
@@ -19,7 +21,7 @@ export const TABLES = {
   JOBS: 'jobs',
   CANDIDATES: 'candidates',
   CAMPAIGNS: 'campaigns',
-  EMAIL_CONFIG: 'email_config'
+  EMAIL_CONFIG: 'email_config',
 } as const;
 
 // Database types
@@ -171,4 +173,4 @@ export interface Database {
       };
     };
   };
-};
+}

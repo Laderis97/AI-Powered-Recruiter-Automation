@@ -32,15 +32,18 @@ export class OpenAILlmClient implements LlmClient {
     this.projectId = process.env.OPENAI_PROJECT_ID;
     this.baseUrl = 'https://api.openai.com/v1/chat/completions';
     this.models = ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'];
-    
+
     if (!this.apiKey) {
       throw new Error('❌ Missing OPENAI_API_KEY in environment');
     }
   }
 
-  async completeJSON<T>(prompt: string, schema: z.ZodSchema<T>): Promise<Result<T>> {
+  async completeJSON<T>(
+    prompt: string,
+    schema: z.ZodSchema<T>
+  ): Promise<Result<T>> {
     const startTime = Date.now();
-    
+
     for (const model of this.models) {
       try {
         const response = await axios.post(
@@ -49,25 +52,26 @@ export class OpenAILlmClient implements LlmClient {
             model,
             messages: [
               {
-                role: "system",
-                content: "You are an expert AI recruiter with 10+ years of experience in technical recruitment. You specialize in analyzing candidate-job matches, identifying skills gaps, and generating targeted interview questions. Always respond with valid JSON that matches the requested schema exactly. Provide detailed, actionable insights that help recruiters make informed decisions."
+                role: 'system',
+                content:
+                  'You are an expert AI recruiter with 10+ years of experience in technical recruitment. You specialize in analyzing candidate-job matches, identifying skills gaps, and generating targeted interview questions. Always respond with valid JSON that matches the requested schema exactly. Provide detailed, actionable insights that help recruiters make informed decisions.',
               },
               {
-                role: "user",
-                content: prompt
-              }
+                role: 'user',
+                content: prompt,
+              },
             ],
             temperature: 0.3, // Lower temperature for more consistent JSON
             max_tokens: 2000,
-            response_format: { type: "json_object" }
+            response_format: { type: 'json_object' },
           },
           {
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${this.apiKey}`,
-              ...(this.projectId && { "OpenAI-Project": this.projectId })
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.apiKey}`,
+              ...(this.projectId && { 'OpenAI-Project': this.projectId }),
             },
-            timeout: 30000
+            timeout: 30000,
           }
         );
 
@@ -79,17 +83,19 @@ export class OpenAILlmClient implements LlmClient {
         try {
           const parsed = JSON.parse(content);
           const validated = schema.parse(parsed);
-          
+
           return {
             ok: true,
             data: validated,
             raw: content,
             provider: 'OpenAI',
             model,
-            latency: Date.now() - startTime
+            latency: Date.now() - startTime,
           };
         } catch (parseError) {
-          console.warn(`Model ${model} returned invalid JSON, trying next model...`);
+          console.warn(
+            `Model ${model} returned invalid JSON, trying next model...`
+          );
           continue;
         }
       } catch (error) {
@@ -102,13 +108,13 @@ export class OpenAILlmClient implements LlmClient {
       ok: false,
       error: 'All OpenAI models failed to provide valid JSON response',
       provider: 'OpenAI',
-      latency: Date.now() - startTime
+      latency: Date.now() - startTime,
     };
   }
 
   async completeText(prompt: string): Promise<Result<string>> {
     const startTime = Date.now();
-    
+
     for (const model of this.models) {
       try {
         const response = await axios.post(
@@ -117,24 +123,25 @@ export class OpenAILlmClient implements LlmClient {
             model,
             messages: [
               {
-                role: "system",
-                content: "You are an expert AI recruiter with 10+ years of experience in technical recruitment. Provide clear, professional, and actionable responses that help recruiters evaluate candidates effectively."
+                role: 'system',
+                content:
+                  'You are an expert AI recruiter with 10+ years of experience in technical recruitment. Provide clear, professional, and actionable responses that help recruiters evaluate candidates effectively.',
               },
               {
-                role: "user",
-                content: prompt
-              }
+                role: 'user',
+                content: prompt,
+              },
             ],
             temperature: 0.7,
-            max_tokens: 1500
+            max_tokens: 1500,
           },
           {
             headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${this.apiKey}`,
-              ...(this.projectId && { "OpenAI-Project": this.projectId })
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${this.apiKey}`,
+              ...(this.projectId && { 'OpenAI-Project': this.projectId }),
             },
-            timeout: 30000
+            timeout: 30000,
           }
         );
 
@@ -145,7 +152,7 @@ export class OpenAILlmClient implements LlmClient {
             data: content,
             provider: 'OpenAI',
             model,
-            latency: Date.now() - startTime
+            latency: Date.now() - startTime,
           };
         }
       } catch (error) {
@@ -158,9 +165,7 @@ export class OpenAILlmClient implements LlmClient {
       ok: false,
       error: 'All OpenAI models failed to provide response',
       provider: 'OpenAI',
-      latency: Date.now() - startTime
+      latency: Date.now() - startTime,
     };
   }
 }
-
-

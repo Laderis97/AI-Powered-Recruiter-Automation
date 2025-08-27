@@ -12,10 +12,10 @@ declare module 'mammoth' {
   }
 
   function extractRawText(options: Options): Promise<ConversionResult>;
-  
+
   const mammoth: {
     extractRawText: typeof extractRawText;
   };
-  
+
   export = mammoth;
 }
