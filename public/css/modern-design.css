@@ -2008,14 +2008,14 @@ p {
   font-weight: var(--font-weight-semibold) !important;
 }
 
-/* Chart Container - Fixed Dimensions */
+/* Chart Container - Fixed Dimensions with Proper Padding */
 .time-to-hire-chart-section .chart-bars {
   width: 100% !important;
   height: 350px !important;
-  min-height: 350px !important;
+  min-height: 260px !important;
   max-height: 350px !important;
   overflow: visible !important;
-  padding: var(--space-6) var(--space-4) var(--space-4) var(--space-4) !important;
+  padding: var(--space-8) var(--space-4) var(--space-4) var(--space-4) !important;
   display: flex !important;
   align-items: flex-end !important;
   justify-content: space-around !important;
