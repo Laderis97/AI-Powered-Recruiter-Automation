@@ -2963,10 +2963,12 @@ function populateTimeToHireModal(data) {
       <h4>Monthly Hires Trend</h4>
       <div class="chart-bars">
         ${data.monthlyHires.map(item => {
-          const height = maxHires > 0 ? (item.count / maxHires) * 240 : 0; // Increased from 200 to 240 for better visibility
+          // Calculate height with proper proportions for 350px container
+          const maxCount = Math.max(...data.monthlyHires.map(m => m.count));
+          const height = maxCount > 0 ? Math.max(16, (item.count / maxCount) * 300) : 16;
           return `
             <div class="chart-bar">
-              <div class="bar-fill" style="height: ${height}px; min-height: 8px; max-height: 240px;"></div>
+              <div class="bar-fill" style="height: ${height}px; min-height: 16px; max-height: 300px;"></div>
               <div class="bar-label">${item.month}</div>
               <div class="bar-value">${item.count}</div>
             </div>
