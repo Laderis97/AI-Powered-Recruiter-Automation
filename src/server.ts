@@ -481,6 +481,25 @@ app.get('/api/analytics/funnel-stage/:stage', async (req, res) => {
   }
 });
 
+app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
+  try {
+    const { stage } = req.params;
+    const performanceData = await databaseService.getStagePerformanceOverTime(stage);
+    
+    if (!performanceData || performanceData.length === 0) {
+      return res.status(404).json({ success: false, error: 'Stage performance data not found' });
+    }
+    
+    res.json({
+      success: true,
+      data: performanceData
+    });
+  } catch (error) {
+    console.error('Error fetching stage performance data:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch stage performance data' });
+  }
+});
+
 // Time to hire analytics endpoint
 app.get('/api/analytics/time-to-hire', async (req, res) => {
   try {

@@ -297,6 +297,58 @@ const dummyAnalytics: Analytics = {
   ]
 };
 
+// Stage performance over time data
+const stagePerformanceOverTime = {
+  Applications: [
+    { week: 'Week 1', candidates: 45, conversions: 28, avgTime: 2.1 },
+    { week: 'Week 2', candidates: 52, conversions: 33, avgTime: 2.3 },
+    { week: 'Week 3', candidates: 38, conversions: 24, avgTime: 2.7 },
+    { week: 'Week 4', candidates: 61, conversions: 39, avgTime: 2.4 },
+    { week: 'Week 5', candidates: 47, conversions: 30, avgTime: 2.6 },
+    { week: 'Week 6', candidates: 55, conversions: 35, avgTime: 2.2 }
+  ],
+  Screening: [
+    { week: 'Week 1', candidates: 28, conversions: 16, avgTime: 3.0 },
+    { week: 'Week 2', candidates: 33, conversions: 19, avgTime: 3.2 },
+    { week: 'Week 3', candidates: 24, conversions: 14, avgTime: 3.5 },
+    { week: 'Week 4', candidates: 39, conversions: 22, avgTime: 3.1 },
+    { week: 'Week 5', candidates: 30, conversions: 17, avgTime: 3.3 },
+    { week: 'Week 6', candidates: 35, conversions: 20, avgTime: 3.0 }
+  ],
+  Interviews: [
+    { week: 'Week 1', candidates: 16, conversions: 6, avgTime: 5.5 },
+    { week: 'Week 2', candidates: 19, conversions: 7, avgTime: 5.8 },
+    { week: 'Week 3', candidates: 14, conversions: 5, avgTime: 6.2 },
+    { week: 'Week 4', candidates: 22, conversions: 8, avgTime: 5.9 },
+    { week: 'Week 5', candidates: 17, conversions: 6, avgTime: 6.1 },
+    { week: 'Week 6', candidates: 20, conversions: 8, avgTime: 5.7 }
+  ],
+  Finalists: [
+    { week: 'Week 1', candidates: 6, conversions: 4, avgTime: 4.0 },
+    { week: 'Week 2', candidates: 7, conversions: 5, avgTime: 4.2 },
+    { week: 'Week 3', candidates: 5, conversions: 3, avgTime: 4.5 },
+    { week: 'Week 4', candidates: 8, conversions: 6, avgTime: 4.1 },
+    { week: 'Week 5', candidates: 6, conversions: 4, avgTime: 4.3 },
+    { week: 'Week 6', candidates: 8, conversions: 5, avgTime: 4.0 }
+  ],
+  Offers: [
+    { week: 'Week 1', candidates: 4, conversions: 3, avgTime: 2.5 },
+    { week: 'Week 2', candidates: 5, conversions: 4, avgTime: 2.8 },
+    { week: 'Week 3', candidates: 3, conversions: 2, avgTime: 3.0 },
+    { week: 'Week 4', candidates: 6, conversions: 5, avgTime: 2.7 },
+    { week: 'Week 5', candidates: 4, conversions: 3, avgTime: 2.9 },
+    { week: 'Week 6', candidates: 5, conversions: 4, avgTime: 2.6 }
+  ],
+  Hires: [
+    { week: 'Week 1', candidates: 3, conversions: 3, avgTime: 1.5 },
+    { week: 'Week 2', candidates: 4, conversions: 4, avgTime: 1.6 },
+    { week: 'Week 3', candidates: 2, conversions: 2, avgTime: 1.4 },
+    { week: 'Week 4', candidates: 5, conversions: 5, avgTime: 1.5 },
+    { week: 'Week 5', candidates: 3, conversions: 3, avgTime: 1.7 },
+    { week: 'Week 6', candidates: 4, conversions: 4, avgTime: 1.5 }
+  ]
+};
+
 // Detailed stage data for expanded funnel view
 const stageDetails = {
   Applications: {
@@ -602,6 +654,10 @@ export class DatabaseService {
 
   async getStageDetails(stage: string): Promise<any> {
     return stageDetails[stage as keyof typeof stageDetails] || null;
+  }
+
+  async getStagePerformanceOverTime(stage: string): Promise<any[]> {
+    return stagePerformanceOverTime[stage as keyof typeof stagePerformanceOverTime] || [];
   }
 
   async getCandidatesByStage(stage: string): Promise<Candidate[]> {

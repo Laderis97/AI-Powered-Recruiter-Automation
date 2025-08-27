@@ -2679,8 +2679,15 @@ async function openFunnelStageModal(stage) {
   }
 }
 
+// Global variables for stage performance
+let stagePerformanceChart = null;
+let currentStage = null;
+
 // Populate funnel modal with data
 function populateFunnelModal(stage, data) {
+  // Set current stage
+  currentStage = stage;
+  
   // Update modal title
   document.getElementById('funnelStageName').textContent = stage;
   
@@ -2700,6 +2707,9 @@ function populateFunnelModal(stage, data) {
   
   // Populate insights tab
   populateInsightsTab(data.insights);
+  
+  // Load stage performance chart data
+  loadStagePerformanceChart(stage);
   
   // Set active tab to candidates
   switchFunnelTab('candidates', null);
@@ -2758,6 +2768,213 @@ function populateInsightsTab(insights) {
   insightsContainer.innerHTML = insightsHTML;
 }
 
+// Load stage performance chart data
+async function loadStagePerformanceChart(stage) {
+  try {
+    console.log('🔍 loadStagePerformanceChart: Loading performance data for stage:', stage);
+    const response = await fetch(`/api/analytics/stage-performance/${encodeURIComponent(stage)}`);
+    console.log('📡 loadStagePerformanceChart: Response status:', response.status);
+    
+    if (response.ok) {
+      const result = await response.json();
+      console.log('📊 loadStagePerformanceChart: API response:', result);
+      
+      if (result.success) {
+        console.log('✅ loadStagePerformanceChart: Data loaded successfully, calling renderStagePerformanceChart');
+        renderStagePerformanceChart(result.data, stage);
+      } else {
+        console.error('❌ loadStagePerformanceChart: API returned success: false:', result.error);
+        showStagePerformanceError('Failed to load stage performance data');
+      }
+    } else {
+      console.error('❌ loadStagePerformanceChart: HTTP error:', response.status);
+      showStagePerformanceError('Failed to fetch stage performance data');
+    }
+  } catch (error) {
+    console.error('❌ loadStagePerformanceChart: Error:', error);
+    showStagePerformanceError('Error loading stage performance data');
+  }
+}
+
+// Render stage performance chart using Chart.js
+function renderStagePerformanceChart(data, stage) {
+  console.log('🔍 renderStagePerformanceChart: Rendering chart for stage:', stage, 'with data:', data);
+  
+  // Destroy existing chart if it exists
+  if (stagePerformanceChart) {
+    stagePerformanceChart.destroy();
+    stagePerformanceChart = null;
+  }
+  
+  const ctx = document.getElementById('stagePerformanceChart');
+  if (!ctx) {
+    console.error('❌ renderStagePerformanceChart: Canvas element not found');
+    return;
+  }
+  
+  // Prepare data for Chart.js
+  const labels = data.map(item => item.week);
+  const candidatesData = data.map(item => item.candidates);
+  const conversionsData = data.map(item => item.conversions);
+  const avgTimeData = data.map(item => item.avgTime);
+  
+  // Calculate conversion rates
+  const conversionRates = data.map(item => 
+    item.candidates > 0 ? ((item.conversions / item.candidates) * 100).toFixed(1) : 0
+  );
+  
+  stagePerformanceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Candidates',
+          data: candidatesData,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Conversions',
+          data: conversionsData,
+          borderColor: 'rgb(34, 197, 94)',
+          backgroundColor: 'rgba(34, 197, 94, 0.1)',
+          borderWidth: 2,
+          fill: true,
+          tension: 0.4,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Conversion Rate (%)',
+          data: conversionRates,
+          borderColor: 'rgb(239, 68, 68)',
+          backgroundColor: 'rgba(239, 68, 68, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y1'
+        },
+        {
+          label: 'Avg Time (days)',
+          data: avgTimeData,
+          borderColor: 'rgb(168, 85, 247)',
+          backgroundColor: 'rgba(168, 85, 247, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          yAxisID: 'y2'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: `${stage} Performance Over Time`,
+          font: {
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        legend: {
+          display: true,
+          position: 'top'
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.dataset.label || '';
+              const value = context.parsed.y;
+              if (label.includes('Rate')) {
+                return `${label}: ${value}%`;
+              } else if (label.includes('Time')) {
+                return `${label}: ${value} days`;
+              } else {
+                return `${label}: ${value}`;
+              }
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          display: true,
+          title: {
+            display: true,
+            text: 'Week'
+          }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          title: {
+            display: true,
+            text: 'Count'
+          },
+          beginAtZero: true
+        },
+        y1: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Conversion Rate (%)'
+          },
+          beginAtZero: true,
+          max: 100,
+          grid: {
+            drawOnChartArea: false,
+          },
+        },
+        y2: {
+          type: 'linear',
+          display: true,
+          position: 'right',
+          title: {
+            display: true,
+            text: 'Avg Time (days)'
+          },
+          beginAtZero: true,
+          grid: {
+            drawOnChartArea: false,
+          },
+        }
+      }
+    }
+  });
+  
+  console.log('✅ renderStagePerformanceChart: Chart rendered successfully');
+}
+
+// Show stage performance error
+function showStagePerformanceError(message) {
+  const chartContainer = document.querySelector('.performance-chart');
+  if (chartContainer) {
+    chartContainer.innerHTML = `
+      <div class="chart-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>${message}</p>
+        <button class="btn btn-sm" onclick="loadStagePerformanceChart(currentStage)">
+          <i class="fas fa-sync-alt"></i>
+          Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
 // Switch funnel modal tabs
 function switchFunnelTab(tabName, event) {
   // Update tab buttons
@@ -2773,6 +2990,13 @@ function switchFunnelTab(tabName, event) {
     pane.classList.remove('active');
   });
   document.getElementById(`${tabName}-tab`).classList.add('active');
+  
+  // If switching to analytics tab, resize the chart
+  if (tabName === 'analytics' && stagePerformanceChart) {
+    setTimeout(() => {
+      stagePerformanceChart.resize();
+    }, 100);
+  }
 }
 
 // Close hiring funnel modal

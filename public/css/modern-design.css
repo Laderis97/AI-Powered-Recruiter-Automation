@@ -1611,10 +1611,38 @@ p {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius);
+  padding: var(--space-4);
+  position: relative;
+}
+
+.performance-chart canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.chart-error {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: 100%;
+  text-align: center;
   color: var(--color-text-secondary);
+}
+
+.chart-error i {
+  font-size: var(--font-size-2xl);
+  margin-bottom: var(--space-2);
+  color: var(--color-warning);
+}
+
+.chart-error p {
+  margin-bottom: var(--space-3);
+}
+
+.chart-error .btn {
+  margin-top: var(--space-2);
 }
 
 /* Clickable Funnel Stages */
