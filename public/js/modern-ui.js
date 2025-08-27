@@ -1891,6 +1891,16 @@ function createCandidateCard(candidate) {
     card.setAttribute('data-track', 'candidate-card');
     card.setAttribute('data-candidate-id', candidate.id || 'unknown');
     
+    // Make the entire card clickable
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', (e) => {
+      // Don't trigger if clicking on action buttons
+      if (e.target.closest('.candidate-actions')) {
+        return;
+      }
+      viewCandidateDetails(candidate.id || 'unknown');
+    });
+    
     // Generate initials for avatar
     const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
     
@@ -1913,32 +1923,32 @@ function createCandidateCard(candidate) {
       displayTitle = displayTitle.substring(0, 50) + '...';
     }
     
-         const cardHTML = `
-       <div class="candidate-avatar" data-morph>${initials}</div>
-       <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
-       <p class="candidate-title">${displayTitle}</p>
-       <div class="candidate-skills">
-         ${skills}
-       </div>
-       <div class="candidate-meta">
-         <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
-         <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
-       </div>
-       <div class="candidate-actions">
-         <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id || 'unknown'}')">
-           <i class="fas fa-eye"></i>
-         </button>
-         <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id || 'unknown'}')">
-           <i class="fas fa-envelope"></i>
-         </button>
-         <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id || 'unknown'}')">
-           <i class="fas fa-archive"></i>
-         </button>
-       </div>
-     `;
-     
-     console.log('Generated card HTML:', cardHTML);
-     card.innerHTML = cardHTML;
+    const cardHTML = `
+      <div class="candidate-avatar" data-morph>${initials}</div>
+      <h3 class="candidate-name">${candidate.name || 'Unknown Name'}</h3>
+      <p class="candidate-title">${displayTitle}</p>
+      <div class="candidate-skills">
+        ${skills}
+      </div>
+      <div class="candidate-meta">
+        <span class="candidate-location"><i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}</span>
+        <span class="candidate-experience"><i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}</span>
+      </div>
+      <div class="candidate-actions">
+        <button class="btn-icon" title="View Details" onclick="viewCandidateDetails('${candidate.id || 'unknown'}')">
+          <i class="fas fa-eye"></i>
+        </button>
+        <button class="btn-icon" title="Contact" onclick="contactCandidate('${candidate.id || 'unknown'}')">
+          <i class="fas fa-envelope"></i>
+        </button>
+        <button class="btn-icon" title="Archive" onclick="archiveCandidate('${candidate.id || 'unknown'}')">
+          <i class="fas fa-archive"></i>
+        </button>
+      </div>
+    `;
+    
+    console.log('Generated card HTML:', cardHTML);
+    card.innerHTML = cardHTML;
     
     return card;
   } catch (error) {
@@ -1986,10 +1996,13 @@ function showCandidatesEmpty() {
 // Function to view candidate details
 function viewCandidateDetails(candidateId) {
   const candidate = candidatesData.find(c => c.id === candidateId);
-  if (!candidate) return;
+  if (!candidate) {
+    showNotification('Candidate not found', 'error');
+    return;
+  }
   
-  showNotification(`Viewing details for ${candidate.name}`, 'info');
-  // TODO: Implement detailed candidate view modal
+  console.log('Opening candidate details for:', candidate);
+  openCandidateDetailModal(candidate);
 }
 
 // Function to contact candidate
@@ -2973,6 +2986,244 @@ function showStagePerformanceError(message) {
       </div>
     `;
   }
+}
+
+// ===== CANDIDATE DETAIL MODAL FUNCTIONS =====
+
+// Global variable to store current candidate
+let currentCandidate = null;
+
+// Open candidate detail modal
+function openCandidateDetailModal(candidate) {
+  currentCandidate = candidate;
+  
+  // Generate initials for avatar
+  const initials = candidate.name ? candidate.name.split(' ').map(n => n[0]).join('').toUpperCase() : '?';
+  
+  // Update modal header
+  document.getElementById('candidateDetailTitle').textContent = `Candidate Details - ${candidate.name}`;
+  document.getElementById('candidateDetailInitials').textContent = initials;
+  document.getElementById('candidateDetailName').textContent = candidate.name;
+  document.getElementById('candidateDetailTitle').textContent = candidate.title;
+  
+  // Update basic info
+  document.getElementById('candidateDetailLocation').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${candidate.location || 'Location not specified'}`;
+  document.getElementById('candidateDetailExperience').innerHTML = `<i class="fas fa-clock"></i> ${candidate.experience || 'Experience not specified'}`;
+  document.getElementById('candidateDetailStatus').innerHTML = `<i class="fas fa-circle"></i> ${candidate.status || 'Active'}`;
+  
+  // Update match score
+  const matchScoreElement = document.getElementById('candidateDetailMatchScore');
+  const matchScore = candidate.matchScore || 0;
+  matchScoreElement.innerHTML = `
+    <span class="match-score-number">${matchScore}</span>
+    <span class="match-score-percent">%</span>
+  `;
+  
+  // Update stage
+  const stageElement = document.getElementById('candidateDetailStage');
+  stageElement.innerHTML = `<span class="stage-badge">${candidate.stage || 'Applications'}</span>`;
+  
+  // Update skills summary
+  const skillsSummaryElement = document.getElementById('candidateDetailSkillsSummary');
+  if (candidate.skills && candidate.skills.length > 0) {
+    const skillsList = Array.isArray(candidate.skills) ? candidate.skills : candidate.skills.split(',').map(s => s.trim());
+    skillsSummaryElement.innerHTML = skillsList.slice(0, 5).map(skill => `<span class="skill-tag">${skill}</span>`).join('');
+  } else {
+    skillsSummaryElement.innerHTML = '<em>No skills listed</em>';
+  }
+  
+  // Update contact info
+  document.getElementById('candidateDetailEmail').textContent = candidate.email || 'No email provided';
+  document.getElementById('candidateDetailPhone').textContent = candidate.phone || 'No phone provided';
+  
+  // Update professional links
+  updateProfessionalLinks(candidate);
+  
+  // Update notes
+  const notesElement = document.getElementById('candidateDetailNotes');
+  notesElement.innerHTML = candidate.notes ? `<p>${candidate.notes}</p>` : '<p><em>No notes available</em></p>';
+  
+  // Show modal
+  document.getElementById('candidateDetailModal').style.display = 'flex';
+  
+  // Set active tab to overview
+  switchCandidateTab('overview', null);
+}
+
+// Update professional links
+function updateProfessionalLinks(candidate) {
+  const linkedInElement = document.getElementById('candidateDetailLinkedIn');
+  const githubElement = document.getElementById('candidateDetailGithub');
+  const portfolioElement = document.getElementById('candidateDetailPortfolio');
+  
+  if (candidate.linkedin) {
+    linkedInElement.style.display = 'flex';
+    linkedInElement.querySelector('a').href = candidate.linkedin;
+  } else {
+    linkedInElement.style.display = 'none';
+  }
+  
+  if (candidate.github) {
+    githubElement.style.display = 'flex';
+    githubElement.querySelector('a').href = candidate.github;
+  } else {
+    githubElement.style.display = 'none';
+  }
+  
+  if (candidate.portfolio) {
+    portfolioElement.style.display = 'flex';
+    portfolioElement.querySelector('a').href = candidate.portfolio;
+  } else {
+    portfolioElement.style.display = 'none';
+  }
+}
+
+// Close candidate detail modal
+function closeCandidateDetailModal() {
+  document.getElementById('candidateDetailModal').style.display = 'none';
+  currentCandidate = null;
+}
+
+// Switch candidate detail tabs
+function switchCandidateTab(tabName, event) {
+  // Remove active class from all tabs and panes
+  document.querySelectorAll('.candidate-detail-tabs .tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+  
+  // Add active class to clicked tab
+  if (event) {
+    event.target.closest('.tab-btn').classList.add('active');
+  } else {
+    document.querySelector(`[onclick*="${tabName}"]`).classList.add('active');
+  }
+  
+  // Show corresponding pane
+  document.getElementById(`${tabName}-tab`).classList.add('active');
+  
+  // Load tab-specific content
+  loadTabContent(tabName);
+}
+
+// Load tab-specific content
+function loadTabContent(tabName) {
+  if (!currentCandidate) return;
+  
+  switch (tabName) {
+    case 'skills':
+      loadSkillsTab();
+      break;
+    case 'contact':
+      loadContactTab();
+      break;
+    case 'notes':
+      loadNotesTab();
+      break;
+  }
+}
+
+// Load skills tab content
+function loadSkillsTab() {
+  const skillsElement = document.getElementById('candidateDetailSkills');
+  const experienceElement = document.getElementById('candidateDetailExperienceSummary');
+  
+  // Load skills
+  if (currentCandidate.skills && currentCandidate.skills.length > 0) {
+    const skillsList = Array.isArray(currentCandidate.skills) ? currentCandidate.skills : currentCandidate.skills.split(',').map(s => s.trim());
+    skillsElement.innerHTML = skillsList.map(skill => `<span class="skill-tag skill-tag-large">${skill}</span>`).join('');
+  } else {
+    skillsElement.innerHTML = '<p><em>No skills listed</em></p>';
+  }
+  
+  // Load experience summary
+  experienceElement.innerHTML = `
+    <div class="experience-item">
+      <h5>Current Position</h5>
+      <p><strong>${currentCandidate.title}</strong></p>
+      <p>${currentCandidate.experience} of experience</p>
+      ${currentCandidate.currentCompany ? `<p>at ${currentCandidate.currentCompany}</p>` : ''}
+    </div>
+    ${currentCandidate.education ? `
+    <div class="experience-item">
+      <h5>Education</h5>
+      ${currentCandidate.education.map(edu => `<p>${edu}</p>`).join('')}
+    </div>
+    ` : ''}
+  `;
+}
+
+// Load contact tab content
+function loadContactTab() {
+  // Contact info is already loaded in openCandidateDetailModal
+  // This function can be used for additional contact-related functionality
+}
+
+// Load notes tab content
+function loadNotesTab() {
+  // Notes are already loaded in openCandidateDetailModal
+  // This function can be used for additional notes functionality
+}
+
+// Modal action functions
+function contactCandidateFromModal() {
+  if (!currentCandidate) return;
+  showNotification(`Opening contact form for ${currentCandidate.name}`, 'info');
+  // TODO: Implement contact form
+}
+
+function scheduleInterview() {
+  if (!currentCandidate) return;
+  showNotification(`Scheduling interview for ${currentCandidate.name}`, 'info');
+  // TODO: Implement interview scheduling
+}
+
+function viewResume() {
+  if (!currentCandidate) return;
+  if (currentCandidate.resumeUrl) {
+    window.open(currentCandidate.resumeUrl, '_blank');
+  } else {
+    showNotification('No resume available for this candidate', 'warning');
+  }
+}
+
+function addToShortlist() {
+  if (!currentCandidate) return;
+  showNotification(`${currentCandidate.name} added to shortlist`, 'success');
+  // TODO: Implement shortlist functionality
+}
+
+function archiveCandidateFromModal() {
+  if (!currentCandidate) return;
+  if (confirm(`Are you sure you want to archive ${currentCandidate.name}?`)) {
+    showNotification(`${currentCandidate.name} has been archived`, 'success');
+    closeCandidateDetailModal();
+    // TODO: Implement archive functionality
+  }
+}
+
+function addCandidateNote() {
+  if (!currentCandidate) return;
+  
+  const noteText = document.getElementById('newCandidateNote').value.trim();
+  if (!noteText) {
+    showNotification('Please enter a note', 'warning');
+    return;
+  }
+  
+  // Add note to the notes section
+  const notesElement = document.getElementById('candidateDetailNotes');
+  const newNote = document.createElement('div');
+  newNote.className = 'note-item';
+  newNote.innerHTML = `
+    <div class="note-header">
+      <span class="note-date">${new Date().toLocaleDateString()}</span>
+    </div>
+    <p>${noteText}</p>
+  `;
+  
+  notesElement.appendChild(newNote);
+  document.getElementById('newCandidateNote').value = '';
+  
+  showNotification('Note added successfully', 'success');
 }
 
 // Switch funnel modal tabs

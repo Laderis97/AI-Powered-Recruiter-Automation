@@ -1645,6 +1645,367 @@ p {
   margin-top: var(--space-2);
 }
 
+/* ===== CANDIDATE DETAIL MODAL STYLES ===== */
+
+.candidate-detail-content {
+  max-width: 100%;
+}
+
+.candidate-detail-header {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.candidate-detail-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.candidate-detail-info {
+  flex: 1;
+}
+
+.candidate-detail-info h2 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.candidate-detail-job-title {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-lg);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.candidate-detail-meta {
+  display: flex;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.candidate-detail-meta span {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.candidate-detail-meta i {
+  color: var(--color-primary);
+}
+
+.candidate-detail-actions {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
+}
+
+.candidate-detail-tabs {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.candidate-detail-tabs .tab-btn {
+  padding: var(--space-3) var(--space-4);
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 500;
+}
+
+.candidate-detail-tabs .tab-btn:hover {
+  color: var(--color-primary);
+}
+
+.candidate-detail-tabs .tab-btn.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.candidate-overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--space-4);
+}
+
+.overview-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+
+.overview-card h4 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.match-score-display {
+  text-align: center;
+}
+
+.match-score-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-success), var(--color-primary));
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-3) auto;
+  position: relative;
+}
+
+.match-score-number {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.match-score-percent {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.stage-indicator {
+  text-align: center;
+}
+
+.stage-badge {
+  display: inline-block;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-primary);
+  color: white;
+  border-radius: var(--border-radius);
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+.skills-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.quick-actions .btn {
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.skills-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.skills-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.skill-tag-large {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--font-size-md);
+}
+
+.experience-summary {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.experience-item {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+
+.experience-item h5 {
+  margin: 0 0 var(--space-2) 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.experience-item p {
+  margin: 0 0 var(--space-1) 0;
+  color: var(--color-text-secondary);
+}
+
+.contact-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--space-4);
+}
+
+.contact-card {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+
+.contact-card h4 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.contact-item:last-child {
+  border-bottom: none;
+}
+
+.contact-item i {
+  width: 20px;
+  color: var(--color-primary);
+  font-size: var(--font-size-md);
+}
+
+.contact-item div {
+  flex: 1;
+}
+
+.contact-item strong {
+  display: block;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-1);
+}
+
+.contact-item span,
+.contact-item a {
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.contact-item a:hover {
+  color: var(--color-primary);
+}
+
+.notes-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.notes-content {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+  min-height: 200px;
+}
+
+.note-item {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--color-border-light);
+  margin-bottom: var(--space-3);
+}
+
+.note-item:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.note-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.note-date {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.add-note-section {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--space-4);
+}
+
+.add-note-section h5 {
+  margin: 0 0 var(--space-3) 0;
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.add-note-section textarea {
+  width: 100%;
+  margin-bottom: var(--space-3);
+  resize: vertical;
+}
+
+/* Make candidate cards clickable */
+.candidate-card {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.candidate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.candidate-card .candidate-actions {
+  position: relative;
+  z-index: 10;
+}
+
+.candidate-card .candidate-actions button {
+  position: relative;
+  z-index: 11;
+}
+
 /* Clickable Funnel Stages */
 .funnel-stage {
   cursor: pointer;
