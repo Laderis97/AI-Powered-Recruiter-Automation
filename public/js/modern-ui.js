@@ -2959,9 +2959,9 @@ function populateTimeToHireModal(data) {
       </div>
     </div>
 
-    <div class="time-to-hire-chart-section">
+    <div class="chart-card time-to-hire-chart-section">
       <h4>Monthly Hires Trend</h4>
-      <div class="chart-bars">
+      <div class="chart-panel chart-bars">
         ${data.monthlyHires.map(item => {
           // Calculate height with proper y-axis headroom and top padding
           const maxCount = Math.max(...data.monthlyHires.map(m => m.count));

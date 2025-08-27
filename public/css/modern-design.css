@@ -2203,3 +2203,27 @@ p {
     max-width: 98vw !important;
   }
 }
+
+/* Chart Card and Panel Fixes for Main Dashboard */
+.chart-card {
+  overflow: visible !important; /* was hidden */
+}
+
+.chart-panel {
+  padding-top: 12px !important; /* headroom for rounded bars */
+  min-height: 260px !important; /* or whatever you need */
+}
+
+/* Apply to existing chart containers */
+.analytics-chart .chart-container {
+  overflow: visible !important;
+  padding-top: 12px !important;
+  min-height: 260px !important;
+}
+
+/* Ensure all chart containers have proper overflow */
+.chart-container {
+  overflow: visible !important;
+}
+
+/* Time to Hire Chart Section - Complete Rewrite */
