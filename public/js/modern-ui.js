@@ -2530,9 +2530,9 @@ async function loadTimeToHire() {
   }
 }
 
-// Render time to hire chart
-function renderTimeToHireChart(data) {
-  console.log('🔍 renderTimeToHireChart called with data:', data);
+// Render time to hire chart with Chart.js
+function renderTimeToHireChart(data, sla = 8) {
+  console.log('🔍 renderTimeToHireChart called with data:', data, 'SLA:', sla);
   
   const chartContainer = document.getElementById('timeToHireChart');
   if (!chartContainer) {
@@ -2557,19 +2557,8 @@ function renderTimeToHireChart(data) {
       
       <div class="monthly-chart">
         <h4>Monthly Hires Trend</h4>
-        <div class="chart-bars">
-          ${data.monthlyHires.map(item => {
-            const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
-            const height = maxHires > 0 ? (item.count / maxHires) * 200 : 0; // Use 200px as base height
-            
-            return `
-              <div class="chart-bar">
-                <div class="bar-fill" style="height: ${height}px; min-height: 8px;"></div>
-                <div class="bar-label">${item.month}</div>
-                <div class="bar-value">${item.count}</div>
-              </div>
-            `;
-          }).join('')}
+        <div class="chart-panel">
+          <canvas id="tthChart"></canvas>
         </div>
       </div>
       
@@ -2621,18 +2610,74 @@ function renderTimeToHireChart(data) {
   chartContainer.innerHTML = chartHTML;
   console.log('✅ Chart rendered successfully');
   
-  // Additional debugging to check DOM elements
+  // Initialize Chart.js after DOM is ready
   setTimeout(() => {
-    const chartBars = chartContainer.querySelectorAll('.chart-bar');
-    const barFills = chartContainer.querySelectorAll('.bar-fill');
-    console.log('🔍 DOM Check - Chart bars found:', chartBars.length);
-    console.log('🔍 DOM Check - Bar fills found:', barFills.length);
-    
-    if (chartBars.length > 0) {
-      console.log('🔍 First chart bar element:', chartBars[0]);
-      console.log('🔍 First bar fill element:', barFills[0]);
-      console.log('🔍 First bar fill computed height:', window.getComputedStyle(barFills[0]).height);
-      console.log('🔍 First bar fill computed width:', window.getComputedStyle(barFills[0]).width);
+    const canvas = document.getElementById('tthChart');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      
+      // SLA reference line plugin
+      const slaPlugin = {
+        id: 'slaReference',
+        afterDraw: (chart) => {
+          const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
+          const slaY = y.getPixelForValue(sla);
+          
+          ctx.save();
+          ctx.strokeStyle = '#ff6b6b';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.moveTo(left, slaY);
+          ctx.lineTo(right, slaY);
+          ctx.stroke();
+          ctx.restore();
+          
+          // Add SLA label
+          ctx.fillStyle = '#ff6b6b';
+          ctx.font = '12px Inter';
+          ctx.fillText(`SLA: ${sla} days`, right - 10, slaY - 5);
+        }
+      };
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.monthlyHires.map(item => item.month),
+          datasets: [{
+            label: 'Hires',
+            data: data.monthlyHires.map(item => item.count),
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grace: '15%',
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        },
+        plugins: [slaPlugin]
+      });
     }
   }, 100);
 }
@@ -2961,21 +3006,8 @@ function populateTimeToHireModal(data) {
 
     <div class="chart-card time-to-hire-chart-section">
       <h4>Monthly Hires Trend</h4>
-      <div class="chart-panel chart-bars">
-        ${data.monthlyHires.map(item => {
-          // Calculate height with proper y-axis headroom and top padding
-          const maxCount = Math.max(...data.monthlyHires.map(m => m.count));
-          // Add headroom by using maxCount + 2 for domain, and ensure proper top padding
-          const availableHeight = 280; // Reduced from 300 to account for top padding
-          const height = maxCount > 0 ? Math.max(16, (item.count / (maxCount + 2)) * availableHeight) : 16;
-          return `
-            <div class="chart-bar">
-              <div class="bar-fill" style="height: ${height}px; min-height: 16px; max-height: ${availableHeight}px;"></div>
-              <div class="bar-label">${item.month}</div>
-              <div class="bar-value">${item.count}</div>
-            </div>
-          `;
-        }).join('')}
+      <div class="chart-panel">
+        <canvas id="tthModalChart"></canvas>
       </div>
     </div>
 
@@ -3011,6 +3043,78 @@ function populateTimeToHireModal(data) {
   console.log('📝 Generated modal HTML length:', modalHTML.length);
   modalContent.innerHTML = modalHTML;
   console.log('✅ Modal populated successfully');
+  
+  // Initialize Chart.js for modal after DOM is ready
+  setTimeout(() => {
+    const canvas = document.getElementById('tthModalChart');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      
+      // SLA reference line plugin
+      const slaPlugin = {
+        id: 'slaReference',
+        afterDraw: (chart) => {
+          const { ctx, chartArea: { left, right, top, bottom }, scales: { y } } = chart;
+          const slaY = y.getPixelForValue(8); // Default SLA of 8 days
+          
+          ctx.save();
+          ctx.strokeStyle = '#ff6b6b';
+          ctx.lineWidth = 2;
+          ctx.setLineDash([5, 5]);
+          ctx.beginPath();
+          ctx.moveTo(left, slaY);
+          ctx.lineTo(right, slaY);
+          ctx.stroke();
+          ctx.restore();
+          
+          // Add SLA label
+          ctx.fillStyle = '#ff6b6b';
+          ctx.font = '12px Inter';
+          ctx.textAlign = 'right';
+          ctx.fillText('SLA: 8 days', right - 10, slaY - 5);
+        }
+      };
+      
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.monthlyHires.map(item => item.month),
+          datasets: [{
+            label: 'Hires',
+            data: data.monthlyHires.map(item => item.count),
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
+            borderColor: 'rgba(59, 130, 246, 1)',
+            borderWidth: 1,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              grace: '15%',
+              grid: {
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            x: {
+              grid: {
+                display: false
+              }
+            }
+          }
+        },
+        plugins: [slaPlugin]
+      });
+    }
+  }, 100);
 }
 
 function showModalError(message) {

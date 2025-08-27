@@ -2204,6 +2204,11 @@ p {
   }
 }
 
+/* Chart.js Integration */
+.time-to-hire {
+  height: 280px !important;
+}
+
 /* Chart Card and Panel Fixes for Main Dashboard */
 .chart-card {
   overflow: visible !important; /* was hidden */
