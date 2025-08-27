@@ -2470,11 +2470,16 @@ async function loadHiringFunnel() {
 
 // Render hiring funnel chart
 function renderHiringFunnelChart(data) {
+  console.log('🔍 renderHiringFunnelChart: Rendering funnel chart with data:', data);
   const chartContainer = document.getElementById('hiringFunnelChart');
-  if (!chartContainer) return;
+  if (!chartContainer) {
+    console.error('❌ renderHiringFunnelChart: Chart container not found');
+    return;
+  }
   
   // Calculate total for percentages
   const total = data.reduce((sum, item) => sum + item.count, 0);
+  console.log('📊 renderHiringFunnelChart: Total count:', total);
   
   // Create funnel chart HTML
   const chartHTML = `
@@ -2500,6 +2505,7 @@ function renderHiringFunnelChart(data) {
   `;
   
   chartContainer.innerHTML = chartHTML;
+  console.log('✅ renderHiringFunnelChart: Funnel chart rendered with clickable stages');
 }
 
 // Load time to hire data and render chart
@@ -2616,6 +2622,23 @@ function refreshTimeToHire() {
   loadTimeToHire();
 }
 
+// Show analytics error
+function showAnalyticsError(chartId, message) {
+  const chartContainer = document.getElementById(chartId);
+  if (chartContainer) {
+    chartContainer.innerHTML = `
+      <div class="chart-error">
+        <i class="fas fa-exclamation-triangle"></i>
+        <p>${message}</p>
+        <button class="btn btn-sm" onclick="refresh${chartId.charAt(0).toUpperCase() + chartId.slice(1)}()">
+          <i class="fas fa-sync-alt"></i>
+          Retry
+        </button>
+      </div>
+    `;
+  }
+}
+
 // Global functions for analytics
 window.refreshHiringFunnel = refreshHiringFunnel;
 window.refreshTimeToHire = refreshTimeToHire;
@@ -2628,21 +2651,31 @@ window.exportStageData = exportStageData;
 
 // Open funnel stage modal
 async function openFunnelStageModal(stage) {
+  console.log('🔍 openFunnelStageModal: Opening modal for stage:', stage);
   try {
     const response = await fetch(`/api/analytics/funnel-stage/${encodeURIComponent(stage)}`);
+    console.log('📡 openFunnelStageModal: Response status:', response.status);
     if (response.ok) {
       const result = await response.json();
+      console.log('📊 openFunnelStageModal: API response:', result);
       if (result.success) {
+        console.log('✅ openFunnelStageModal: Data loaded successfully, populating modal');
         populateFunnelModal(stage, result.data);
-        document.getElementById('hiringFunnelModal').style.display = 'flex';
+        const modal = document.getElementById('hiringFunnelModal');
+        if (modal) {
+          modal.style.display = 'flex';
+          console.log('✅ openFunnelStageModal: Modal displayed');
+        } else {
+          console.error('❌ openFunnelStageModal: Modal element not found');
+        }
       } else {
-        console.error('Failed to load stage details:', result.error);
+        console.error('❌ openFunnelStageModal: API returned success: false:', result.error);
       }
     } else {
-      console.error('Failed to fetch stage details');
+      console.error('❌ openFunnelStageModal: HTTP error:', response.status);
     }
   } catch (error) {
-    console.error('Error opening funnel stage modal:', error);
+    console.error('❌ openFunnelStageModal: Error:', error);
   }
 }
 
