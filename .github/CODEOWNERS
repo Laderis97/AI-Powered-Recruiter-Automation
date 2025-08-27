@@ -1,0 +1,34 @@
+# Global owners
+* @tech-lead
+
+# Critical security areas
+/src/aiAgent.ts @security-team
+/src/databaseService.ts @security-team
+/.env* @security-team
+
+# Frontend components
+/public/js/ @frontend-team
+/public/css/ @frontend-team
+/views/ @frontend-team
+
+# Backend services
+/src/server.ts @backend-team
+/src/emailService.ts @backend-team
+/src/documentParser.ts @backend-team
+
+# AI and ML components
+/src/openai.ts @ai-team
+/src/aiAgent.ts @ai-team
+
+# Database and data models
+/src/databaseService.ts @data-team
+/src/schemas.ts @data-team
+
+# Infrastructure and deployment
+/Dockerfile @devops-team
+/docker-compose.yml @devops-team
+/.github/workflows/ @devops-team
+
+# Documentation
+/docs/ @tech-lead
+/README.md @tech-lead
