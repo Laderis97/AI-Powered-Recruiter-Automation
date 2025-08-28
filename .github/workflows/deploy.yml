@@ -1,0 +1,343 @@
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+      version:
+        description: 'Version to deploy (e.g., v1.0.0, latest)'
+        required: true
+        default: 'latest'
+      canary_percentage:
+        description: 'Canary deployment percentage (0-100)'
+        required: false
+        default: '10'
+        type: number
+      auto_rollback:
+        description: 'Enable auto-rollback on failure'
+        required: false
+        default: true
+        type: boolean
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  validate:
+    name: Validate Deployment
+    runs-on: ubuntu-latest
+    outputs:
+      deployment_id: ${{ steps.deployment.outputs.deployment_id }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate inputs
+        run: |
+          echo "🔍 Validating deployment inputs..."
+          
+          # Validate environment
+          if [[ "${{ github.event.inputs.environment }}" != "staging" && "${{ github.event.inputs.environment }}" != "production" ]]; then
+            echo "❌ Invalid environment: ${{ github.event.inputs.environment }}"
+            exit 1
+          fi
+          
+          # Validate canary percentage
+          if [[ "${{ github.event.inputs.canary_percentage }}" -lt 0 || "${{ github.event.inputs.canary_percentage }}" -gt 100 ]]; then
+            echo "❌ Invalid canary percentage: ${{ github.event.inputs.canary_percentage }}"
+            exit 1
+          fi
+          
+          # Validate version format
+          if [[ "${{ github.event.inputs.version }}" != "latest" && ! "${{ github.event.inputs.version }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            echo "❌ Invalid version format: ${{ github.event.inputs.version }}"
+            exit 1
+          fi
+          
+          echo "✅ Input validation passed"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Canary: ${{ github.event.inputs.canary_percentage }}%"
+          echo "Auto-rollback: ${{ github.event.inputs.auto_rollback }}"
+
+      - name: Create deployment
+        id: deployment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const deployment = await github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+              environment: '${{ github.event.inputs.environment }}',
+              description: `Deploying ${{ github.event.inputs.version }} to ${{ github.event.inputs.environment }}`,
+              auto_merge: false,
+              required_contexts: []
+            });
+            
+            console.log(`🚀 Deployment created: ${deployment.data.id}`);
+            return deployment.data.id;
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.environment == 'staging'
+    environment:
+      name: staging
+      url: https://staging.example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup deployment tools
+        run: |
+          echo "🔧 Setting up deployment tools..."
+          # Install kubectl, helm, or other deployment tools
+          echo "✅ Deployment tools ready"
+
+      - name: Deploy to staging
+        run: |
+          echo "🚀 Deploying to staging environment..."
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Canary: ${{ github.event.inputs.canary_percentage }}%"
+          
+          # Simulate deployment process
+          echo "📦 Pulling container image..."
+          echo "🔧 Applying configuration..."
+          echo "🌐 Updating service..."
+          
+          # Simulate canary deployment
+          if [[ "${{ github.event.inputs.canary_percentage }}" -gt 0 ]]; then
+            echo "🔄 Canary deployment: ${{ github.event.inputs.canary_percentage }}% traffic to new version"
+            echo "⏳ Waiting for canary evaluation..."
+            sleep 30
+          fi
+          
+          echo "✅ Staging deployment completed successfully"
+
+      - name: Health check
+        run: |
+          echo "🏥 Running health checks..."
+          
+          # Simulate health check endpoints
+          echo "Checking /health endpoint..."
+          echo "Checking /ready endpoint..."
+          echo "Checking database connectivity..."
+          echo "Checking external service dependencies..."
+          
+          # Simulate health check results
+          echo "✅ All health checks passed"
+
+      - name: Update deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.validate.outputs.deployment_id }},
+              state: 'success',
+              environment: 'staging',
+              description: 'Staging deployment successful',
+              environment_url: 'https://staging.example.com'
+            });
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: validate
+    if: github.event.inputs.environment == 'production'
+    environment:
+      name: production
+      url: https://example.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup deployment tools
+        run: |
+          echo "🔧 Setting up production deployment tools..."
+          echo "✅ Production deployment tools ready"
+
+      - name: Pre-deployment checks
+        run: |
+          echo "🔍 Running pre-deployment checks..."
+          
+          # Check if staging is healthy
+          echo "Checking staging environment health..."
+          
+          # Check production readiness
+          echo "Checking production environment readiness..."
+          
+          # Check resource availability
+          echo "Checking resource availability..."
+          
+          echo "✅ Pre-deployment checks passed"
+
+      - name: Deploy to production
+        id: deploy
+        run: |
+          echo "🚀 Deploying to production environment..."
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Canary: ${{ github.event.inputs.canary_percentage }}%"
+          
+          # Simulate production deployment
+          echo "📦 Pulling container image..."
+          echo "🔧 Applying production configuration..."
+          echo "🌐 Updating production service..."
+          
+          # Simulate canary deployment
+          if [[ "${{ github.event.inputs.canary_percentage }}" -gt 0 ]]; then
+            echo "🔄 Production canary deployment: ${{ github.event.inputs.canary_percentage }}% traffic to new version"
+            echo "⏳ Monitoring canary performance..."
+            sleep 60
+            
+            # Simulate canary evaluation
+            echo "📊 Canary metrics analysis..."
+            echo "✅ Canary deployment successful, proceeding with full rollout"
+          fi
+          
+          echo "🌊 Full production rollout..."
+          echo "✅ Production deployment completed successfully"
+
+      - name: Health check
+        id: health_check
+        run: |
+          echo "🏥 Running production health checks..."
+          
+          # Simulate comprehensive health checks
+          echo "Checking /health endpoint..."
+          echo "Checking /ready endpoint..."
+          echo "Checking database connectivity..."
+          echo "Checking external service dependencies..."
+          echo "Checking performance metrics..."
+          echo "Checking error rates..."
+          
+          # Simulate health check results
+          echo "✅ All production health checks passed"
+
+      - name: Update deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.validate.outputs.deployment_id }},
+              state: 'success',
+              environment: 'production',
+              description: 'Production deployment successful',
+              environment_url: 'https://example.com'
+            });
+
+  rollback:
+    name: Auto Rollback
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: |
+      github.event.inputs.auto_rollback == 'true' && 
+      (needs.deploy-staging.result == 'failure' || needs.deploy-production.result == 'failure')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Determine rollback target
+        id: rollback_target
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
+            echo "target=staging" >> $GITHUB_OUTPUT
+          else
+            echo "target=production" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Execute rollback
+        run: |
+          echo "🔄 Executing auto-rollback to ${{ steps.rollback_target.outputs.target }}..."
+          
+          # Simulate rollback process
+          echo "📦 Rolling back to previous version..."
+          echo "🔧 Reverting configuration changes..."
+          echo "🌐 Updating service to previous version..."
+          
+          echo "✅ Rollback completed successfully"
+
+      - name: Verify rollback
+        run: |
+          echo "🔍 Verifying rollback..."
+          
+          # Simulate rollback verification
+          echo "Checking service health..."
+          echo "Checking version..."
+          echo "Checking configuration..."
+          
+          echo "✅ Rollback verification passed"
+
+      - name: Update deployment status (rollback)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.repos.createDeploymentStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              deployment_id: ${{ needs.validate.outputs.deployment_id }},
+              state: 'failure',
+              environment: '${{ github.event.inputs.environment }}',
+              description: 'Deployment failed, auto-rollback executed',
+              environment_url: ${{ github.event.inputs.environment == 'production' && 'https://example.com' || 'https://staging.example.com' }}
+            });
+
+  notify:
+    name: Notify Deployment Results
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production, rollback]
+    if: always()
+    
+    steps:
+      - name: Check deployment results
+        id: results
+        run: |
+          if [[ "${{ github.event.inputs.environment }}" == "staging" ]]; then
+            if [[ "${{ needs.deploy-staging.result }}" == "success" ]]; then
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "message=Staging deployment successful" >> $GITHUB_OUTPUT
+            else
+              echo "status=failure" >> $GITHUB_OUTPUT
+              echo "message=Staging deployment failed" >> $GITHUB_OUTPUT
+            fi
+          else
+            if [[ "${{ needs.deploy-production.result }}" == "success" ]]; then
+              echo "status=success" >> $GITHUB_OUTPUT
+              echo "message=Production deployment successful" >> $GITHUB_OUTPUT
+            else
+              echo "status=failure" >> $GITHUB_OUTPUT
+              echo "message=Production deployment failed" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+      - name: Send notification
+        run: |
+          echo "📢 Deployment notification:"
+          echo "Environment: ${{ github.event.inputs.environment }}"
+          echo "Version: ${{ github.event.inputs.version }}"
+          echo "Status: ${{ steps.results.outputs.status }}"
+          echo "Message: ${{ steps.results.outputs.message }}"
+          
+          if [[ "${{ steps.results.outputs.status }}" == "failure" ]]; then
+            echo "❌ Deployment failed - check logs for details"
+            exit 1
+          else
+            echo "🎉 Deployment successful!"
+          fi

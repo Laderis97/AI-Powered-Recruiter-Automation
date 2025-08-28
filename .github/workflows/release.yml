@@ -1,0 +1,253 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v1.0.0)'
+        required: true
+        default: 'v1.0.0'
+      dry_run:
+        description: 'Dry run mode (no actual release)'
+        required: false
+        default: 'false'
+
+env:
+  NODE_VERSION: '18'
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      security-events: write
+      id-token: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/}"
+          fi
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "🔖 Release version: ${VERSION}"
+
+      - name: Build application
+        run: |
+          echo "🔨 Building application..."
+          npm run build
+          echo "✅ Build completed"
+
+      - name: Run tests
+        run: |
+          echo "🧪 Running tests..."
+          npm run test:unit
+          echo "✅ Tests passed"
+
+      - name: Generate SBOM with CycloneDX
+        id: sbom
+        uses: cyclonedx/gh-action-generate-sbom@v1
+        with:
+          project-name: 'AI-Powered Recruiter Automation'
+          project-version: ${{ env.VERSION }}
+          project-type: 'application'
+          output-format: 'json'
+          output-file: 'bom.json'
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          echo "📝 Generating changelog..."
+          npx conventional-changelog-cli@latest --preset angular --release-count 0 --output-unreleased --outfile CHANGELOG.md
+          echo "✅ Changelog generated"
+
+      - name: Create release assets
+        run: |
+          echo "📦 Creating release assets..."
+          mkdir -p release-assets
+          
+          # Copy built application
+          cp -r dist/ release-assets/
+          
+          # Copy SBOM
+          cp bom.json release-assets/
+          
+          # Copy package files
+          cp package.json package-lock.json release-assets/
+          
+          # Copy documentation
+          cp README.md CONTRIBUTING.md SECURITY.md release-assets/
+          
+          # Create archive
+          tar -czf "ai-recruiter-${{ env.VERSION }}.tar.gz" -C release-assets .
+          zip -r "ai-recruiter-${{ env.VERSION }}.zip" release-assets/
+          
+          echo "✅ Release assets created"
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          labels: |
+            org.opencontainers.image.title=AI-Powered Recruiter Automation
+            org.opencontainers.image.description=AI-powered recruitment automation system
+            org.opencontainers.image.version=${{ env.VERSION }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.created=${{ steps.sbom.outputs.timestamp }}
+
+      - name: Generate SBOM for Docker image
+        id: docker-sbom
+        run: |
+          echo "🐳 Generating Docker image SBOM..."
+          npx @cyclonedx/cyclonedx-npm@latest --package-lock-only --output-format json --output-file docker-bom.json
+          echo "✅ Docker SBOM generated"
+
+      - name: Sign artifacts with cosign
+        id: sign
+        uses: sigstore/cosign-installer@v4
+        with:
+          cosign-release: 'v2.2.2'
+
+      - name: Sign container image
+        run: |
+          echo "🔐 Signing container image..."
+          cosign sign --key env://COSIGN_PRIVATE_KEY ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+      - name: Sign SBOM files
+        run: |
+          echo "🔐 Signing SBOM files..."
+          cosign sign-blob --key env://COSIGN_PRIVATE_KEY bom.json --output-signature bom.json.sig
+          cosign sign-blob --key env://COSIGN_PRIVATE_KEY docker-bom.json --output-signature docker-bom.json.sig
+        env:
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+
+      - name: Create GitHub Release
+        if: github.event.inputs.dry_run != 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: "Release ${{ env.VERSION }}"
+          body: |
+            ## 🚀 AI-Powered Recruiter Automation ${{ env.VERSION }}
+            
+            ### 📋 Release Notes
+            ${{ steps.changelog.outputs.changelog }}
+            
+            ### 📦 Assets
+            - **Application Archive**: `ai-recruiter-${{ env.VERSION }}.tar.gz`
+            - **Application ZIP**: `ai-recruiter-${{ env.VERSION }}.zip`
+            - **SBOM (JSON)**: `bom.json`
+            - **Docker SBOM**: `docker-bom.json`
+            - **Container Image**: `${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}`
+            
+            ### 🔐 Signatures
+            All artifacts are signed with cosign for authenticity verification.
+            
+            ### 📊 SBOM
+            Software Bill of Materials (SBOM) generated using CycloneDX format.
+            
+            ---
+            *Released on: ${{ steps.sbom.outputs.timestamp }}*
+            *Commit: ${{ github.sha }}*
+          files: |
+            ai-recruiter-${{ env.VERSION }}.tar.gz
+            ai-recruiter-${{ env.VERSION }}.zip
+            bom.json
+            bom.json.sig
+            docker-bom.json
+            docker-bom.json.sig
+          draft: false
+          prerelease: false
+          generate_release_notes: false
+
+      - name: Create Draft Release (Dry Run)
+        if: github.event.inputs.dry_run == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}-dry-run
+          name: "Draft Release ${{ env.VERSION }} (Dry Run)"
+          body: |
+            ## 🧪 Draft Release ${{ env.VERSION }} (Dry Run)
+            
+            This is a dry run release for testing purposes.
+            
+            ### 📦 Assets
+            - **Application Archive**: `ai-recruiter-${{ env.VERSION }}.tar.gz`
+            - **Application ZIP**: `ai-recruiter-${{ env.VERSION }}.zip`
+            - **SBOM (JSON)**: `bom.json`
+            - **Docker SBOM**: `docker-bom.json`
+            
+            ### 🔐 Signatures
+            All artifacts are signed with cosign for authenticity verification.
+            
+            ---
+            *This is a dry run - no actual release was created*
+            *Released on: ${{ steps.sbom.outputs.timestamp }}*
+            *Commit: ${{ github.sha }}*
+          files: |
+            ai-recruiter-${{ env.VERSION }}.tar.gz
+            ai-recruiter-${{ env.VERSION }}.zip
+            bom.json
+            bom.json.sig
+            docker-bom.json
+            docker-bom.json.sig
+          draft: true
+          prerelease: true
+          generate_release_notes: false
+
+      - name: Upload SBOM to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: bom.json
+
+      - name: Notify release completion
+        run: |
+          if [ "${{ github.event.inputs.dry_run }}" = "true" ]; then
+            echo "🧪 Dry run completed successfully!"
+            echo "Draft release created: ${{ env.VERSION }}-dry-run"
+          else
+            echo "🎉 Release ${{ env.VERSION }} created successfully!"
+            echo "Container image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}"
+          fi

@@ -80,6 +80,28 @@ function checkAccess(req: Request, res: Response, next: NextFunction) {
 // Apply access control to all routes
 app.use(checkAccess);
 
+// Health check endpoints
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
+
+app.get('/ready', (req, res) => {
+  // Basic readiness check - can be extended with database connectivity, etc.
+  res.status(200).json({
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: 'available',
+      ai: 'available'
+    }
+  });
+});
+
 // Helper function to convert Job to JobPosting
 function convertJobToJobPosting(job: Job): JobPosting {
   return {

@@ -1,0 +1,218 @@
+name: Verify
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '18'
+  NPM_CACHE_FOLDER: ~/.npm
+  NPM_CONFIG_CACHE: ~/.npm
+
+jobs:
+  verify:
+    name: Verify Code Quality & Security
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: package-lock.json
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            node_modules
+            */*/node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            dist/
+            build/
+            coverage/
+          key: ${{ runner.os }}-build-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+
+      - name: Run linting
+        id: lint
+        run: |
+          echo "🔍 Running ESLint..."
+          npm run lint
+          echo "🎨 Running Prettier check..."
+          npm run format:check
+          echo "✅ Linting completed successfully"
+
+      - name: TypeScript type checking
+        id: typecheck
+        run: |
+          echo "🔧 Running TypeScript type check..."
+          npm run typecheck
+          echo "✅ Type checking completed successfully"
+
+      - name: Run unit tests with coverage
+        id: test
+        run: |
+          echo "🧪 Running unit tests with coverage..."
+          npm run test:unit -- --coverage --coverageReporters=lcov --coverageReporters=text
+          echo "✅ Unit tests completed successfully"
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Run security audit
+        id: audit
+        run: |
+          echo "🔒 Running npm audit..."
+          npm audit --audit-level=moderate || {
+            echo "⚠️ Security vulnerabilities found"
+            echo "::warning::Security vulnerabilities detected in dependencies"
+            exit 1
+          }
+          echo "✅ Security audit completed successfully"
+
+      - name: Run SAST with CodeQL
+        id: codeql
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript, typescript
+          queries: security-extended, security-and-quality
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+      - name: Run Semgrep SAST
+        id: semgrep
+        uses: returntocorp/semgrep-action@v1
+        with:
+          config: >-
+            p/security-audit
+            p/secrets
+            p/owasp-top-ten
+            p/javascript
+            p/typescript
+          auditOn: push
+          outputFormat: sarif
+          outputFile: semgrep-results.sarif
+
+      - name: Upload Semgrep results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: semgrep-results.sarif
+
+      - name: Run dependency vulnerability scan
+        id: dependency-check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          projectName: 'AI-Powered-Recruiter-Automation'
+          path: '.'
+          format: 'SARIF'
+          out: 'reports'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --suppression suppression.xml
+
+      - name: Upload dependency check results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: reports/dependency-check-report.sarif
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('## 🔍 Verification Results'));
+            
+            const results = {
+              lint: '${{ steps.lint.outcome }}',
+              typecheck: '${{ steps.typecheck.outcome }}',
+              test: '${{ steps.test.outcome }}',
+              audit: '${{ steps.audit.outcome }}',
+              codeql: '${{ steps.codeql.outcome }}',
+              semgrep: '${{ steps.semgrep.outcome }}',
+              dependencyCheck: '${{ steps.dependency-check.outcome }}'
+            };
+            
+            const statusEmoji = (status) => status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚠️';
+            
+            const body = `## 🔍 Verification Results
+            
+            | Check | Status |
+            |------|--------|
+            | **Linting** | ${statusEmoji(results.lint)} ${results.lint} |
+            | **Type Checking** | ${statusEmoji(results.typecheck)} ${results.typecheck} |
+            | **Unit Tests** | ${statusEmoji(results.test)} ${results.test} |
+            | **Security Audit** | ${statusEmoji(results.audit)} ${results.audit} |
+            | **CodeQL SAST** | ${statusEmoji(results.codeql)} ${results.codeql} |
+            | **Semgrep SAST** | ${statusEmoji(results.semgrep)} ${results.semgrep} |
+            | **Dependency Check** | ${statusEmoji(results.dependencyCheck)} ${results.dependencyCheck} |
+            
+            ---
+            *Last updated: ${new Date().toISOString()}*
+            *Workflow: [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Fail on critical issues
+        if: |
+          steps.lint.outcome == 'failure' ||
+          steps.typecheck.outcome == 'failure' ||
+          steps.test.outcome == 'failure' ||
+          steps.audit.outcome == 'failure'
+        run: |
+          echo "❌ Critical verification steps failed!"
+          echo "Please fix the issues above before merging."
+          exit 1

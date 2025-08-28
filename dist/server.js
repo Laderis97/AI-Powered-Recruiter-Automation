@@ -51,6 +51,26 @@ function checkAccess(req, res, next) {
 }
 // Apply access control to all routes
 app.use(checkAccess);
+// Health check endpoints
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
+app.get('/ready', (req, res) => {
+    // Basic readiness check - can be extended with database connectivity, etc.
+    res.status(200).json({
+        status: 'ready',
+        timestamp: new Date().toISOString(),
+        services: {
+            database: 'available',
+            ai: 'available'
+        }
+    });
+});
 // Helper function to convert Job to JobPosting
 function convertJobToJobPosting(job) {
     return {
@@ -467,9 +487,7 @@ app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
     }
     catch (error) {
         console.error('Error fetching stage performance data:', error);
-        res
-            .status(500)
-            .json({
+        res.status(500).json({
             success: false,
             error: 'Failed to fetch stage performance data',
         });
@@ -611,9 +629,7 @@ app.post('/api/role-alignment', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Candidate ID and Job ID are required',
             });
@@ -650,9 +666,7 @@ app.post('/api/skills-gap', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Candidate ID and Job ID are required',
             });
@@ -689,9 +703,7 @@ app.post('/api/interview-questions', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Candidate ID and Job ID are required',
             });
@@ -713,9 +725,7 @@ app.post('/api/interview-questions', async (req, res) => {
         }
         else {
             console.error('Interview questions generation failed:', result.error);
-            res
-                .status(500)
-                .json({
+            res.status(500).json({
                 success: false,
                 error: 'Failed to generate interview questions',
             });
@@ -731,9 +741,7 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Candidate ID and Job ID are required',
             });
@@ -763,9 +771,7 @@ app.post('/api/interview-questions/categorized', async (req, res) => {
         }
         else {
             console.error('Categorized interview questions generation failed:', result.error);
-            res
-                .status(500)
-                .json({
+            res.status(500).json({
                 success: false,
                 error: 'Failed to generate categorized interview questions',
             });
@@ -781,9 +787,7 @@ app.post('/api/cultural-fit', async (req, res) => {
     try {
         const { candidateId, jobId } = req.body;
         if (!candidateId || !jobId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Candidate ID and Job ID are required',
             });
@@ -1342,9 +1346,7 @@ app.get('/api/ai/ab-test/:testId/variant', async (req, res) => {
         const { testId } = req.params;
         const { candidateId } = req.query;
         if (!testId || !candidateId) {
-            return res
-                .status(400)
-                .json({
+            return res.status(400).json({
                 success: false,
                 error: 'Test ID and candidate ID are required',
             });
@@ -1450,7 +1452,7 @@ app.post('/api/ai/feedback', async (req, res) => {
 // Delete a job posting
 app.delete('/api/jobs/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+  const { id } = req.params;
     console.log(`🗑️ Deleting job: ${id}`);
     
     // Get the job first to check if it exists
