@@ -202,34 +202,37 @@ const FEATURES = {
 
 ## Security & Compliance
 
-### Threat Model (STRIDE-lite)
+### Threat Model (STRIDE)
 
-| Threat                     | Mitigation              | Owner               |
-| -------------------------- | ----------------------- | ------------------- |
-| **Spoofing**               | JWT tokens, OAuth2      | Auth team           |
-| **Tampering**              | Input validation, HTTPS | Backend team        |
-| **Repudiation**            | Audit logs, signatures  | Security team       |
-| **Information Disclosure** | Encryption, RBAC        | Security team       |
-| **Denial of Service**      | Rate limiting, CDN      | Infrastructure team |
-| **Elevation of Privilege** | Least privilege, RBAC   | Security team       |
+| Threat                     | Mitigation              | Owner               | Reference |
+| -------------------------- | ----------------------- | ------------------- | --------- |
+| **Spoofing**               | JWT tokens, OAuth2      | Auth team           | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
+| **Tampering**              | Input validation, HTTPS | Backend team        | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
+| **Repudiation**            | Audit logs, signatures  | Security team       | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
+| **Information Disclosure** | Encryption, RBAC        | Security team       | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
+| **Denial of Service**      | Rate limiting, CDN      | Infrastructure team | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
+| **Elevation of Privilege** | Least privilege, RBAC   | Security team       | [STRIDE Checklist](../threat-model/STRIDE-checklist.md) |
 
 ### Security Tools
 
-| Tool                 | Purpose                    | Frequency     |
-| -------------------- | -------------------------- | ------------- |
-| **SAST**             | Code vulnerability scan    | Every PR      |
-| **DAST**             | Runtime vulnerability scan | Weekly        |
-| **Dependency Audit** | Known vulnerabilities      | Daily         |
-| **SBOM**             | Software bill of materials | Every release |
-| **Secret Scanner**   | Credential detection       | Pre-commit    |
+| Tool                 | Purpose                    | Frequency     | Reference |
+| -------------------- | -------------------------- | ------------- | --------- |
+| **SAST**             | CodeQL, Semgrep           | Every PR      | [CodeQL Config](../.github/codeql/codeql-config.yml) |
+| **Secret Scanner**   | Gitleaks                   | Every PR      | [Gitleaks Workflow](../.github/workflows/gitleaks.yml) |
+| **Dependency Audit** | OWASP, npm audit          | Daily         | [Verify Workflow](../.github/workflows/verify.yml) |
+| **SBOM**             | CycloneDX                  | Every release | [Release Workflow](../.github/workflows/release.yml) |
+| **Container Security**| Multi-stage, signing      | Every build   | [Dockerfile](../Dockerfile) |
 
 ### Compliance Checklist
 
-- [ ] GDPR compliance (candidate data)
-- [ ] SOC 2 Type II controls
-- [ ] Data retention policies
-- [ ] Access logging
-- [ ] Encryption at rest/transit
+- [x] GDPR compliance (candidate data) - [SECURITY.md](../SECURITY.md)
+- [ ] SOC 2 Type II controls - [SECURITY.md](../SECURITY.md)
+- [x] Data retention policies - [SECURITY.md](../SECURITY.md)
+- [x] Access logging - [SECURITY.md](../SECURITY.md)
+- [x] Encryption at rest/transit - [SECURITY.md](../SECURITY.md)
+- [x] Threat modeling - [STRIDE Checklist](../threat-model/STRIDE-checklist.md)
+- [x] Automated security scanning - [Verify Workflow](../.github/workflows/verify.yml)
+- [x] Dependency management - [Dependabot Config](../.github/dependabot.yml)
 
 ---
 

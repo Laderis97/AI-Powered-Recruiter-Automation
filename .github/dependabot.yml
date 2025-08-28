@@ -1,0 +1,181 @@
+# Dependabot configuration for AI-Powered Recruiter Automation
+# Automatically updates dependencies with security focus
+
+version: 2
+updates:
+  # Enable version updates for npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "Laderis97"
+    assignees:
+      - "Laderis97"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "security"
+      - "automated"
+    # Group minor and patch updates together
+    groups:
+      security-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Ignore major version updates for now
+    ignore:
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+    # Security updates should be merged automatically if tests pass
+    automerged_updates:
+      - match:
+          dependency_type: "direct"
+          update_type: "security"
+        automerge: true
+        commit_message_options:
+          prefix: "security"
+          include_scope: true
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Laderis97"
+    assignees:
+      - "Laderis97"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+    # Group all GitHub Actions updates
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Security updates for actions should be merged automatically
+    automerged_updates:
+      - match:
+          dependency_type: "direct"
+          update_type: "security"
+        automerge: true
+        commit_message_options:
+          prefix: "security"
+          include_scope: true
+
+  # Enable version updates for Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Laderis97"
+    assignees:
+      - "Laderis97"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "automated"
+    # Group Docker updates
+    groups:
+      docker-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Security updates for Docker should be merged automatically
+    automerged_updates:
+      - match:
+          dependency_type: "direct"
+          update_type: "security"
+        automerge: true
+        commit_message_options:
+          prefix: "security"
+          include_scope: true
+
+  # Enable version updates for pip dependencies (if any)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "Laderis97"
+    assignees:
+      - "Laderis97"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "python"
+      - "automated"
+    # Group pip updates
+    groups:
+      pip-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    # Security updates for pip should be merged automatically
+    automerged_updates:
+      - match:
+          dependency_type: "direct"
+          update_type: "security"
+        automerge: true
+        commit_message_options:
+          prefix: "security"
+          include_scope: true
+
+# Global configuration
+registries:
+  # Configure npm registry for private packages if needed
+  npm:
+    type: "npm-registry"
+    url: "https://registry.npmjs.org"
+    # Add authentication if using private packages
+    # username: ${{ secrets.NPM_USERNAME }}
+    # password: ${{ secrets.NPM_PASSWORD }}
+
+# Configure security policies
+security-updates-only: false
+allow:
+  # Allow all dependency types
+  - dependency-type: "all"
+
+# Configure merge strategies
+rebase-strategy: "auto"
+target-branch: "develop"

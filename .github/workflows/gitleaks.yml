@@ -1,0 +1,112 @@
+name: Gitleaks Security Scan
+
+on:
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    # Run weekly on Sundays at 2 AM UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  gitleaks:
+    name: Gitleaks Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        id: gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          config-path: ./.github/gitleaks/.gitleaks.toml
+          report-format: sarif
+          report-path: gitleaks-report.sarif
+          redact: true
+          verbose: true
+          exit-code: 0
+
+      - name: Upload Gitleaks results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: gitleaks-report.sarif
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            try {
+              const report = JSON.parse(fs.readFileSync('gitleaks-report.sarif', 'utf8'));
+              const findings = report.runs?.[0]?.results || [];
+              
+              if (findings.length === 0) {
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: `## 🔒 Gitleaks Security Scan Results
+                  
+                  ✅ **No secrets detected!** Your code is clean of hardcoded secrets.
+                  
+                  ---
+                  *Scanned with Gitleaks v2*`
+                });
+              } else {
+                const secretTypes = [...new Set(findings.map(f => f.rule.id))];
+                const locations = findings.map(f => `- \`${f.locations[0].physicalLocation.artifactLocation.uri}\` (line ${f.locations[0].physicalLocation.region.startLine})`);
+                
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  body: `## ⚠️ Gitleaks Security Scan Results
+                  
+                  🚨 **${findings.length} potential secret(s) detected!**
+                  
+                  **Secret Types Found:**
+                  ${secretTypes.map(t => `- \`${t}\``).join('\n')}
+                  
+                  **Locations:**
+                  ${locations.join('\n')}
+                  
+                  **⚠️ Action Required:** Please review and remove any hardcoded secrets before merging.
+                  
+                  ---
+                  *Scanned with Gitleaks v2*`
+                });
+              }
+            } catch (error) {
+              console.error('Error processing Gitleaks report:', error);
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## ❌ Gitleaks Scan Error
+                
+                An error occurred while processing the security scan results.
+                
+                **Error:** ${error.message}
+                
+                Please check the workflow logs for details.
+                
+                ---
+                *Scanned with Gitleaks v2*`
+              });
+            }
+
+      - name: Fail on secrets found
+        if: steps.gitleaks.outcome == 'failure'
+        run: |
+          echo "❌ Secrets detected in code!"
+          echo "Please review and remove any hardcoded secrets before merging."
+          exit 1

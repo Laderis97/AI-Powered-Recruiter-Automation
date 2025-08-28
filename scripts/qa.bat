@@ -9,6 +9,7 @@ if "%1"=="install-hooks" goto :install_hooks
 if "%1"=="lint" goto :lint
 if "%1"=="test" goto :test
 if "%1"=="scan" goto :scan
+if "%1"=="sbom" goto :sbom
 if "%1"=="all" goto :all
 if "%1"=="help" goto :help
 
@@ -24,6 +25,7 @@ echo   install-hooks  - Install pre-commit hooks
 echo   lint          - Run linting and formatting checks
 echo   test          - Run unit tests
 echo   scan          - Run security and spell checks
+echo   sbom          - Generate Software Bill of Materials
 echo   all           - Run all checks (default)
 echo   help          - Show this help message
 echo.
@@ -119,6 +121,19 @@ if %ERRORLEVEL% equ 0 (
 )
 
 echo ✅ Security and spell checks completed!
+goto :end
+
+:sbom
+echo 📋 Generating Software Bill of Materials...
+echo.
+echo Using npx to generate SBOM...
+call npx @cyclonedx/cyclonedx-npm --output-format json --output-file cyclonedx.json
+if %ERRORLEVEL% equ 0 (
+    echo ✅ SBOM generated: cyclonedx.json
+    echo ✅ SBOM generation completed!
+) else (
+    echo ❌ Failed to generate SBOM
+)
 goto :end
 
 :all

@@ -21,6 +21,20 @@ install-hooks:
 qa: lint test-unit scan
 	@echo "✅ All QA checks passed!"
 
+# Generate Software Bill of Materials (SBOM)
+sbom:
+	@echo "📋 Generating Software Bill of Materials..."
+	@if command -v cyclonedx >/dev/null 2>&1; then \
+		cyclonedx npm --output-format json --output-file cyclonedx.json; \
+		echo "✅ SBOM generated: cyclonedx.json"; \
+	elif command -v npx >/dev/null 2>&1; then \
+		npx @cyclonedx/cyclonedx-npm --output-format json --output-file cyclonedx.json; \
+		echo "✅ SBOM generated: cyclonedx.json"; \
+	else \
+		echo "❌ CycloneDX tools not found. Install with: npm install -g @cyclonedx/cyclonedx-npm"; \
+		exit 1; \
+	fi
+
 # Linting and formatting
 lint:
 	@echo "🔍 Running linting and formatting checks..."

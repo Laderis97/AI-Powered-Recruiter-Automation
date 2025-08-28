@@ -1,0 +1,168 @@
+# Gitleaks configuration for AI-Powered Recruiter Automation
+# Detects hardcoded secrets, API keys, passwords, and other sensitive data
+
+[allowlist]
+# Allowlist patterns for false positives
+description = "Allowlist for known false positives"
+paths = [
+    "**/*.md",
+    "**/docs/**",
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "**/.git/**",
+    "**/resumes/**",
+    "**/uploads/**"
+]
+
+# Allowlist specific patterns that are not secrets
+regexes = [
+    "example\\.com",
+    "test@test\\.com",
+    "password123",
+    "admin123",
+    "123456789",
+    "000000000",
+    "test123",
+    "dummy",
+    "placeholder",
+    "fake",
+    "mock",
+    "sample"
+]
+
+# Allowlist specific commit hashes or patterns
+commits = [
+    "commit-hash-here"
+]
+
+[[rules]]
+id = "generic-api-key"
+description = "Generic API Key"
+regex = '''(?i)(api[_-]?key|apikey|secret[_-]?key|secretkey|auth[_-]?key|authkey|access[_-]?key|accesskey|private[_-]?key|privatekey|client[_-]?secret|clientsecret|app[_-]?secret|appsecret|session[_-]?key|sessionkey|token[_-]?key|tokenkey)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_]{20,}["\s]*'''
+tags = ["key", "api", "generic"]
+
+[[rules]]
+id = "aws-access-key-id"
+description = "AWS Access Key ID"
+regex = '''AKIA[0-9A-Z]{16}'''
+tags = ["key", "aws"]
+
+[[rules]]
+id = "aws-secret-access-key"
+description = "AWS Secret Access Key"
+regex = '''(?i)aws[_-]?(secret[_-]?)?access[_-]?key[_-]?(id)?["\s]*(?::|=>|=)\s*["\s]*[A-Za-z0-9+/]{4}(?:[A-Za-z0-9+/]{2})?(?:[A-Za-z0-9+/]{2})?["\s]*'''
+tags = ["key", "aws"]
+
+[[rules]]
+id = "github-personal-access-token"
+description = "GitHub Personal Access Token"
+regex = '''ghp_[0-9a-zA-Z]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+id = "github-oauth-token"
+description = "GitHub OAuth Token"
+regex = '''gho_[0-9a-zA-Z]{36}'''
+tags = ["key", "github"]
+
+[[rules]]
+id = "slack-token"
+description = "Slack Token"
+regex = '''xox[p|b|o|a]-[0-9]{12}-[0-9]{12}-[a-z0-9]{32}'''
+tags = ["key", "slack"]
+
+[[rules]]
+id = "google-api-key"
+description = "Google API Key"
+regex = '''AIza[0-9A-Za-z\-_]{35}'''
+tags = ["key", "google"]
+
+[[rules]]
+id = "firebase-url"
+description = "Firebase URL"
+regex = '''https://[a-zA-Z0-9\-_]+\.firebaseio\.com'''
+tags = ["url", "firebase"]
+
+[[rules]]
+id = "database-url"
+description = "Database Connection String"
+regex = '''(?i)(mongodb|postgresql|mysql|redis)://[a-zA-Z0-9\-_]+:[a-zA-Z0-9\-_]+@[a-zA-Z0-9\-_.]+:[0-9]+/[a-zA-Z0-9\-_]+'''
+tags = ["database", "connection"]
+
+[[rules]]
+id = "email-password"
+description = "Email Password"
+regex = '''(?i)(smtp|email|mail)[_-]?(password|pass|pwd)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_!@#$%^&*()]{8,}["\s]*'''
+tags = ["password", "email"]
+
+[[rules]]
+id = "jwt-token"
+description = "JWT Token"
+regex = '''eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*'''
+tags = ["jwt", "token"]
+
+[[rules]]
+id = "private-key"
+description = "Private Key"
+regex = '''-----BEGIN[^-]+PRIVATE KEY-----[\s\S]*-----END[^-]+PRIVATE KEY-----'''
+tags = ["key", "private"]
+
+[[rules]]
+id = "ssh-private-key"
+description = "SSH Private Key"
+regex = '''-----BEGIN OPENSSH PRIVATE KEY-----[\s\S]*-----END OPENSSH PRIVATE KEY-----'''
+tags = ["key", "ssh", "private"]
+
+[[rules]]
+id = "hardcoded-password"
+description = "Hardcoded Password"
+regex = '''(?i)(password|passwd|pwd)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_!@#$%^&*()]{8,}["\s]*'''
+tags = ["password", "hardcoded"]
+
+[[rules]]
+id = "hardcoded-secret"
+description = "Hardcoded Secret"
+regex = '''(?i)(secret|key|token)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_!@#$%^&*()]{16,}["\s]*'''
+tags = ["secret", "hardcoded"]
+
+[[rules]]
+id = "openai-api-key"
+description = "OpenAI API Key"
+regex = '''sk-[a-zA-Z0-9]{48}'''
+tags = ["key", "openai", "ai"]
+
+[[rules]]
+id = "supabase-url"
+description = "Supabase URL"
+regex = '''https://[a-zA-Z0-9\-_]+\.supabase\.co'''
+tags = ["url", "supabase"]
+
+[[rules]]
+id = "supabase-anon-key"
+description = "Supabase Anonymous Key"
+regex = '''eyJ[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*'''
+tags = ["key", "supabase"]
+
+# Custom rules for the AI-Powered Recruiter Automation project
+[[rules]]
+id = "ai-service-key"
+description = "AI Service API Key"
+regex = '''(?i)(ai|ml|openai|anthropic|cohere|huggingface)[_-]?(api[_-]?key|key|token)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_]{20,}["\s]*'''
+tags = ["key", "ai", "ml"]
+
+[[rules]]
+id = "recruitment-service-key"
+description = "Recruitment Service API Key"
+regex = '''(?i)(recruitment|hiring|ats|job[_-]?board)[_-]?(api[_-]?key|key|token)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_]{20,}["\s]*'''
+tags = ["key", "recruitment", "hiring"]
+
+[[rules]]
+id = "email-service-key"
+description = "Email Service API Key"
+regex = '''(?i)(sendgrid|mailgun|ses|mailchimp|postmark)[_-]?(api[_-]?key|key|token)["\s]*(?::|=>|=)\s*["\s]*[a-zA-Z0-9\-_]{20,}["\s]*'''
+tags = ["key", "email", "service"]

@@ -1,0 +1,54 @@
+name: "AI-Powered Recruiter Automation CodeQL Config"
+
+# Disable default queries and use custom query suite
+disable-default-queries: false
+
+# Query suite selection
+queries:
+  - uses: security-and-quality
+  - uses: security-extended
+  - uses: security-experimental
+
+# Paths to exclude from analysis
+paths-ignore:
+  - '**/node_modules/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/coverage/**'
+  - '**/__tests__/**'
+  - '**/*.test.ts'
+  - '**/*.spec.ts'
+  - '**/docs/**'
+  - '**/.github/**'
+  - '**/resumes/**'
+  - '**/uploads/**'
+
+# Paths to include in analysis
+paths:
+  - 'src/**'
+  - 'public/**'
+  - 'views/**'
+
+# Query filters for specific security concerns
+query-filters:
+  - include:
+      tags contain: security
+  - include:
+      tags contain: external-data
+  - include:
+      tags contain: injection
+  - include:
+      tags contain: xss
+  - include:
+      tags contain: sql-injection
+  - include:
+      tags contain: path-traversal
+  - include:
+      tags contain: deserialization
+  - exclude:
+      tags contain: experimental
+      tags contain: very-low
+
+# Memory and performance settings
+memory: 4096
+threads: 0

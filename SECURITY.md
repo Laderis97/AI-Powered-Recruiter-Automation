@@ -2,8 +2,6 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
-
 | Version | Supported          |
 | ------- | ------------------ |
 | 1.0.x   | :white_check_mark: |
@@ -11,84 +9,110 @@ Use this section to tell people about which versions of your project are current
 
 ## Reporting a Vulnerability
 
-We take the security of AI-Powered Recruiter Automation seriously. If you believe you have found a security vulnerability, please report it to us as described below.
+We take security vulnerabilities seriously. If you discover a security vulnerability, please follow these steps:
 
-### **Please DO NOT create a public GitHub issue for security vulnerabilities.**
+1. **Do NOT create a public GitHub issue** for security vulnerabilities
+2. **Email us directly** at [security@cardcircle-ai.com](mailto:security@cardcircle-ai.com)
+3. **Include detailed information** about the vulnerability
+4. **Provide steps to reproduce** the issue
+5. **Include any relevant code** or configuration
 
-### Reporting Process
+## Security Response SLA
 
-1. **Email Security Team**: Send an email to [security@company.com](mailto:security@company.com) with the subject line `[SECURITY] AI Recruiter Vulnerability Report`
+### Initial Response Times
+- **Critical**: 4 hours
+- **High**: 24 hours  
+- **Medium**: 48 hours
+- **Low**: 1 week
 
-2. **Include the following information**:
-   - Description of the vulnerability
-   - Steps to reproduce the issue
-   - Potential impact assessment
-   - Suggested fix (if available)
-   - Your contact information
+### Resolution Timelines
+- **Critical**: 24-48 hours
+- **High**: 1-2 weeks
+- **Medium**: 2-4 weeks
+- **Low**: 1-2 months
 
-3. **Response Timeline**:
-   - **Initial Response**: Within 24 hours
-   - **Status Update**: Within 72 hours
-   - **Resolution**: Depends on severity (see below)
+### Public Disclosure
+- **Critical/High**: Within 30 days of fix
+- **Medium/Low**: Within 90 days of fix
+- Coordinated disclosure with security researchers
 
-### Vulnerability Severity Levels
+## Security Contact Information
 
-| Level        | Response Time | Description                                               |
-| ------------ | ------------- | --------------------------------------------------------- |
-| **Critical** | 24-48 hours   | Remote code execution, data breach, authentication bypass |
-| **High**     | 3-7 days      | Privilege escalation, sensitive data exposure             |
-| **Medium**   | 1-2 weeks     | Information disclosure, denial of service                 |
-| **Low**      | 2-4 weeks     | Minor issues, best practice violations                    |
+### Primary Security Contact
+- **Email**: [security@cardcircle-ai.com](mailto:security@cardcircle-ai.com)
+- **PGP Key**: [security-pgp.asc](https://github.com/Laderis97/AI-Powered-Recruiter-Automation/raw/main/security-pgp.asc)
+- **Response Time**: 24/7 for critical issues
 
-### Responsible Disclosure
+### Security Team
+- **Lead**: [Laderis97](https://github.com/Laderis97)
+- **Backup**: [security-team@cardcircle-ai.com](mailto:security-team@cardcircle-ai.com)
 
-We follow responsible disclosure practices:
+## Vulnerability Disclosure Process
 
-1. **Private Reporting**: All security issues are handled privately
-2. **Timeline Communication**: We'll keep you informed of our progress
-3. **Credit**: We'll credit you in our security advisories (unless you prefer anonymity)
-4. **Coordination**: We'll work with you to ensure the issue is resolved before public disclosure
+1. **Discovery**: Security researcher finds vulnerability
+2. **Report**: Email sent to security@cardcircle-ai.com
+3. **Acknowledgment**: Confirmation within SLA timeframe
+4. **Investigation**: Technical assessment and severity classification
+5. **Fix Development**: Security patch development
+6. **Testing**: Security testing and validation
+7. **Deployment**: Secure deployment to production
+8. **Disclosure**: Public disclosure with credit to researcher
 
-### Security Best Practices
+## Security Measures
 
-To help maintain security:
+### Code Security
+- **SAST Scanning**: CodeQL and Semgrep integration
+- **Secret Scanning**: Gitleaks automated detection
+- **Dependency Scanning**: Automated vulnerability detection
+- **Code Review**: Mandatory security review for all changes
 
-- Keep dependencies updated
-- Use strong authentication
-- Follow the principle of least privilege
-- Regularly review access controls
-- Monitor for suspicious activity
-- Use HTTPS in production
-- Validate all inputs
-- Implement proper error handling
+### Infrastructure Security
+- **Container Security**: Multi-stage builds with security scanning
+- **Artifact Signing**: Cosign integration for authenticity
+- **SBOM Generation**: CycloneDX for supply chain transparency
+- **Environment Protection**: Staging/production isolation
 
-### Security Contacts
+### Operational Security
+- **Access Control**: Role-based access control
+- **Audit Logging**: Comprehensive activity logging
+- **Incident Response**: Documented response procedures
+- **Security Training**: Regular team security awareness
 
-- **Security Team**: [security@company.com](mailto:security@company.com)
-- **Emergency Contact**: [emergency@company.com](mailto:emergency@company.com)
-- **PGP Key**: [security-pgp.asc](https://company.com/security-pgp.asc)
+## Security Best Practices
 
-### Bug Bounty Program
+- Keep dependencies updated via Dependabot
+- Use environment variables for secrets
+- Follow OWASP secure coding guidelines
+- Regular security audits and penetration testing
+- Implement proper authentication and authorization
+- Use HTTPS in production with proper TLS configuration
+- Regular security training for development team
 
-We currently do not have a formal bug bounty program, but we do appreciate security researchers who responsibly disclose vulnerabilities. We may offer recognition or other forms of appreciation for significant findings.
+## Bug Bounty Program
 
-### Security Updates
+We offer a bug bounty program for security researchers:
 
-Security updates will be released as patch versions (e.g., 1.0.1, 1.0.2) and announced through:
+- **Critical**: $500 - $2,000
+- **High**: $200 - $500
+- **Medium**: $50 - $200
+- **Low**: $25 - $50
 
-- GitHub Security Advisories
-- Release notes
-- Security mailing list
+### Eligibility
+- First valid report of a vulnerability
+- Responsible disclosure following our policy
+- Not a duplicate of existing reports
+- Not affecting end-of-life versions
 
-### Compliance
+## Compliance
 
-This project follows security best practices and aims to comply with:
+- **SOC 2 Type II**: In progress
+- **GDPR**: Compliant
+- **CCPA**: Compliant
+- **ISO 27001**: Planned for 2024
 
-- OWASP Top 10
-- GDPR requirements
-- SOC 2 Type II controls
-- Industry security standards
+## Security Resources
 
----
-
-**Thank you for helping keep AI-Powered Recruiter Automation secure!**
+- [OWASP Top 10](https://owasp.org/www-project-top-ten/)
+- [Security Headers](https://securityheaders.com/)
+- [Mozilla Security Guidelines](https://infosec.mozilla.org/guidelines/)
+- [GitHub Security Lab](https://securitylab.github.com/)
