@@ -104,6 +104,59 @@
     </div>
   </section>
 
+  <!-- Dashboard Navigation -->
+  <section class="dashboard-navigation">
+    <div class="container">
+      <!-- Breadcrumb Navigation -->
+      <div class="breadcrumb-nav" id="breadcrumbNav">
+        <button class="breadcrumb-item active" data-view="all">
+          <i class="fas fa-home"></i>
+          <span>Dashboard</span>
+        </button>
+        <div class="breadcrumb-separator" id="breadcrumbSeparator" style="display: none;">
+          <i class="fas fa-chevron-right"></i>
+        </div>
+        <button class="breadcrumb-item" id="currentSection" style="display: none;">
+          <i class="fas fa-th-large"></i>
+          <span>Section</span>
+        </button>
+      </div>
+      
+      <!-- Main Navigation Tabs -->
+      <div class="nav-tabs" data-stagger>
+        <button class="nav-tab active" data-view="all" data-track="nav-all" title="Dashboard Overview (Alt+1)">
+          <i class="fas fa-th-large"></i>
+          <span>All</span>
+        </button>
+        <button class="nav-tab" data-view="candidates" data-track="nav-candidates-tab" title="Candidates (Alt+2)">
+          <i class="fas fa-users"></i>
+          <span>Candidates</span>
+        </button>
+        <button class="nav-tab" data-view="jobs" data-track="nav-jobs-tab" title="Jobs (Alt+3)">
+          <i class="fas fa-briefcase"></i>
+          <span>Jobs</span>
+        </button>
+        <button class="nav-tab" data-view="analytics" data-track="nav-analytics-tab" title="Analytics (Alt+4)">
+          <i class="fas fa-chart-line"></i>
+          <span>Analytics</span>
+        </button>
+      </div>
+      
+      <!-- Quick Actions -->
+      <div class="nav-quick-actions" id="navQuickActions">
+        <button class="btn btn-sm btn-outline" onclick="window.scrollTo({top: 0, behavior: 'smooth'})" title="Back to Top">
+          <i class="fas fa-arrow-up"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" onclick="refreshCurrentView()" title="Refresh View">
+          <i class="fas fa-sync-alt"></i>
+        </button>
+        <button class="btn btn-sm btn-outline" onclick="showKeyboardShortcuts()" title="Keyboard Shortcuts">
+          <i class="fas fa-keyboard"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
   <!-- Dashboard Overview -->
   <section id="dashboard" class="dashboard-overview">
     <div class="container">
@@ -271,10 +324,16 @@
   <section id="jobs" class="jobs">
     <div class="container">
       <div class="section-header" data-stagger>
-        <h2 class="section-title">Job Management</h2>
-        <p class="section-subtitle">
-          Create, manage, and optimize job postings with AI-powered insights
-        </p>
+        <div class="section-header-content">
+          <h2 class="section-title">Job Management</h2>
+          <p class="section-subtitle">
+            Create, manage, and optimize job postings with AI-powered insights
+          </p>
+        </div>
+        <button class="btn btn-outline btn-sm back-to-dashboard" onclick="navigateToDashboard()" title="Back to Dashboard">
+          <i class="fas fa-arrow-left"></i>
+          Back to Dashboard
+        </button>
       </div>
       
       <div class="jobs-actions" data-stagger>
@@ -416,10 +475,16 @@
   <section id="candidates" class="candidates">
     <div class="container">
       <div class="section-header" data-stagger>
-        <h2 class="section-title">Uploaded Candidates</h2>
-        <p class="section-subtitle">
-          AI-parsed candidates from uploaded resumes
-        </p>
+        <div class="section-header-content">
+          <h2 class="section-title">Uploaded Candidates</h2>
+          <p class="section-subtitle">
+            AI-parsed candidates from uploaded resumes
+          </p>
+        </div>
+        <button class="btn btn-outline btn-sm back-to-dashboard" onclick="navigateToDashboard()" title="Back to Dashboard">
+          <i class="fas fa-arrow-left"></i>
+          Back to Dashboard
+        </button>
       </div>
       
       <!-- Candidates Actions -->
@@ -472,10 +537,16 @@
   <section id="analytics" class="analytics">
     <div class="container">
       <div class="section-header" data-stagger>
-        <h2 class="section-title">Recruitment Analytics</h2>
-        <p class="section-subtitle">
-          Data-driven insights to optimize your hiring process and improve outcomes
-        </p>
+        <div class="section-header-content">
+          <h2 class="section-title">Recruitment Analytics</h2>
+          <p class="section-subtitle">
+            Data-driven insights to optimize your hiring process and improve outcomes
+          </p>
+        </div>
+        <button class="btn btn-outline btn-sm back-to-dashboard" onclick="navigateToDashboard()" title="Back to Dashboard">
+          <i class="fas fa-arrow-left"></i>
+          Back to Dashboard
+        </button>
       </div>
       
       <div class="analytics-grid">

@@ -30,6 +30,12 @@ class ModernUI {
     this.setupAdvancedAnimations();
     this.setupRealTimeUpdates();
     this.setupAdvancedSearch();
+    
+    // Initialize dashboard view after everything is set up
+    setTimeout(() => {
+      this.initializeDashboardView();
+      this.restoreUserState();
+    }, 100);
   }
 
   // === THEME TOGGLE (Lowest Complexity) ===
@@ -64,12 +70,511 @@ class ModernUI {
       link.addEventListener('click', e => {
         e.preventDefault();
         const targetId = link.getAttribute('href').substring(1);
+        
+        // Handle special navigation cases
+        if (targetId === 'dashboard') {
+          // Dashboard link - show overview and scroll to top
+          this.switchToView('all', this.getDashboardSections());
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+          this.updateHeaderNavigationState('dashboard');
+          return;
+        }
+        
+        // For other sections, scroll to them and update state
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: 'smooth' });
+          this.updateHeaderNavigationState(targetId);
+          
+          // Update dashboard view if we're in a specific section
+          if (targetId === 'candidates') {
+            this.switchToView('candidates', this.getDashboardSections());
+          } else if (targetId === 'analytics') {
+            this.switchToView('analytics', this.getDashboardSections());
+          } else if (targetId === 'ai-tools') {
+            // AI Tools section - keep current dashboard view but scroll to section
+            this.updateHeaderNavigationState('ai-tools');
+          }
         }
       });
     });
+
+    // Setup dashboard navigation tabs
+    this.setupDashboardNavigation();
+    
+    // Setup landing page navigation
+    this.setupLandingPageNavigation();
+  }
+
+  // === DASHBOARD NAVIGATION ===
+  setupDashboardNavigation() {
+    const navTabs = document.querySelectorAll('.nav-tab');
+    const breadcrumbItems = document.querySelectorAll('.breadcrumb-item');
+    const sections = this.getDashboardSections();
+
+    // Setup main navigation tabs
+    navTabs.forEach(tab => {
+      // Add ripple effect on click
+      tab.addEventListener('click', (e) => {
+        this.createRippleEffect(e, tab);
+        
+        const view = tab.getAttribute('data-view');
+        this.switchToView(view, sections);
+        
+        // Add haptic feedback if supported
+        if (navigator.vibrate) {
+          navigator.vibrate(50);
+        }
+      });
+
+      // Add hover animations
+      tab.addEventListener('mouseenter', () => {
+        if (!tab.classList.contains('active')) {
+          tab.style.transform = 'translateY(-2px) scale(1.02)';
+        }
+      });
+
+      tab.addEventListener('mouseleave', () => {
+        if (!tab.classList.contains('active')) {
+          tab.style.transform = 'translateY(0) scale(1)';
+        }
+      });
+    });
+
+    // Setup breadcrumb navigation
+    breadcrumbItems.forEach(item => {
+      item.addEventListener('click', () => {
+        const view = item.getAttribute('data-view');
+        this.switchToView(view, sections);
+      });
+    });
+
+    // Setup keyboard navigation
+    this.setupKeyboardNavigation();
+
+    // Setup global navigation functions
+    window.navigateToDashboard = () => this.switchToView('all', sections);
+    window.refreshCurrentView = () => this.refreshCurrentView();
+    window.showKeyboardShortcuts = () => this.showKeyboardShortcuts();
+  }
+
+  // Helper method to get dashboard sections
+  getDashboardSections() {
+    return {
+      all: document.querySelector('.dashboard-overview'),
+      candidates: document.getElementById('candidates'),
+      jobs: document.getElementById('jobs'),
+      analytics: document.getElementById('analytics')
+    };
+  }
+
+  // Update header navigation state
+  updateHeaderNavigationState(activeSection) {
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      const href = link.getAttribute('href').substring(1);
+      if (href === activeSection) {
+        link.classList.add('active');
+      }
+    });
+    
+    // Show/hide "Back to Dashboard" button based on section
+    this.toggleBackToDashboardButton(activeSection);
+  }
+
+  // Toggle "Back to Dashboard" button visibility
+  toggleBackToDashboardButton(activeSection) {
+    let backButton = document.querySelector('.back-to-dashboard-header');
+    
+    if (!backButton) {
+      // Create the button if it doesn't exist
+      backButton = document.createElement('button');
+      backButton.className = 'btn btn-sm btn-outline back-to-dashboard-header';
+      backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Dashboard';
+      backButton.style.position = 'fixed';
+      backButton.style.top = '80px';
+      backButton.style.right = '20px';
+      backButton.style.zIndex = '999';
+      backButton.style.display = 'none';
+      
+      backButton.addEventListener('click', () => {
+        this.switchToView('all', this.getDashboardSections());
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        this.updateHeaderNavigationState('dashboard');
+      });
+      
+      document.body.appendChild(backButton);
+    }
+    
+    // Show button only when not in dashboard overview
+    if (activeSection !== 'dashboard' && activeSection !== 'all') {
+      backButton.style.display = 'block';
+    } else {
+      backButton.style.display = 'none';
+    }
+  }
+
+  // Setup landing page navigation
+  setupLandingPageNavigation() {
+    // Add landing page link to header if not exists
+    const navLinks = document.querySelector('.nav-links');
+    if (navLinks && !document.querySelector('.nav-link-landing')) {
+      const landingLink = document.createElement('a');
+      landingLink.href = '/';
+      landingLink.className = 'nav-link nav-link-landing';
+      landingLink.setAttribute('data-track', 'nav-landing');
+      landingLink.innerHTML = '<i class="fas fa-home"></i> Landing';
+      
+      // Insert at the beginning
+      navLinks.insertBefore(landingLink, navLinks.firstChild);
+      
+      // Add click handler
+      landingLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.navigateToLandingPage();
+      });
+    }
+  }
+
+  // Navigate to landing page
+  navigateToLandingPage() {
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to return to the landing page? Your current work will be saved.')) {
+      // Save current state if needed
+      this.saveCurrentState();
+      
+      // Navigate to landing page
+      window.location.href = '/';
+    }
+  }
+
+  // Save current state before navigation
+  saveCurrentState() {
+    // Save current view and scroll position
+    const currentView = document.querySelector('.nav-tab.active')?.getAttribute('data-view') || 'all';
+    const scrollPosition = window.scrollY;
+    
+    // Store in sessionStorage for potential return
+    sessionStorage.setItem('dashboardState', JSON.stringify({
+      view: currentView,
+      scrollPosition: scrollPosition,
+      timestamp: Date.now()
+    }));
+  }
+
+  // Restore user state when returning to dashboard
+  restoreUserState() {
+    try {
+      const savedState = sessionStorage.getItem('dashboardState');
+      if (savedState) {
+        const state = JSON.parse(savedState);
+        const now = Date.now();
+        const timeDiff = now - state.timestamp;
+        
+        // Only restore if within last 30 minutes
+        if (timeDiff < 30 * 60 * 1000) {
+          // Restore view
+          if (state.view && state.view !== 'all') {
+            this.switchToView(state.view, this.getDashboardSections());
+          }
+          
+          // Restore scroll position after a short delay
+          if (state.scrollPosition) {
+            setTimeout(() => {
+              window.scrollTo({
+                top: state.scrollPosition,
+                behavior: 'smooth'
+              });
+            }, 500);
+          }
+          
+          // Update header navigation state
+          this.updateHeaderNavigationState(state.view);
+          
+          this.showNotification('Welcome back! Your previous view has been restored.', 'info', 3000);
+        } else {
+          // Clear expired state
+          sessionStorage.removeItem('dashboardState');
+        }
+      }
+    } catch (error) {
+      console.warn('Could not restore user state:', error);
+      sessionStorage.removeItem('dashboardState');
+    }
+  }
+
+  showKeyboardShortcuts() {
+    const shortcuts = [
+      { key: 'Alt + 1', action: 'Dashboard Overview' },
+      { key: 'Alt + 2', action: 'Candidates' },
+      { key: 'Alt + 3', action: 'Jobs' },
+      { key: 'Alt + 4', action: 'Analytics' },
+      { key: 'Escape', action: 'Back to Dashboard' }
+    ];
+
+    let message = '📋 <strong>Keyboard Shortcuts:</strong><br><br>';
+    shortcuts.forEach(shortcut => {
+      message += `<kbd>${shortcut.key}</kbd> - ${shortcut.action}<br>`;
+    });
+
+    this.showNotification(message, 'info', 5000);
+  }
+
+  switchToView(view, sections) {
+    const navTabs = document.querySelectorAll('.nav-tab');
+    
+    // Update active tab with smooth transition
+    navTabs.forEach(t => {
+      t.classList.remove('active');
+      t.style.transform = 'scale(1)';
+    });
+    
+    const activeTab = document.querySelector(`[data-view="${view}"]`);
+    if (activeTab) {
+      activeTab.classList.add('active');
+      activeTab.style.transform = 'scale(1.05)';
+      
+      // Reset transform after animation
+      setTimeout(() => {
+        activeTab.style.transform = 'scale(1)';
+      }, 200);
+    }
+
+    // Update breadcrumb
+    this.updateBreadcrumb(view);
+
+    // Show/hide sections based on view
+    this.switchDashboardView(view, sections);
+    
+    // Show navigation notification
+    const viewNames = {
+      all: 'Dashboard Overview',
+      candidates: 'Candidates',
+      jobs: 'Jobs',
+      analytics: 'Analytics'
+    };
+    
+    if (view !== 'all') {
+      this.showNotification(`Navigated to ${viewNames[view]}`, 'info');
+    }
+    
+    // Track user interaction
+    this.trackEvent('dashboard_nav_switch', { view });
+  }
+
+  updateBreadcrumb(view) {
+    const breadcrumbNav = document.getElementById('breadcrumbNav');
+    const breadcrumbSeparator = document.getElementById('breadcrumbSeparator');
+    const currentSection = document.getElementById('currentSection');
+    const breadcrumbItems = document.querySelectorAll('.breadcrumb-item');
+
+    // Reset breadcrumb
+    breadcrumbItems.forEach(item => item.classList.remove('active'));
+
+    if (view === 'all') {
+      // Show only dashboard breadcrumb
+      breadcrumbSeparator.style.display = 'none';
+      currentSection.style.display = 'none';
+      breadcrumbItems[0].classList.add('active');
+    } else {
+      // Show dashboard + current section
+      const sectionNames = {
+        candidates: 'Candidates',
+        jobs: 'Jobs',
+        analytics: 'Analytics'
+      };
+
+      const sectionIcons = {
+        candidates: 'fas fa-users',
+        jobs: 'fas fa-briefcase',
+        analytics: 'fas fa-chart-line'
+      };
+
+      breadcrumbSeparator.style.display = 'flex';
+      currentSection.style.display = 'flex';
+      currentSection.innerHTML = `
+        <i class="${sectionIcons[view]}"></i>
+        <span>${sectionNames[view]}</span>
+      `;
+      currentSection.classList.add('active');
+    }
+  }
+
+  setupKeyboardNavigation() {
+    document.addEventListener('keydown', (e) => {
+      // Alt + number shortcuts
+      if (e.altKey && !e.ctrlKey && !e.shiftKey) {
+        const shortcuts = {
+          '1': 'all',
+          '2': 'candidates',
+          '3': 'jobs',
+          '4': 'analytics'
+        };
+
+        if (shortcuts[e.key]) {
+          e.preventDefault();
+          const sections = {
+            all: document.querySelector('.dashboard-overview'),
+            candidates: document.getElementById('candidates'),
+            jobs: document.getElementById('jobs'),
+            analytics: document.getElementById('analytics')
+          };
+          this.switchToView(shortcuts[e.key], sections);
+        }
+      }
+
+      // Escape key to go back to dashboard
+      if (e.key === 'Escape') {
+        const sections = {
+          all: document.querySelector('.dashboard-overview'),
+          candidates: document.getElementById('candidates'),
+          jobs: document.getElementById('jobs'),
+          analytics: document.getElementById('analytics')
+        };
+        this.switchToView('all', sections);
+      }
+    });
+  }
+
+  refreshCurrentView() {
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab) {
+      const view = activeTab.getAttribute('data-view');
+      this.showNotification(`Refreshing ${view} view...`, 'info');
+      
+      // Add refresh animation
+      activeTab.style.transform = 'rotate(360deg)';
+      setTimeout(() => {
+        activeTab.style.transform = 'rotate(0deg)';
+      }, 500);
+
+      // TODO: Implement actual refresh logic for each view
+      setTimeout(() => {
+        this.showNotification(`${view} view refreshed`, 'success');
+      }, 1000);
+    }
+  }
+
+  // Create ripple effect for better visual feedback
+  createRippleEffect(event, element) {
+    const ripple = document.createElement('span');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = x + 'px';
+    ripple.style.top = y + 'px';
+    ripple.classList.add('ripple');
+    
+    element.appendChild(ripple);
+    
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
+
+  switchDashboardView(view, sections) {
+    // Add loading state
+    this.showLoadingState();
+
+    // Hide all sections with fade out animation
+    Object.values(sections).forEach(section => {
+      if (section) {
+        section.style.opacity = '0';
+        section.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+          section.style.display = 'none';
+        }, 200);
+      }
+    });
+
+    // Show selected section with fade in animation
+    setTimeout(() => {
+      if (view === 'all') {
+        // Show dashboard overview
+        if (sections.all) {
+          sections.all.style.display = 'block';
+          sections.all.style.opacity = '0';
+          sections.all.style.transform = 'translateY(20px)';
+          
+          setTimeout(() => {
+            sections.all.style.opacity = '1';
+            sections.all.style.transform = 'translateY(0)';
+          }, 50);
+        }
+      } else {
+        // Show specific section
+        if (sections[view]) {
+          sections[view].style.display = 'block';
+          sections[view].style.opacity = '0';
+          sections[view].style.transform = 'translateY(20px)';
+          
+          setTimeout(() => {
+            sections[view].style.opacity = '1';
+            sections[view].style.transform = 'translateY(0)';
+            sections[view].scrollIntoView({ behavior: 'smooth' });
+          }, 50);
+        }
+      }
+
+      // Hide loading state
+      this.hideLoadingState();
+    }, 250);
+
+    // Update page title and analytics
+    this.updateDashboardTitle(view);
+  }
+
+  showLoadingState() {
+    // Add a subtle loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'nav-loading-indicator';
+    loadingIndicator.innerHTML = '<div class="loading-spinner"></div>';
+    document.body.appendChild(loadingIndicator);
+  }
+
+  hideLoadingState() {
+    const loadingIndicator = document.querySelector('.nav-loading-indicator');
+    if (loadingIndicator) {
+      loadingIndicator.remove();
+    }
+  }
+
+  updateDashboardTitle(view) {
+    const titles = {
+      all: 'Dashboard Overview',
+      candidates: 'Candidates',
+      jobs: 'Jobs',
+      analytics: 'Analytics'
+    };
+
+    const titleElement = document.querySelector('.section-title');
+    if (titleElement && titles[view]) {
+      titleElement.textContent = titles[view];
+    }
+
+    // Update URL hash for bookmarking
+    window.location.hash = view === 'all' ? '#dashboard' : `#${view}`;
+  }
+
+  // Initialize dashboard view based on URL hash
+  initializeDashboardView() {
+    const hash = window.location.hash.substring(1);
+    const navTabs = document.querySelectorAll('.nav-tab');
+    
+    if (hash && hash !== 'dashboard') {
+      // Find the corresponding tab
+      const targetTab = Array.from(navTabs).find(tab => 
+        tab.getAttribute('data-view') === hash
+      );
+      
+      if (targetTab) {
+        targetTab.click();
+      }
+    }
   }
 
   // === SEARCH (Lowest Complexity) ===
