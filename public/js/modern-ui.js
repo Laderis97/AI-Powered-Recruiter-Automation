@@ -70,7 +70,7 @@ class ModernUI {
       link.addEventListener('click', e => {
         e.preventDefault();
         const targetId = link.getAttribute('href').substring(1);
-        
+
         // Handle special navigation cases
         if (targetId === 'dashboard') {
           // Dashboard link - show overview and scroll to top
@@ -79,13 +79,13 @@ class ModernUI {
           this.updateHeaderNavigationState('dashboard');
           return;
         }
-        
+
         // For other sections, scroll to them and update state
         const targetElement = document.getElementById(targetId);
         if (targetElement) {
           targetElement.scrollIntoView({ behavior: 'smooth' });
           this.updateHeaderNavigationState(targetId);
-          
+
           // Update dashboard view if we're in a specific section
           if (targetId === 'candidates') {
             this.switchToView('candidates', this.getDashboardSections());
@@ -299,7 +299,7 @@ class ModernUI {
         }
       }
     } catch (error) {
-      console.warn('Could not restore user state:', error);
+      // console.warn('Could not restore user state:', error);
       sessionStorage.removeItem('dashboardState');
     }
   }
@@ -364,7 +364,6 @@ class ModernUI {
   }
 
   updateBreadcrumb(view) {
-    const breadcrumbNav = document.getElementById('breadcrumbNav');
     const breadcrumbSeparator = document.getElementById('breadcrumbSeparator');
     const currentSection = document.getElementById('currentSection');
     const breadcrumbItems = document.querySelectorAll('.breadcrumb-item');
@@ -603,7 +602,7 @@ class ModernUI {
 
     this.showNotification(`Searching for: ${query}`, 'info');
     // TODO: Implement actual search functionality
-    console.log('Search query:', query);
+    // console.log('Search query:', query);
   }
 
   // === EVENT TRACKING (Lowest Complexity) ===
@@ -621,8 +620,8 @@ class ModernUI {
   }
 
   trackEvent(eventType, data) {
-    console.log('Event tracked:', eventType, data);
     // TODO: Send to analytics service
+    // console.log('Event tracked:', eventType, data);
   }
 
   // === BASIC ANIMATIONS (Lowest Complexity) ===
@@ -650,11 +649,11 @@ class ModernUI {
         const analytics = await response.json();
         this.updateStatsWithRealData(analytics);
       } else {
-        console.warn('Failed to fetch analytics, using fallback data');
+        // console.warn('Failed to fetch analytics, using fallback data');
         this.updateStatsWithFallbackData();
       }
     } catch (error) {
-      console.warn('Error fetching analytics, using fallback data:', error);
+      // console.warn('Error fetching analytics, using fallback data:', error);
       this.updateStatsWithFallbackData();
     }
 
@@ -695,11 +694,12 @@ class ModernUI {
         case 'totalCampaigns':
           value = analytics.totalCampaigns || 0;
           break;
-        case 'responseRate':
+        case 'responseRate': {
           // Convert percentage string to number (e.g., "85.5%" -> 85.5)
           const rateStr = analytics.responseRate || '0%';
           value = parseFloat(rateStr.replace('%', '')) || 0;
           break;
+        }
       }
 
       element.setAttribute('data-target', value.toString());
@@ -762,7 +762,7 @@ class ModernUI {
       });
 
       // Click effects
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (event) => {
         this.rippleEffect(card, event);
       });
     });
@@ -892,7 +892,6 @@ class ModernUI {
     if (!button) return;
     
     const originalHTML = button.innerHTML || '';
-    const originalText = button.textContent || '';
 
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
@@ -1141,7 +1140,7 @@ class ModernUI {
   setupWebSocket() {
     // Simulate WebSocket connection for real-time updates
     // In a real implementation, this would connect to your backend
-    console.log('WebSocket connection simulated for real-time updates');
+    // console.log('WebSocket connection simulated for real-time updates');
   }
 
   // === PHASE 3: ADVANCED SEARCH & FILTERING (Higher Complexity) ===
