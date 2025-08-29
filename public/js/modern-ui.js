@@ -478,7 +478,7 @@ class ModernUI {
 
   switchDashboardView(view, sections) {
     // Add loading state
-    this.showLoadingState();
+    this.showNavigationLoadingState();
 
     // Hide all sections with fade out animation
     Object.values(sections).forEach(section => {
@@ -521,14 +521,14 @@ class ModernUI {
       }
 
       // Hide loading state
-      this.hideLoadingState();
+      this.hideNavigationLoadingState();
     }, 250);
 
     // Update page title and analytics
     this.updateDashboardTitle(view);
   }
 
-  showLoadingState() {
+  showNavigationLoadingState() {
     // Add a subtle loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.className = 'nav-loading-indicator';
@@ -536,7 +536,7 @@ class ModernUI {
     document.body.appendChild(loadingIndicator);
   }
 
-  hideLoadingState() {
+  hideNavigationLoadingState() {
     const loadingIndicator = document.querySelector('.nav-loading-indicator');
     if (loadingIndicator) {
       loadingIndicator.remove();
@@ -889,8 +889,10 @@ class ModernUI {
   }
 
   showLoadingState(button) {
-    const originalText = button.textContent;
-    const originalHTML = button.innerHTML;
+    if (!button) return;
+    
+    const originalHTML = button.innerHTML || '';
+    const originalText = button.textContent || '';
 
     button.disabled = true;
     button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
