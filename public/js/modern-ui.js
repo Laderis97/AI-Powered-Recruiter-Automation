@@ -30,7 +30,7 @@ class ModernUI {
     this.setupAdvancedAnimations();
     this.setupRealTimeUpdates();
     this.setupAdvancedSearch();
-    
+
     // Initialize dashboard view after everything is set up
     setTimeout(() => {
       this.initializeDashboardView();
@@ -101,7 +101,7 @@ class ModernUI {
 
     // Setup dashboard navigation tabs
     this.setupDashboardNavigation();
-    
+
     // Setup landing page navigation
     this.setupLandingPageNavigation();
   }
@@ -115,12 +115,12 @@ class ModernUI {
     // Setup main navigation tabs
     navTabs.forEach(tab => {
       // Add ripple effect on click
-      tab.addEventListener('click', (e) => {
+      tab.addEventListener('click', e => {
         this.createRippleEffect(e, tab);
-        
+
         const view = tab.getAttribute('data-view');
         this.switchToView(view, sections);
-        
+
         // Add haptic feedback if supported
         if (navigator.vibrate) {
           navigator.vibrate(50);
@@ -164,7 +164,7 @@ class ModernUI {
       all: document.querySelector('.dashboard-overview'),
       candidates: document.getElementById('candidates'),
       jobs: document.getElementById('jobs'),
-      analytics: document.getElementById('analytics')
+      analytics: document.getElementById('analytics'),
     };
   }
 
@@ -178,7 +178,7 @@ class ModernUI {
         link.classList.add('active');
       }
     });
-    
+
     // Show/hide "Back to Dashboard" button based on section
     this.toggleBackToDashboardButton(activeSection);
   }
@@ -186,27 +186,28 @@ class ModernUI {
   // Toggle "Back to Dashboard" button visibility
   toggleBackToDashboardButton(activeSection) {
     let backButton = document.querySelector('.back-to-dashboard-header');
-    
+
     if (!backButton) {
       // Create the button if it doesn't exist
       backButton = document.createElement('button');
       backButton.className = 'btn btn-sm btn-outline back-to-dashboard-header';
-      backButton.innerHTML = '<i class="fas fa-arrow-left"></i> Back to Dashboard';
+      backButton.innerHTML =
+        '<i class="fas fa-arrow-left"></i> Back to Dashboard';
       backButton.style.position = 'fixed';
       backButton.style.top = '80px';
       backButton.style.right = '20px';
       backButton.style.zIndex = '999';
       backButton.style.display = 'none';
-      
+
       backButton.addEventListener('click', () => {
         this.switchToView('all', this.getDashboardSections());
         window.scrollTo({ top: 0, behavior: 'smooth' });
         this.updateHeaderNavigationState('dashboard');
       });
-      
+
       document.body.appendChild(backButton);
     }
-    
+
     // Show button only when not in dashboard overview
     if (activeSection !== 'dashboard' && activeSection !== 'all') {
       backButton.style.display = 'block';
@@ -225,12 +226,12 @@ class ModernUI {
       landingLink.className = 'nav-link nav-link-landing';
       landingLink.setAttribute('data-track', 'nav-landing');
       landingLink.innerHTML = '<i class="fas fa-home"></i> Landing';
-      
+
       // Insert at the beginning
       navLinks.insertBefore(landingLink, navLinks.firstChild);
-      
+
       // Add click handler
-      landingLink.addEventListener('click', (e) => {
+      landingLink.addEventListener('click', e => {
         e.preventDefault();
         this.navigateToLandingPage();
       });
@@ -240,10 +241,14 @@ class ModernUI {
   // Navigate to landing page
   navigateToLandingPage() {
     // Show confirmation dialog
-    if (confirm('Are you sure you want to return to the landing page? Your current work will be saved.')) {
+    if (
+      confirm(
+        'Are you sure you want to return to the landing page? Your current work will be saved.'
+      )
+    ) {
       // Save current state if needed
       this.saveCurrentState();
-      
+
       // Navigate to landing page
       window.location.href = '/';
     }
@@ -252,15 +257,20 @@ class ModernUI {
   // Save current state before navigation
   saveCurrentState() {
     // Save current view and scroll position
-    const currentView = document.querySelector('.nav-tab.active')?.getAttribute('data-view') || 'all';
+    const currentView =
+      document.querySelector('.nav-tab.active')?.getAttribute('data-view') ||
+      'all';
     const scrollPosition = window.scrollY;
-    
+
     // Store in sessionStorage for potential return
-    sessionStorage.setItem('dashboardState', JSON.stringify({
-      view: currentView,
-      scrollPosition: scrollPosition,
-      timestamp: Date.now()
-    }));
+    sessionStorage.setItem(
+      'dashboardState',
+      JSON.stringify({
+        view: currentView,
+        scrollPosition: scrollPosition,
+        timestamp: Date.now(),
+      })
+    );
   }
 
   // Restore user state when returning to dashboard
@@ -271,28 +281,32 @@ class ModernUI {
         const state = JSON.parse(savedState);
         const now = Date.now();
         const timeDiff = now - state.timestamp;
-        
+
         // Only restore if within last 30 minutes
         if (timeDiff < 30 * 60 * 1000) {
           // Restore view
           if (state.view && state.view !== 'all') {
             this.switchToView(state.view, this.getDashboardSections());
           }
-          
+
           // Restore scroll position after a short delay
           if (state.scrollPosition) {
             setTimeout(() => {
               window.scrollTo({
                 top: state.scrollPosition,
-                behavior: 'smooth'
+                behavior: 'smooth',
               });
             }, 500);
           }
-          
+
           // Update header navigation state
           this.updateHeaderNavigationState(state.view);
-          
-          this.showNotification('Welcome back! Your previous view has been restored.', 'info', 3000);
+
+          this.showNotification(
+            'Welcome back! Your previous view has been restored.',
+            'info',
+            3000
+          );
         } else {
           // Clear expired state
           sessionStorage.removeItem('dashboardState');
@@ -310,7 +324,7 @@ class ModernUI {
       { key: 'Alt + 2', action: 'Candidates' },
       { key: 'Alt + 3', action: 'Jobs' },
       { key: 'Alt + 4', action: 'Analytics' },
-      { key: 'Escape', action: 'Back to Dashboard' }
+      { key: 'Escape', action: 'Back to Dashboard' },
     ];
 
     let message = '📋 <strong>Keyboard Shortcuts:</strong><br><br>';
@@ -323,18 +337,18 @@ class ModernUI {
 
   switchToView(view, sections) {
     const navTabs = document.querySelectorAll('.nav-tab');
-    
+
     // Update active tab with smooth transition
     navTabs.forEach(t => {
       t.classList.remove('active');
       t.style.transform = 'scale(1)';
     });
-    
+
     const activeTab = document.querySelector(`[data-view="${view}"]`);
     if (activeTab) {
       activeTab.classList.add('active');
       activeTab.style.transform = 'scale(1.05)';
-      
+
       // Reset transform after animation
       setTimeout(() => {
         activeTab.style.transform = 'scale(1)';
@@ -346,19 +360,19 @@ class ModernUI {
 
     // Show/hide sections based on view
     this.switchDashboardView(view, sections);
-    
+
     // Show navigation notification
     const viewNames = {
       all: 'Dashboard Overview',
       candidates: 'Candidates',
       jobs: 'Jobs',
-      analytics: 'Analytics'
+      analytics: 'Analytics',
     };
-    
+
     if (view !== 'all') {
       this.showNotification(`Navigated to ${viewNames[view]}`, 'info');
     }
-    
+
     // Track user interaction
     this.trackEvent('dashboard_nav_switch', { view });
   }
@@ -381,13 +395,13 @@ class ModernUI {
       const sectionNames = {
         candidates: 'Candidates',
         jobs: 'Jobs',
-        analytics: 'Analytics'
+        analytics: 'Analytics',
       };
 
       const sectionIcons = {
         candidates: 'fas fa-users',
         jobs: 'fas fa-briefcase',
-        analytics: 'fas fa-chart-line'
+        analytics: 'fas fa-chart-line',
       };
 
       breadcrumbSeparator.style.display = 'flex';
@@ -401,14 +415,14 @@ class ModernUI {
   }
 
   setupKeyboardNavigation() {
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       // Alt + number shortcuts
       if (e.altKey && !e.ctrlKey && !e.shiftKey) {
         const shortcuts = {
-          '1': 'all',
-          '2': 'candidates',
-          '3': 'jobs',
-          '4': 'analytics'
+          1: 'all',
+          2: 'candidates',
+          3: 'jobs',
+          4: 'analytics',
         };
 
         if (shortcuts[e.key]) {
@@ -417,7 +431,7 @@ class ModernUI {
             all: document.querySelector('.dashboard-overview'),
             candidates: document.getElementById('candidates'),
             jobs: document.getElementById('jobs'),
-            analytics: document.getElementById('analytics')
+            analytics: document.getElementById('analytics'),
           };
           this.switchToView(shortcuts[e.key], sections);
         }
@@ -429,7 +443,7 @@ class ModernUI {
           all: document.querySelector('.dashboard-overview'),
           candidates: document.getElementById('candidates'),
           jobs: document.getElementById('jobs'),
-          analytics: document.getElementById('analytics')
+          analytics: document.getElementById('analytics'),
         };
         this.switchToView('all', sections);
       }
@@ -441,7 +455,7 @@ class ModernUI {
     if (activeTab) {
       const view = activeTab.getAttribute('data-view');
       this.showNotification(`Refreshing ${view} view...`, 'info');
-      
+
       // Add refresh animation
       activeTab.style.transform = 'rotate(360deg)';
       setTimeout(() => {
@@ -462,14 +476,14 @@ class ModernUI {
     const size = Math.max(rect.width, rect.height);
     const x = event.clientX - rect.left - size / 2;
     const y = event.clientY - rect.top - size / 2;
-    
+
     ripple.style.width = ripple.style.height = size + 'px';
     ripple.style.left = x + 'px';
     ripple.style.top = y + 'px';
     ripple.classList.add('ripple');
-    
+
     element.appendChild(ripple);
-    
+
     setTimeout(() => {
       ripple.remove();
     }, 600);
@@ -498,7 +512,7 @@ class ModernUI {
           sections.all.style.display = 'block';
           sections.all.style.opacity = '0';
           sections.all.style.transform = 'translateY(20px)';
-          
+
           setTimeout(() => {
             sections.all.style.opacity = '1';
             sections.all.style.transform = 'translateY(0)';
@@ -510,7 +524,7 @@ class ModernUI {
           sections[view].style.display = 'block';
           sections[view].style.opacity = '0';
           sections[view].style.transform = 'translateY(20px)';
-          
+
           setTimeout(() => {
             sections[view].style.opacity = '1';
             sections[view].style.transform = 'translateY(0)';
@@ -547,7 +561,7 @@ class ModernUI {
       all: 'Dashboard Overview',
       candidates: 'Candidates',
       jobs: 'Jobs',
-      analytics: 'Analytics'
+      analytics: 'Analytics',
     };
 
     const titleElement = document.querySelector('.section-title');
@@ -563,13 +577,13 @@ class ModernUI {
   initializeDashboardView() {
     const hash = window.location.hash.substring(1);
     const navTabs = document.querySelectorAll('.nav-tab');
-    
+
     if (hash && hash !== 'dashboard') {
       // Find the corresponding tab
-      const targetTab = Array.from(navTabs).find(tab => 
-        tab.getAttribute('data-view') === hash
+      const targetTab = Array.from(navTabs).find(
+        tab => tab.getAttribute('data-view') === hash
       );
-      
+
       if (targetTab) {
         targetTab.click();
       }
@@ -609,7 +623,7 @@ class ModernUI {
   setupEventTracking() {
     const buttons = document.querySelectorAll('button, .btn');
     buttons.forEach(button => {
-      button.addEventListener('click', e => {
+      button.addEventListener('click', () => {
         this.trackEvent('button_click', {
           text: button.textContent.trim(),
           class: button.className,
@@ -619,9 +633,9 @@ class ModernUI {
     });
   }
 
-  trackEvent(eventType, data) {
+  trackEvent() {
     // TODO: Send to analytics service
-    // console.log('Event tracked:', eventType, data);
+    // Event tracking implementation pending
   }
 
   // === BASIC ANIMATIONS (Lowest Complexity) ===
@@ -762,7 +776,7 @@ class ModernUI {
       });
 
       // Click effects
-      card.addEventListener('click', (event) => {
+      card.addEventListener('click', event => {
         this.rippleEffect(card, event);
       });
     });
@@ -890,7 +904,7 @@ class ModernUI {
 
   showLoadingState(button) {
     if (!button) return;
-    
+
     const originalHTML = button.innerHTML || '';
 
     button.disabled = true;
@@ -1364,7 +1378,6 @@ class ModernUI {
 
 // Global variables for resume upload
 let selectedFiles = [];
-let uploadQueue = [];
 let parsedResults = [];
 
 // Global variables for job management
@@ -1398,7 +1411,6 @@ function closeResumeUploadModal() {
 // Function to reset the upload form
 function resetUploadForm() {
   selectedFiles = [];
-  uploadQueue = [];
   parsedResults = [];
   const fileList = document.getElementById('fileList');
   const progressBar = document.querySelector('.progress-fill');
@@ -1573,7 +1585,6 @@ async function processFilesSequentially(files, index) {
     updateFileStatus(index, 'success', 'Processed successfully');
     parsedResults.push(result);
   } catch (error) {
-    console.error('Error processing file:', error);
     updateFileStatus(index, 'error', error.message || 'Processing failed');
   }
 
@@ -1583,7 +1594,7 @@ async function processFilesSequentially(files, index) {
   }, 500);
 }
 
-async function uploadSingleFile(file, index) {
+async function uploadSingleFile(file) {
   const formData = new FormData();
   formData.append('resume', file);
 
@@ -1615,8 +1626,8 @@ function updateProgress(percentage, text) {
   }
 }
 
-function updateFileStatus(index, status, message) {
-  const fileItem = document.querySelector(`[data-file-index="${index}"]`);
+function updateFileStatus(fileIndex, status, message) {
+  const fileItem = document.querySelector(`[data-file-index="${fileIndex}"]`);
   if (fileItem) {
     const statusElement = fileItem.querySelector('.file-status');
     if (statusElement) {
@@ -1668,13 +1679,6 @@ function hideProcessButton() {
   }
 }
 
-function updateUploadZone() {
-  const uploadZone = document.getElementById('uploadZone');
-  if (uploadZone) {
-    uploadZone.classList.remove('dragover');
-  }
-}
-
 function clearResults() {
   const resultsContent = document.getElementById('resultsContent');
   if (resultsContent) {
@@ -1689,7 +1693,7 @@ function displayParsedResults() {
 
   let resultsHTML = '<h4>Parsed Candidates</h4>';
 
-  parsedResults.forEach((candidate, index) => {
+  parsedResults.forEach(candidate => {
     const skillsList =
       candidate.skills && candidate.skills.length > 0
         ? candidate.skills
@@ -1779,10 +1783,8 @@ function getNotificationIcon(type) {
 
 // Initialize resume upload when DOM is loaded
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('DOMContentLoaded: Starting initialization...');
-
   // Initialize ModernUI
-  const modernUI = new ModernUI();
+  new ModernUI();
 
   // Initialize resume upload functionality
   initializeResumeUpload();
@@ -1801,13 +1803,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Test candidate data after a short delay
   setTimeout(() => {
-    console.log('DOMContentLoaded: Testing candidate data after delay...');
-    console.log('candidatesData at test time:', candidatesData);
-    console.log('candidatesData length at test time:', candidatesData.length);
-
     // Force a re-render to see if that helps
     if (candidatesData.length > 0) {
-      console.log('DOMContentLoaded: Forcing re-render of candidates...');
       renderCandidates();
     }
   }, 2000);
@@ -2129,7 +2126,6 @@ async function submitJob(jobData, successMessage) {
       showNotification(error.message || 'Failed to save job', 'error');
     }
   } catch (error) {
-    console.error('Error submitting job:', error);
     showNotification('Failed to save job. Please try again.', 'error');
   }
 }
@@ -2143,10 +2139,10 @@ async function loadJobs() {
       jobsData = data.jobs || [];
       renderJobs();
     } else {
-      console.error('Failed to load jobs');
+      // Failed to load jobs
     }
   } catch (error) {
-    console.error('Error loading jobs:', error);
+    // Error loading jobs
   }
 }
 
@@ -2367,108 +2363,55 @@ function initializeJobManagement() {
 // Function to load candidates from the server
 async function loadCandidates() {
   try {
-    console.log('loadCandidates: Starting to fetch candidates...');
     showCandidatesLoading();
 
     const response = await fetch('/api/candidates');
-    console.log('loadCandidates: Response status:', response.status);
 
     if (response.ok) {
       const data = await response.json();
-      console.log('loadCandidates: Raw data received:', data);
-      console.log('loadCandidates: Data type:', typeof data);
-      console.log(
-        'loadCandidates: Data length:',
-        Array.isArray(data) ? data.length : 'Not an array'
-      );
-
       candidatesData = data || [];
-      console.log('loadCandidates: Processed candidatesData:', candidatesData);
-      console.log(
-        'loadCandidates: candidatesData length:',
-        candidatesData.length
-      );
-
       renderCandidates();
     } else {
-      console.error(
-        'loadCandidates: Failed to load candidates, status:',
-        response.status
-      );
       showCandidatesEmpty();
     }
   } catch (error) {
-    console.error('loadCandidates: Error loading candidates:', error);
     showCandidatesEmpty();
   }
 }
 
 // Function to render candidates in the grid
 function renderCandidates() {
-  console.log('renderCandidates called with data:', candidatesData);
-
   const candidatesGrid = document.getElementById('candidatesGrid');
   const loadingState = document.getElementById('candidatesLoading');
   const emptyState = document.getElementById('candidatesEmpty');
 
-  console.log('DOM elements found:', {
-    candidatesGrid: !!candidatesGrid,
-    loadingState: !!loadingState,
-    emptyState: !!emptyState,
-  });
-
   if (!candidatesGrid) {
-    console.error('candidatesGrid element not found!');
     return;
   }
 
   // Hide loading and empty states
   if (loadingState) {
     loadingState.style.display = 'none';
-    console.log('Hidden loading state');
   }
   if (emptyState) {
     emptyState.style.display = 'none';
-    console.log('Hidden empty state');
   }
 
   // Clear existing content
   candidatesGrid.innerHTML = '';
-  console.log('Cleared candidates grid');
 
   // Ensure candidates grid is visible
   candidatesGrid.style.display = 'grid';
-  console.log('Set candidates grid display to grid');
-
-  console.log('candidatesData length:', candidatesData.length);
 
   if (candidatesData.length === 0) {
-    console.log('No candidates data, showing empty state');
     showCandidatesEmpty();
     return;
   }
 
-  console.log(
-    'Creating candidate cards for',
-    candidatesData.length,
-    'candidates'
-  );
-  candidatesData.forEach((candidate, index) => {
-    console.log(`Creating card ${index + 1}:`, candidate);
+  candidatesData.forEach(candidate => {
     const candidateCard = createCandidateCard(candidate);
     if (candidateCard) {
       candidatesGrid.appendChild(candidateCard);
-      console.log(`Card ${index + 1} added to grid`);
-      console.log(`Grid now has ${candidatesGrid.children.length} children`);
-      console.log(`Grid display style: ${candidatesGrid.style.display}`);
-      console.log(
-        `Grid computed display: ${window.getComputedStyle(candidatesGrid).display}`
-      );
-    } else {
-      console.error(
-        `Failed to create card for candidate ${index + 1}:`,
-        candidate
-      );
     }
   });
 }
@@ -2553,12 +2496,10 @@ function createCandidateCard(candidate) {
       </div>
     `;
 
-    console.log('Generated card HTML:', cardHTML);
     card.innerHTML = cardHTML;
 
     return card;
   } catch (error) {
-    console.error('Error creating candidate card:', error, candidate);
     // Return a fallback card
     const fallbackCard = document.createElement('div');
     fallbackCard.className = 'candidate-card error';
