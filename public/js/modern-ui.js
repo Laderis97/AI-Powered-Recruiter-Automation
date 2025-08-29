@@ -2548,7 +2548,6 @@ function viewCandidateDetails(candidateId) {
     return;
   }
 
-  console.log('Opening candidate details for:', candidate);
   openCandidateDetailModal(candidate);
 }
 
@@ -2639,18 +2638,11 @@ function renderFilteredCandidates(filteredCandidates) {
 
 // Initialize candidate management functionality
 function initializeCandidateManagement() {
-  console.log('initializeCandidateManagement: Starting initialization...');
-
   // Add event listeners for candidate filters
   const statusFilter = document.querySelector(
     '[data-track="candidate-status-filter"]'
   );
   const sortFilter = document.querySelector('[data-track="candidate-sort"]');
-
-  console.log('initializeCandidateManagement: Found filters:', {
-    statusFilter: !!statusFilter,
-    sortFilter: !!sortFilter,
-  });
 
   if (statusFilter) {
     statusFilter.addEventListener('change', filterCandidates);
@@ -2661,7 +2653,6 @@ function initializeCandidateManagement() {
   }
 
   // Load initial candidates
-  console.log('initializeCandidateManagement: Loading initial candidates...');
   loadCandidates();
 }
 
@@ -2669,15 +2660,11 @@ function initializeCandidateManagement() {
 
 // Initialize AI tools functionality
 function initializeAITools() {
-  console.log('🧠 Initializing AI Tools...');
-
   // Add event listeners for AI tool buttons
   const aiToolButtons = document.querySelectorAll('.ai-tool-btn');
   aiToolButtons.forEach(button => {
     button.addEventListener('click', handleAIToolClick);
   });
-
-  console.log(`✅ AI Tools initialized with ${aiToolButtons.length} buttons`);
 }
 
 // Handle AI tool button clicks
