@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
-import { app } from '../../src/server.js';
+import { app } from '../../src/server';
 
 describe('API Integration Tests', () => {
   beforeAll(async () => {

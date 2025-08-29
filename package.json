@@ -7,13 +7,17 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "ts-node --esm src/server.ts",
+    "dev": "tsx src/server.ts",
     "test-parser": "ts-node --esm src/testDocumentParser.ts",
     "test": "jest",
-    "test:unit": "jest --testPathPatterns=unit",
-    "test:integration": "jest --testPathPatterns=integration",
-    "test:e2e": "jest --testPathPatterns=e2e",
+    "test:unit": "jest --testPathPatterns=__tests__/unit --coverage",
+    "test:int": "jest --testPathPatterns=__tests__/integration --coverage",
+    "test:e2e": "playwright test",
+    "test:all": "npm run test:unit && npm run test:int && npm run test:e2e",
+    "test:coverage": "jest --coverage --coverageReporters=html",
     "test:watch": "jest --watch",
+    "test:debug": "jest --runInBand --detectOpenHandles",
+    "test:flaky": "jest --testPathPattern=__tests__/unit/flaky-test-example.test.js",
     "lint": "eslint public/**/*.js --ext .js",
     "lint:fix": "eslint src/**/*.ts public/**/*.js --ext .ts,.js --fix",
     "typecheck": "tsc --noEmit",
@@ -29,10 +33,20 @@
     "qa:lint": "scripts\\qa.bat lint",
     "qa:test": "scripts\\qa.bat test",
     "qa:scan": "scripts\\qa.bat scan",
+    "qa:sbom": "scripts\\qa.bat sbom",
     "install-hooks": "scripts\\qa.bat install-hooks",
     "postinstall": "npm run build"
   },
   "dependencies": {
+    "@opentelemetry/api": "^1.7.0",
+    "@opentelemetry/auto-instrumentations-node": "^0.41.1",
+    "@opentelemetry/exporter-metrics-otlp-http": "^0.48.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.48.0",
+    "@opentelemetry/resources": "^1.21.0",
+    "@opentelemetry/sdk-metrics": "^1.21.0",
+    "@opentelemetry/sdk-node": "^0.48.0",
+    "@opentelemetry/sdk-trace-base": "^1.21.0",
+    "@opentelemetry/semantic-conventions": "^1.21.0",
     "@supabase/supabase-js": "^2.55.0",
     "@types/nodemailer": "^7.0.0",
     "@types/uuid": "^10.0.0",
@@ -50,11 +64,13 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "uuid": "^11.1.0",
+    "winston": "^3.11.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@commitlint/cli": "^18.0.0",
     "@commitlint/config-conventional": "^18.0.0",
+    "@playwright/test": "^1.40.0",
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@types/body-parser": "^1.19.6",
@@ -63,6 +79,7 @@
     "@types/jest": "^30.0.0",
     "@types/multer": "^1.4.7",
     "@types/pdf-parse": "^1.1.5",
+    "@types/pg": "^8.10.9",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
     "@types/supertest": "^6.0.2",
@@ -79,11 +96,15 @@
     "jsdom": "^26.1.0",
     "lint-staged": "^15.0.0",
     "markdownlint-cli": "^0.37.0",
+    "pg": "^8.11.3",
+    "playwright": "^1.40.0",
     "pre-commit": "^1.2.2",
     "prettier": "^3.2.5",
     "supertest": "^7.0.0",
+    "testcontainers": "^10.0.0",
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
+    "tsx": "^4.20.5",
     "typescript": "^5.2.2"
   },
   "engines": {
@@ -94,5 +115,8 @@
     "commitizen": {
       "path": "./node_modules/cz-conventional-changelog"
     }
+  },
+  "ts-node": {
+    "esm": true
   }
 }

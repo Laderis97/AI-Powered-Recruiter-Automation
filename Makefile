@@ -21,6 +21,38 @@ install-hooks:
 qa: lint test-unit scan
 	@echo "✅ All QA checks passed!"
 
+# Testing targets
+test-unit:
+	@echo "🧪 Running unit tests..."
+	npm run test:unit
+
+test-int:
+	@echo "🔗 Running integration tests..."
+	npm run test:int
+
+test-e2e:
+	@echo "🌐 Running E2E tests..."
+	npm run test:e2e
+
+test-all: test-unit test-int test-e2e
+	@echo "✅ All tests completed!"
+
+# Test coverage
+test-coverage:
+	@echo "📊 Generating test coverage report..."
+	npm run test:coverage
+	@echo "✅ Coverage report generated in /coverage"
+
+# Test debugging
+test-debug:
+	@echo "🐛 Running tests in debug mode..."
+	npm run test:debug
+
+# Flaky test isolation
+test-flaky:
+	@echo "⚠️  Running flaky tests..."
+	npm run test:flaky
+
 # Generate Software Bill of Materials (SBOM)
 sbom:
 	@echo "📋 Generating Software Bill of Materials..."

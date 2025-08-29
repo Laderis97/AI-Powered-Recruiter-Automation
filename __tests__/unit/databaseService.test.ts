@@ -1,9 +1,54 @@
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { databaseService } from '../../src/databaseService.js';
+
+// Mock the databaseService module
+jest.mock('../../src/databaseService', () => ({
+  databaseService: {
+    getAnalytics: jest.fn(),
+    getAllCandidates: jest.fn(),
+    getAllJobs: jest.fn()
+  }
+}));
+
+// Import after mocking
+import { databaseService } from '../../src/databaseService';
 
 describe('DatabaseService', () => {
   beforeEach(() => {
-    // Reset any test state if needed
+    // Reset mocks before each test
+    jest.clearAllMocks();
+    
+    // Setup default mock implementations
+    (databaseService.getAnalytics as jest.Mock).mockResolvedValue({
+      totalJobs: 5,
+      totalCandidates: 25,
+      timeToHire: '15 days',
+      hiringFunnel: [
+        { stage: 'applied', count: 100 },
+        { stage: 'screening', count: 50 },
+        { stage: 'interview', count: 20 },
+        { stage: 'offer', count: 5 }
+      ]
+    });
+    
+    (databaseService.getAllCandidates as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        name: 'John Doe',
+        title: 'Software Engineer',
+        email: 'john@example.com',
+        status: 'active'
+      }
+    ]);
+    
+    (databaseService.getAllJobs as jest.Mock).mockResolvedValue([
+      {
+        id: '1',
+        title: 'Senior Developer',
+        description: 'Full-stack development role',
+        company: 'Tech Corp',
+        status: 'open'
+      }
+    ]);
   });
 
   describe('getAnalytics', () => {

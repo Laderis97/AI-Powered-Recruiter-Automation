@@ -8,6 +8,13 @@ REM Check if we have parameters
 if "%1"=="install-hooks" goto :install_hooks
 if "%1"=="lint" goto :lint
 if "%1"=="test" goto :test
+if "%1"=="test-unit" goto :test_unit
+if "%1"=="test-int" goto :test_int
+if "%1"=="test-e2e" goto :test_e2e
+if "%1"=="test-all" goto :test_all
+if "%1"=="test-coverage" goto :test_coverage
+if "%1"=="test-debug" goto :test_debug
+if "%1"=="test-flaky" goto :test_flaky
 if "%1"=="scan" goto :scan
 if "%1"=="sbom" goto :sbom
 if "%1"=="all" goto :all
@@ -24,6 +31,13 @@ echo Commands:
 echo   install-hooks  - Install pre-commit hooks
 echo   lint          - Run linting and formatting checks
 echo   test          - Run unit tests
+echo   test-unit     - Run unit tests only
+echo   test-int      - Run integration tests only
+echo   test-e2e      - Run E2E tests only
+echo   test-all      - Run all test types
+echo   test-coverage - Generate test coverage report
+echo   test-debug    - Run tests in debug mode
+echo   test-flaky    - Run flaky tests
 echo   scan          - Run security and spell checks
 echo   sbom          - Generate Software Bill of Materials
 echo   all           - Run all checks (default)
@@ -83,6 +97,76 @@ if %ERRORLEVEL% neq 0 (
     goto :end
 )
 echo ✅ Unit tests passed!
+goto :end
+
+:test_unit
+echo 🧪 Running unit tests...
+call npm run test:unit
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Unit tests failed
+    goto :end
+)
+echo ✅ Unit tests passed!
+goto :end
+
+:test_int
+echo 🔗 Running integration tests...
+call npm run test:int
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Integration tests failed
+    goto :end
+)
+echo ✅ Integration tests passed!
+goto :end
+
+:test_e2e
+echo 🌐 Running E2E tests...
+call npm run test:e2e
+if %ERRORLEVEL% neq 0 (
+    echo ❌ E2E tests failed
+    goto :end
+)
+echo ✅ E2E tests passed!
+goto :end
+
+:test_all
+echo 🚀 Running all test types...
+call npm run test:all
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Tests failed
+    goto :end
+)
+echo ✅ All tests passed!
+goto :end
+
+:test_coverage
+echo 📊 Generating test coverage report...
+call npm run test:coverage
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Coverage generation failed
+    goto :end
+)
+echo ✅ Coverage report generated in /coverage
+goto :end
+
+:test_debug
+echo 🐛 Running tests in debug mode...
+call npm run test:debug
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Debug tests failed
+    goto :end
+)
+echo ✅ Debug tests completed
+goto :end
+
+:test_flaky
+echo ⚠️  Running flaky tests...
+call npm run test:flaky
+if %ERRORLEVEL% neq 0 (
+    echo ❌ Flaky tests failed
+    goto :end
+)
+echo ✅ Flaky tests completed
 goto :end
 
 :scan
