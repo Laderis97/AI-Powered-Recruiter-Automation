@@ -2014,7 +2014,6 @@ document.head.appendChild(style);
 // ===== JOB MANAGEMENT FUNCTIONALITY =====
 
 // Global variables for job management
-let currentJobId = null;
 
 // Function to open the Add Job modal
 function openAddJobModal() {
@@ -2043,7 +2042,6 @@ function resetJobForm() {
   const form = document.getElementById('addJobForm');
   if (form) {
     form.reset();
-    currentJobId = null;
   }
 }
 
@@ -2117,7 +2115,7 @@ async function submitJob(jobData, successMessage) {
     });
 
     if (response.ok) {
-      const result = await response.json();
+      await response.json();
       showNotification(successMessage, 'success');
       closeAddJobModal();
       loadJobs(); // Refresh jobs list
@@ -2257,7 +2255,6 @@ function editJob(jobId) {
   const job = jobsData.find(j => j.id === jobId);
   if (!job) return;
 
-  currentJobId = jobId;
   populateJobForm(job);
   openAddJobModal();
 }
@@ -2297,13 +2294,13 @@ function populateJobForm(job) {
 }
 
 // Function to view applications for a job
-function viewApplications(jobId) {
+function viewApplications() {
   showNotification('Applications feature coming soon!', 'info');
   // TODO: Implement applications view
 }
 
 // Function to show job options menu
-function showJobOptions(jobId) {
+function showJobOptions() {
   showNotification('Job options menu coming soon!', 'info');
   // TODO: Implement job options menu
 }
@@ -2798,7 +2795,6 @@ async function runAIAnalysis(toolType) {
       showNotification(`Analysis failed: ${data.error}`, 'error');
     }
   } catch (error) {
-    console.error('AI analysis error:', error);
     showNotification('Analysis failed. Please try again.', 'error');
   }
 }
@@ -2995,15 +2991,11 @@ function exportAIResults(toolType, data) {
 
 // Initialize analytics charts
 function initializeAnalytics() {
-  console.log('📊 Initializing Analytics...');
-
   // Load hiring funnel chart
   loadHiringFunnel();
 
   // Load time to hire chart
   loadTimeToHire();
-
-  console.log('✅ Analytics initialized');
 }
 
 // Load hiring funnel data and render chart
@@ -3027,26 +3019,19 @@ async function loadHiringFunnel() {
       );
     }
   } catch (error) {
-    console.error('Error loading hiring funnel:', error);
     showAnalyticsError('hiringFunnelChart', 'Error loading hiring funnel data');
   }
 }
 
 // Render hiring funnel chart
 function renderHiringFunnelChart(data) {
-  console.log(
-    '🔍 renderHiringFunnelChart: Rendering funnel chart with data:',
-    data
-  );
   const chartContainer = document.getElementById('hiringFunnelChart');
   if (!chartContainer) {
-    console.error('❌ renderHiringFunnelChart: Chart container not found');
     return;
   }
 
   // Calculate total for percentages
   const total = data.reduce((sum, item) => sum + item.count, 0);
-  console.log('📊 renderHiringFunnelChart: Total count:', total);
 
   // Create funnel chart HTML
   const chartHTML = `
@@ -3075,38 +3060,22 @@ function renderHiringFunnelChart(data) {
   `;
 
   chartContainer.innerHTML = chartHTML;
-  console.log(
-    '✅ renderHiringFunnelChart: Funnel chart rendered with clickable stages'
-  );
 }
 
 // Load time to hire data and render chart
 async function loadTimeToHire() {
-  console.log('🔄 loadTimeToHire: Starting to fetch data...');
   try {
     const response = await fetch('/api/analytics/time-to-hire');
-    console.log('📡 loadTimeToHire: Response status:', response.status);
 
     if (response.ok) {
       const result = await response.json();
-      console.log('📊 loadTimeToHire: API response:', result);
 
       if (result.success) {
-        console.log(
-          '✅ loadTimeToHire: Data loaded successfully, calling renderTimeToHireChart'
-        );
         renderTimeToHireChart(result.data, 8);
-      } else {
-        console.error('❌ loadTimeToHire: API returned success: false');
-        console.error('Failed to load time to hire data');
       }
-    } else {
-      console.error('❌ loadTimeToHire: HTTP error:', response.status);
-      console.error('Failed to fetch time to hire data');
     }
   } catch (error) {
-    console.error('❌ loadTimeToHire: Error:', error);
-    console.error('Error loading time to hire data');
+    // Error loading time to hire data
   }
 }
 
@@ -3120,7 +3089,6 @@ function renderTimeToHireChart(apiData, sla = 8) {
 
   const el = document.getElementById('tthChart');
   if (!el) {
-    console.warn('tthChart canvas not found');
     return;
   }
   const ctx = el.getContext('2d');
