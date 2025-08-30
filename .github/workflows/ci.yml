@@ -33,12 +33,15 @@ jobs:
       - name: Type check
         run: npm run build
       
-      - name: Security scan
-        uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-        with:
-          args: --severity-threshold=high
+      - name: Security audit
+        run: |
+          echo "🔒 Running npm audit..."
+          npm audit --audit-level=moderate || {
+            echo "⚠️ Security vulnerabilities found"
+            echo "::warning::Security vulnerabilities detected in dependencies"
+            exit 1
+          }
+          echo "✅ Security audit completed successfully"
       
       - name: Secret scan
         uses: trufflesecurity/trufflehog@main
@@ -169,7 +172,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/develop'
-    environment: staging
     
     steps:
       - uses: actions/checkout@v4
@@ -190,7 +192,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/main'
-    environment: production
     
     steps:
       - uses: actions/checkout@v4
