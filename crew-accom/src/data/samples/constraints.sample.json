@@ -1,0 +1,11 @@
+{
+  "maxCommuteMinutes": 30,
+  "minHotelRating": 3.8,
+  "maxNightlyUsd": 220,
+  "preferredBrands": ["Hilton", "Marriott", "Hyatt"],
+  "blacklistHotels": [],
+  "minRestHours": 10,
+  "sameHotelForCrew": true,
+  "minReviews": 100,
+  "safetyFlags": []
+}

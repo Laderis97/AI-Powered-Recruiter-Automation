@@ -1,0 +1,155 @@
+[
+  {
+    "id": "H1",
+    "name": "Hilton Seattle Airport",
+    "lat": 47.4489,
+    "lon": -122.3094,
+    "address": "17620 International Blvd, SEA Demo Ave",
+    "brand": "Hilton",
+    "rating": 4.2,
+    "reviews": 1250,
+    "amenities": ["WiFi", "Fitness Center", "Airport Shuttle", "Business Center"],
+    "rate": {
+      "hotelId": "H1",
+      "currency": "USD",
+      "nightly": 199,
+      "taxesFees": 25
+    }
+  },
+  {
+    "id": "H2",
+    "name": "Marriott Seattle Airport",
+    "lat": 47.4600,
+    "lon": -122.3300,
+    "address": "3201 S 176th St, SEA Demo Blvd",
+    "brand": "Marriott",
+    "rating": 4.0,
+    "reviews": 890,
+    "amenities": ["WiFi", "Pool", "Airport Shuttle", "Restaurant"],
+    "rate": {
+      "hotelId": "H2",
+      "currency": "USD",
+      "nightly": 189,
+      "taxesFees": 22
+    }
+  },
+  {
+    "id": "H3",
+    "name": "Budget Inn SEA",
+    "lat": 47.4620,
+    "lon": -122.3500,
+    "address": "15000 Pacific Hwy S, SEA Sample St",
+    "brand": "Independent",
+    "rating": 3.2,
+    "reviews": 95,
+    "amenities": ["WiFi", "Parking"],
+    "rate": {
+      "hotelId": "H3",
+      "currency": "USD",
+      "nightly": 99,
+      "taxesFees": 12
+    }
+  },
+  {
+    "id": "H4",
+    "name": "Hyatt House Seattle Airport",
+    "lat": 47.4450,
+    "lon": -122.3080,
+    "address": "18418 International Blvd, SEA Premium Way",
+    "brand": "Hyatt",
+    "rating": 4.3,
+    "reviews": 450,
+    "amenities": ["WiFi", "Kitchenette", "Airport Shuttle", "Fitness Center", "Pool"],
+    "rate": {
+      "hotelId": "H4",
+      "currency": "USD",
+      "nightly": 215,
+      "taxesFees": 28
+    }
+  },
+  {
+    "id": "H5",
+    "name": "DoubleTree DFW Airport",
+    "lat": 32.8968,
+    "lon": -97.0380,
+    "address": "4441 W John Carpenter Fwy, DFW Area",
+    "brand": "Hilton",
+    "rating": 3.9,
+    "reviews": 680,
+    "amenities": ["WiFi", "Airport Shuttle", "Restaurant", "Fitness Center"],
+    "rate": {
+      "hotelId": "H5",
+      "currency": "USD",
+      "nightly": 169,
+      "taxesFees": 20
+    }
+  },
+  {
+    "id": "H6",
+    "name": "Grand Hyatt DFW",
+    "lat": 32.8975,
+    "lon": -97.0420,
+    "address": "2337 S International Pkwy, DFW Terminal Area",
+    "brand": "Hyatt",
+    "rating": 4.5,
+    "reviews": 1100,
+    "amenities": ["WiFi", "Spa", "Multiple Restaurants", "Fitness Center", "Pool", "Airport Connector"],
+    "rate": {
+      "hotelId": "H6",
+      "currency": "USD",
+      "nightly": 279,
+      "taxesFees": 35
+    }
+  },
+  {
+    "id": "H7",
+    "name": "Hilton JFK Airport",
+    "lat": 40.6413,
+    "lon": -73.7781,
+    "address": "144-02 135th Ave, JFK Airport Area, New York",
+    "brand": "Hilton",
+    "rating": 4.1,
+    "reviews": 980,
+    "amenities": ["WiFi", "Airport Shuttle", "Fitness Center", "Restaurant", "Business Center"],
+    "rate": {
+      "hotelId": "H7",
+      "currency": "USD",
+      "nightly": 210,
+      "taxesFees": 30
+    }
+  },
+  {
+    "id": "H8",
+    "name": "Marriott JFK Airport",
+    "lat": 40.6500,
+    "lon": -73.7900,
+    "address": "145-11 North Conduit Ave, JFK Area, New York",
+    "brand": "Marriott",
+    "rating": 3.9,
+    "reviews": 750,
+    "amenities": ["WiFi", "Airport Shuttle", "Pool", "Restaurant"],
+    "rate": {
+      "hotelId": "H8",
+      "currency": "USD",
+      "nightly": 235,
+      "taxesFees": 28
+    }
+  },
+  {
+    "id": "H9",
+    "name": "Hyatt House JFK",
+    "lat": 40.6350,
+    "lon": -73.7850,
+    "address": "135-30 140th St, JFK Airport, New York",
+    "brand": "Hyatt",
+    "rating": 4.3,
+    "reviews": 450,
+    "amenities": ["WiFi", "Kitchenette", "Airport Shuttle", "Fitness Center", "Pool"],
+    "rate": {
+      "hotelId": "H9",
+      "currency": "USD",
+      "nightly": 265,
+      "taxesFees": 32
+    }
+  }
+]
