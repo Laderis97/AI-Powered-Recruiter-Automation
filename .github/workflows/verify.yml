@@ -16,7 +16,7 @@ jobs:
   verify:
     name: Verify Code Quality & Security
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -132,7 +132,7 @@ jobs:
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
         with:
-          category: "/language:${{matrix.language}}"
+          category: '/language:${{matrix.language}}'
 
       - name: Run Semgrep SAST
         id: semgrep
@@ -201,9 +201,9 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
+
             const botComment = comments.find(comment => comment.user.type === 'Bot' && comment.body.includes('## 🔍 Verification Results'));
-            
+
             const results = {
               lint: '${{ steps.lint.outcome }}',
               typecheck: '${{ steps.typecheck.outcome }}',
@@ -215,11 +215,11 @@ jobs:
               semgrep: '${{ steps.semgrep.outcome }}',
               dependencyCheck: '${{ steps.dependency-check.outcome }}'
             };
-            
+
             const statusEmoji = (status) => status === 'success' ? '✅' : status === 'failure' ? '❌' : '⚠️';
-            
+
             const body = `## 🔍 Verification Results
-            
+
             | Check | Status |
             |------|--------|
             | **Linting** | ${statusEmoji(results.lint)} ${results.lint} |
@@ -231,11 +231,11 @@ jobs:
             | **CodeQL SAST** | ${statusEmoji(results.codeql)} ${results.codeql} |
             | **Semgrep SAST** | ${statusEmoji(results.semgrep)} ${results.semgrep} |
             | **Dependency Check** | ${statusEmoji(results.dependencyCheck)} ${results.dependencyCheck} |
-            
+
             ---
             *Last updated: ${new Date().toISOString()}*
             *Workflow: [${{ github.workflow }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})*`;
-            
+
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,

@@ -1040,6 +1040,11 @@ class ModernUI {
     const morphElements = document.querySelectorAll('[data-morph]');
 
     morphElements.forEach(element => {
+      // Skip user avatar as it has special click functionality
+      if (element.id === 'userAvatar') {
+        return;
+      }
+
       element.addEventListener('mouseenter', () => {
         element.style.transform = 'scale(1.05) rotate(2deg)';
         element.style.filter = 'brightness(1.1)';
@@ -1050,6 +1055,103 @@ class ModernUI {
         element.style.filter = 'brightness(1)';
       });
     });
+
+    // Setup user avatar dropdown functionality
+    this.setupUserAvatarDropdown();
+  }
+
+  setupUserAvatarDropdown() {
+    const userAvatar = document.getElementById('userAvatar');
+    const avatarDropdown = document.getElementById('avatarDropdown');
+
+    if (!userAvatar || !avatarDropdown) {
+      return;
+    }
+
+    // Toggle dropdown on avatar click
+    userAvatar.addEventListener('click', e => {
+      e.stopPropagation();
+      avatarDropdown.classList.toggle('show');
+    });
+
+    // Handle dropdown item clicks
+    const dropdownItems = avatarDropdown.querySelectorAll('.dropdown-item');
+    dropdownItems.forEach(item => {
+      item.addEventListener('click', e => {
+        e.preventDefault();
+        const action = item.getAttribute('data-action');
+        this.handleUserAction(action);
+        avatarDropdown.classList.remove('show');
+      });
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', e => {
+      if (!userAvatar.contains(e.target)) {
+        avatarDropdown.classList.remove('show');
+      }
+    });
+
+    // Close dropdown on escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && avatarDropdown.classList.contains('show')) {
+        avatarDropdown.classList.remove('show');
+      }
+    });
+  }
+
+  handleUserAction(action) {
+    switch (action) {
+      case 'profile':
+        this.showUserProfile();
+        break;
+      case 'settings':
+        this.showUserSettings();
+        break;
+      case 'preferences':
+        this.showUserPreferences();
+        break;
+      case 'help':
+        this.showHelpSupport();
+        break;
+      case 'logout':
+        this.handleLogout();
+        break;
+      default:
+        // eslint-disable-next-line no-console
+        console.log('Unknown user action:', action);
+    }
+  }
+
+  showUserProfile() {
+    // Show user profile modal or navigate to profile page
+    this.showNotification('Profile functionality coming soon!', 'info');
+  }
+
+  showUserSettings() {
+    // Show user settings modal or navigate to settings page
+    this.showNotification('Settings functionality coming soon!', 'info');
+  }
+
+  showUserPreferences() {
+    // Show user preferences modal
+    this.showNotification('Preferences functionality coming soon!', 'info');
+  }
+
+  showHelpSupport() {
+    // Show help and support modal or navigate to help page
+    this.showNotification('Help & Support functionality coming soon!', 'info');
+  }
+
+  handleLogout() {
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to sign out?')) {
+      this.showNotification('Signing out...', 'info');
+      // In a real app, this would redirect to logout endpoint
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    }
   }
 
   setupIntersectionObserver() {
