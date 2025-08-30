@@ -2731,6 +2731,7 @@ function getToolDisplayName(toolType) {
 }
 
 // Run AI analysis
+// eslint-disable-next-line no-unused-vars
 async function runAIAnalysis(toolType) {
   const candidateId = document.getElementById('ai-candidate-select').value;
   const jobId = document.getElementById('ai-job-select').value;
@@ -2967,6 +2968,7 @@ function showAIAnalysisResults(toolType, data) {
 }
 
 // Export AI results
+// eslint-disable-next-line no-unused-vars
 function exportAIResults(toolType, data) {
   const timestamp = new Date().toISOString().split('T')[0];
   const filename = `${toolType}-analysis-${timestamp}.json`;
@@ -3101,7 +3103,7 @@ function renderTimeToHireChart(apiData, sla = 8) {
     afterDraw(chart, _args, opts) {
       const {
         ctx,
-        chartArea: { top, bottom, left, right },
+        chartArea: { left, right },
         scales: { y },
       } = chart;
       if (!y) return;
@@ -3158,11 +3160,6 @@ function renderTimeToHireChart(apiData, sla = 8) {
     },
     plugins: [slaLine],
   });
-
-  console.log('Chart.js: chart created', {
-    labelsCount: labels.length,
-    valuesMax: Math.max(...values),
-  });
 }
 
 // Refresh functions for analytics
@@ -3217,50 +3214,30 @@ window.exportStageData = exportStageData;
 
 // Open funnel stage modal
 async function openFunnelStageModal(stage) {
-  console.log('🔍 openFunnelStageModal: Opening modal for stage:', stage);
   try {
     const response = await fetch(
       `/api/analytics/funnel-stage/${encodeURIComponent(stage)}`
     );
-    console.log('📡 openFunnelStageModal: Response status:', response.status);
     if (response.ok) {
       const result = await response.json();
-      console.log('📊 openFunnelStageModal: API response:', result);
       if (result.success) {
-        console.log(
-          '✅ openFunnelStageModal: Data loaded successfully, populating modal'
-        );
         populateFunnelModal(stage, result.data);
         const modal = document.getElementById('hiringFunnelModal');
         if (modal) {
           modal.style.display = 'flex';
-          console.log('✅ openFunnelStageModal: Modal displayed');
-        } else {
-          console.error('❌ openFunnelStageModal: Modal element not found');
         }
-      } else {
-        console.error(
-          '❌ openFunnelStageModal: API returned success: false:',
-          result.error
-        );
       }
-    } else {
-      console.error('❌ openFunnelStageModal: HTTP error:', response.status);
     }
   } catch (error) {
-    console.error('❌ openFunnelStageModal: Error:', error);
+    // Error opening funnel stage modal
   }
 }
 
 // Global variables for stage performance
 let stagePerformanceChart = null;
-let currentStage = null;
 
 // Populate funnel modal with data
 function populateFunnelModal(stage, data) {
-  // Set current stage
-  currentStage = stage;
-
   // Update modal title
   document.getElementById('funnelStageName').textContent = stage;
 
@@ -3357,56 +3334,28 @@ function populateInsightsTab(insights) {
 // Load stage performance chart data
 async function loadStagePerformanceChart(stage) {
   try {
-    console.log(
-      '🔍 loadStagePerformanceChart: Loading performance data for stage:',
-      stage
-    );
     const response = await fetch(
       `/api/analytics/stage-performance/${encodeURIComponent(stage)}`
-    );
-    console.log(
-      '📡 loadStagePerformanceChart: Response status:',
-      response.status
     );
 
     if (response.ok) {
       const result = await response.json();
-      console.log('📊 loadStagePerformanceChart: API response:', result);
 
       if (result.success) {
-        console.log(
-          '✅ loadStagePerformanceChart: Data loaded successfully, calling renderStagePerformanceChart'
-        );
         renderStagePerformanceChart(result.data, stage);
       } else {
-        console.error(
-          '❌ loadStagePerformanceChart: API returned success: false:',
-          result.error
-        );
         showStagePerformanceError('Failed to load stage performance data');
       }
     } else {
-      console.error(
-        '❌ loadStagePerformanceChart: HTTP error:',
-        response.status
-      );
       showStagePerformanceError('Failed to fetch stage performance data');
     }
   } catch (error) {
-    console.error('❌ loadStagePerformanceChart: Error:', error);
     showStagePerformanceError('Error loading stage performance data');
   }
 }
 
 // Render stage performance chart using Chart.js
 function renderStagePerformanceChart(data, stage) {
-  console.log(
-    '🔍 renderStagePerformanceChart: Rendering chart for stage:',
-    stage,
-    'with data:',
-    data
-  );
-
   // Destroy existing chart if it exists
   if (stagePerformanceChart) {
     stagePerformanceChart.destroy();
@@ -3415,7 +3364,6 @@ function renderStagePerformanceChart(data, stage) {
 
   const ctx = document.getElementById('stagePerformanceChart');
   if (!ctx) {
-    console.error('❌ renderStagePerformanceChart: Canvas element not found');
     return;
   }
 
@@ -3563,8 +3511,6 @@ function renderStagePerformanceChart(data, stage) {
       },
     },
   });
-
-  console.log('✅ renderStagePerformanceChart: Chart rendered successfully');
 }
 
 // Show stage performance error
@@ -3797,18 +3743,21 @@ function loadNotesTab() {
 }
 
 // Modal action functions
+// eslint-disable-next-line no-unused-vars
 function contactCandidateFromModal() {
   if (!currentCandidate) return;
   showNotification(`Opening contact form for ${currentCandidate.name}`, 'info');
   // TODO: Implement contact form
 }
 
+// eslint-disable-next-line no-unused-vars
 function scheduleInterview() {
   if (!currentCandidate) return;
   showNotification(`Scheduling interview for ${currentCandidate.name}`, 'info');
   // TODO: Implement interview scheduling
 }
 
+// eslint-disable-next-line no-unused-vars
 function viewResume() {
   if (!currentCandidate) return;
   if (currentCandidate.resumeUrl) {
@@ -3818,12 +3767,14 @@ function viewResume() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function addToShortlist() {
   if (!currentCandidate) return;
   showNotification(`${currentCandidate.name} added to shortlist`, 'success');
   // TODO: Implement shortlist functionality
 }
 
+// eslint-disable-next-line no-unused-vars
 function archiveCandidateFromModal() {
   if (!currentCandidate) return;
   if (confirm(`Are you sure you want to archive ${currentCandidate.name}?`)) {
@@ -3833,6 +3784,7 @@ function archiveCandidateFromModal() {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function addCandidateNote() {
   if (!currentCandidate) return;
 
@@ -3917,7 +3869,6 @@ function exportStageData() {
 
 // Time to Hire Modal Functions
 function openTimeToHireModal() {
-  console.log('🔍 openTimeToHireModal: Opening modal...');
   const modal = document.getElementById('timeToHireModal');
   if (modal) {
     modal.style.display = 'flex';
@@ -3925,13 +3876,10 @@ function openTimeToHireModal() {
 
     // Trigger modal opened event for chart resize
     document.dispatchEvent(new CustomEvent('timeToHireModal:opened'));
-  } else {
-    console.error('❌ timeToHireModal not found');
   }
 }
 
 function closeTimeToHireModal() {
-  console.log('🔍 closeTimeToHireModal: Closing modal...');
   const modal = document.getElementById('timeToHireModal');
   if (modal) {
     modal.style.display = 'none';
@@ -3939,47 +3887,30 @@ function closeTimeToHireModal() {
 }
 
 function refreshTimeToHireModal() {
-  console.log('🔍 refreshTimeToHireModal: Refreshing modal data...');
   loadTimeToHireModalData();
 }
 
 async function loadTimeToHireModalData() {
-  console.log('🔄 loadTimeToHireModalData: Loading data for modal...');
   try {
     const response = await fetch('/api/analytics/time-to-hire');
-    console.log(
-      '📡 loadTimeToHireModalData: Response status:',
-      response.status
-    );
     if (response.ok) {
       const result = await response.json();
-      console.log('📊 loadTimeToHireModalData: API response:', result);
       if (result.success) {
-        console.log(
-          '✅ loadTimeToHireModalData: Data loaded successfully, populating modal'
-        );
         populateTimeToHireModal(result.data);
       } else {
-        console.error(
-          '❌ loadTimeToHireModalData: API returned success: false'
-        );
         showModalError('Failed to load time to hire data');
       }
     } else {
-      console.error('❌ loadTimeToHireModalData: HTTP error:', response.status);
       showModalError('Failed to fetch time to hire data');
     }
   } catch (error) {
-    console.error('❌ loadTimeToHireModalData: Error:', error);
     showModalError('Error loading time to hire data');
   }
 }
 
 function populateTimeToHireModal(data) {
-  console.log('🔍 populateTimeToHireModal: Populating modal with data:', data);
   const modalContent = document.getElementById('timeToHireModalContent');
   if (!modalContent) {
-    console.error('❌ timeToHireModalContent not found');
     return;
   }
 
@@ -3990,7 +3921,6 @@ function populateTimeToHireModal(data) {
   );
   const avgHiresPerMonth = totalHires / data.monthlyHires.length;
   const maxHires = Math.max(...data.monthlyHires.map(m => m.count));
-  const minHires = Math.min(...data.monthlyHires.map(m => m.count));
 
   // Calculate trends
   const recentMonths = data.monthlyHires.slice(-3);
@@ -4115,9 +4045,7 @@ function populateTimeToHireModal(data) {
     </div>
   `;
 
-  console.log('📝 Generated modal HTML length:', modalHTML.length);
   modalContent.innerHTML = modalHTML;
-  console.log('✅ Modal populated successfully');
 
   // Initialize Chart.js for modal after DOM is ready
   setTimeout(() => {
@@ -4128,10 +4056,10 @@ function populateTimeToHireModal(data) {
       // dashed SLA line
       const slaLine = {
         id: 'slaLine',
-        afterDraw(chart, _args, opts) {
+        afterDraw(chart) {
           const {
             ctx,
-            chartArea: { top, bottom, left, right },
+            chartArea: { left, right },
             scales: { y },
           } = chart;
           if (!y) return;
@@ -4219,7 +4147,9 @@ document.addEventListener('timeToHireModal:opened', () => {
 });
 
 // Debug function for chart container styles - run in console
+// eslint-disable-next-line no-console
 function debugChartContainer() {
+  // eslint-disable-next-line no-console
   console.log('🔍 Debugging chart container styles...');
 
   // Try different selectors to find the chart
@@ -4235,12 +4165,14 @@ function debugChartContainer() {
   for (const selector of selectors) {
     chartElement = document.querySelector(selector);
     if (chartElement) {
+      // eslint-disable-next-line no-console
       console.log(`✅ Found chart element with selector: ${selector}`);
       break;
     }
   }
 
   if (!chartElement) {
+    // eslint-disable-next-line no-console
     console.log('❌ No chart element found with any selector');
     return;
   }
@@ -4251,6 +4183,7 @@ function debugChartContainer() {
 
   while (n && level < 10) {
     const cs = getComputedStyle(n);
+    // eslint-disable-next-line no-console
     console.log(`Level ${level}:`, n.tagName, n.className, {
       overflow: cs.overflow,
       clipPath: cs.clipPath,
@@ -4270,14 +4203,17 @@ function debugChartContainer() {
   }
 
   // Also check for any conflicting CSS rules
+  // eslint-disable-next-line no-console
   console.log('🔍 Checking for potential CSS conflicts...');
   const allCharts = document.querySelectorAll('[class*="chart"]');
+  // eslint-disable-next-line no-console
   console.log(`Found ${allCharts.length} elements with "chart" in class name`);
 
   allCharts.forEach((el, index) => {
     if (index < 5) {
       // Limit output
       const cs = getComputedStyle(el);
+      // eslint-disable-next-line no-console
       console.log(`Chart element ${index}:`, el.className, {
         overflow: cs.overflow,
         height: cs.height,
