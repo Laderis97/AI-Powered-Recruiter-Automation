@@ -1,38 +1,72 @@
 // src/server.ts
 
 import express from 'express';
+import cors from 'cors';
 import * as dotenv from 'dotenv';
 import { planLayover } from './orchestrator';
 import { createContext } from './context';
 import flightsData from './data/samples/flights.sample.json';
 import constraintsData from './data/samples/constraints.sample.json';
 import { CrewPairing, Constraints } from './data/types';
+import { createSupabaseService } from './services/supabase';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Initialize Supabase service (will gracefully handle missing config)
+let supabaseService: ReturnType<typeof createSupabaseService> | null = null;
+try {
+  if (process.env.SUPABASE_URL && process.env.SUPABASE_ANON_KEY) {
+    supabaseService = createSupabaseService();
+    console.log('✅ Supabase integration enabled');
+  } else {
+    console.log('ℹ️ Supabase integration disabled (using local data)');
+  }
+} catch (error) {
+  console.warn('⚠️ Supabase initialization failed, using local data:', error.message);
+}
+
 // Middleware
-app.use(express.json());
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://your-domain.com'] // Replace with your actual domain
+    : true, // Allow all origins in development
+  credentials: true,
+}));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// CORS for development
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  next();
-});
-
 // Health check
-app.get('/health', (req, res) => {
-  res.json({
+app.get('/health', async (req, res) => {
+  const health = {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     service: 'crew-accommodations-planner',
     version: '0.1.0',
-  });
+    environment: process.env.NODE_ENV,
+    features: {
+      supabaseIntegration: !!supabaseService,
+      liveMapsAPI: process.env.ENABLE_LIVE_MAPS_API === 'true',
+      liveHotelAPI: process.env.ENABLE_LIVE_HOTEL_API === 'true',
+    },
+    services: {} as Record<string, any>,
+  };
+
+  // Check Supabase health if available
+  if (supabaseService) {
+    try {
+      const supabaseHealth = await supabaseService.healthCheck();
+      health.services.supabase = supabaseHealth;
+    } catch (error) {
+      health.services.supabase = { status: 'error', error: error.message };
+      health.status = 'degraded';
+    }
+  }
+
+  res.json(health);
 });
 
 // Get available pairings
