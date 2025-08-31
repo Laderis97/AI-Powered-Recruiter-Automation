@@ -1,0 +1,87 @@
+services:
+  - type: web
+    name: crew-accommodations-planner
+    env: node
+    plan: starter
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:server
+    healthCheckPath: /health
+    
+    envVars:
+      # Supabase Configuration
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      
+      # External API Keys
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: MAPS_API_KEY
+        sync: false
+      
+      # Application Configuration
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      
+      # Crew Accommodation Specific
+      - key: DEFAULT_AIRLINE_ID
+        sync: false
+      - key: CACHE_TTL_MINUTES
+        value: 60
+      - key: MAX_PROCESSING_TIME_MS
+        value: 30000
+      
+      # Feature Flags
+      - key: ENABLE_LIVE_MAPS_API
+        value: false
+      - key: ENABLE_LIVE_HOTEL_API
+        value: false
+      - key: ENABLE_AUDIT_LOGGING
+        value: true
+    
+    # Auto-deploy from main branch
+    autoDeploy: true
+    
+    # Scaling configuration
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+    
+    # Health check configuration
+    healthCheck:
+      httpPath: /health
+      httpHeaders:
+        - name: User-Agent
+          value: render-health-check
+    
+    # Build and runtime configuration
+    buildFilter:
+      paths:
+      - src/**
+      - package.json
+      - package-lock.json
+      - tsconfig.json
+      ignoredPaths:
+      - README.md
+      - docs/**
+      - "*.md"
+
+databases:
+  # Note: Using external Supabase instead of Render PostgreSQL
+  # This section is for reference if you want to add Redis caching
+  - name: crew-accom-cache
+    plan: starter
+    databaseName: crew_accom_cache
+    user: crew_accom
+    
+    # Environment variables for the cache database
+    envVars:
+      - key: REDIS_URL
+        fromDatabase:
+          name: crew-accom-cache
+          property: connectionString

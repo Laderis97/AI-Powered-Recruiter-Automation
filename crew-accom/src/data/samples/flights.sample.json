@@ -1,0 +1,50 @@
+[
+  {
+    "id": "PAIR001",
+    "members": [
+      {"id":"C1","role":"Captain", "seniority": 15},
+      {"id":"F1","role":"FirstOfficer", "seniority": 8},
+      {"id":"A1","role":"FA", "seniority": 5}
+    ],
+    "legs": [
+      {
+        "flightNo":"VQ123",
+        "carrier":"VQ",
+        "depIata":"SFO",
+        "arrIata":"SEA",
+        "depUtc":"2025-01-15T01:00:00Z",
+        "arrUtc":"2025-01-15T03:00:00Z",
+        "equipment":"B737"
+      }
+    ]
+  },
+  {
+    "id": "PAIR002",
+    "members": [
+      {"id":"C2","role":"Captain", "seniority": 20},
+      {"id":"F2","role":"FirstOfficer", "seniority": 10},
+      {"id":"A2","role":"FA", "seniority": 7},
+      {"id":"A3","role":"FA", "seniority": 3}
+    ],
+    "legs": [
+      {
+        "flightNo":"AA456",
+        "carrier":"AA",
+        "depIata":"LAX",
+        "arrIata":"DFW",
+        "depUtc":"2025-01-15T14:30:00Z",
+        "arrUtc":"2025-01-15T19:45:00Z",
+        "equipment":"A320"
+      },
+      {
+        "flightNo":"AA789",
+        "carrier":"AA",
+        "depIata":"DFW",
+        "arrIata":"JFK",
+        "depUtc":"2025-01-16T08:15:00Z",
+        "arrUtc":"2025-01-16T12:30:00Z",
+        "equipment":"B777"
+      }
+    ]
+  }
+]

@@ -1,0 +1,42 @@
+[
+  {
+    "iata": "SEA",
+    "name": "Seattle-Tacoma International Airport",
+    "lat": 47.4502,
+    "lon": -122.3088,
+    "city": "Seattle",
+    "tz": "America/Los_Angeles"
+  },
+  {
+    "iata": "SFO",
+    "name": "San Francisco International Airport",
+    "lat": 37.6213,
+    "lon": -122.3790,
+    "city": "San Francisco",
+    "tz": "America/Los_Angeles"
+  },
+  {
+    "iata": "DFW",
+    "name": "Dallas/Fort Worth International Airport",
+    "lat": 32.8968,
+    "lon": -97.0380,
+    "city": "Dallas",
+    "tz": "America/Chicago"
+  },
+  {
+    "iata": "JFK",
+    "name": "John F. Kennedy International Airport",
+    "lat": 40.6413,
+    "lon": -73.7781,
+    "city": "New York",
+    "tz": "America/New_York"
+  },
+  {
+    "iata": "LAX",
+    "name": "Los Angeles International Airport",
+    "lat": 33.9428,
+    "lon": -118.4081,
+    "city": "Los Angeles",
+    "tz": "America/Los_Angeles"
+  }
+]
