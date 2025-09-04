@@ -40,6 +40,11 @@ RUN npm ci --only=production && npm cache clean --force
 # Copy built application from builder stage
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 
+# Copy views, public, and resumes directories
+COPY --chown=nodejs:nodejs views ./views
+COPY --chown=nodejs:nodejs public ./public
+COPY --chown=nodejs:nodejs resumes ./resumes
+
 # Copy necessary files
 COPY --chown=nodejs:nodejs README.md ./
 COPY --chown=nodejs:nodejs SECURITY.md ./
