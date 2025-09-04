@@ -8,6 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev dependencies for build)
+ENV DOCKER=true
 RUN npm ci
 
 # Copy source code
@@ -33,6 +34,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
+ENV DOCKER=true
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy built application from builder stage

@@ -27,7 +27,7 @@
     "deploy:prod": "echo 'Deploy to production - implement your deployment script'",
     "rollback": "echo 'Rollback deployment - implement your rollback script'",
     "commit": "git-cz",
-    "prepare": "husky install",
+    "prepare": "if [ \"$CI\" != \"true\" ] && [ \"$DOCKER\" != \"true\" ]; then husky install; fi",
     "markdownlint": "markdownlint '**/*.md' --ignore node_modules",
     "qa": "scripts\\qa.bat",
     "qa:lint": "scripts\\qa.bat lint",
