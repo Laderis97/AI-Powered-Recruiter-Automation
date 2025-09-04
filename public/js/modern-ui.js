@@ -51,10 +51,17 @@ class ModernUI {
 
   // === AVATAR DROPDOWN (Lowest Complexity) ===
   setupAvatarDropdown() {
+    console.log('🔧 Setting up avatar dropdown...');
     const userAvatar = document.getElementById('userAvatar');
     const avatarDropdown = document.getElementById('avatarDropdown');
 
+    console.log('User Avatar element:', userAvatar);
+    console.log('Avatar Dropdown element:', avatarDropdown);
+
     if (userAvatar && avatarDropdown) {
+      console.log(
+        '✅ Avatar dropdown elements found, setting up event listeners...'
+      );
       // Toggle dropdown on avatar click
       userAvatar.addEventListener('click', e => {
         e.stopPropagation();
@@ -89,9 +96,13 @@ class ModernUI {
   }
 
   toggleAvatarDropdown() {
+    console.log('🔄 Toggling avatar dropdown...');
     const avatarDropdown = document.getElementById('avatarDropdown');
     if (avatarDropdown) {
       avatarDropdown.classList.toggle('show');
+      console.log('✅ Dropdown toggled, classes:', avatarDropdown.className);
+    } else {
+      console.log('❌ Avatar dropdown element not found');
     }
   }
 
@@ -4406,14 +4417,21 @@ window.debugChartContainer = debugChartContainer;
 
 // Initialize ModernUI when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('🚀 DOM Content Loaded - Initializing ModernUI...');
   window.modernUI = new ModernUI();
+  console.log('✅ ModernUI initialized:', window.modernUI);
 });
 
 // Also initialize if DOM is already loaded
 if (document.readyState === 'loading') {
+  console.log('📄 DOM still loading, waiting for DOMContentLoaded...');
   document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM Content Loaded (fallback) - Initializing ModernUI...');
     window.modernUI = new ModernUI();
+    console.log('✅ ModernUI initialized (fallback):', window.modernUI);
   });
 } else {
+  console.log('📄 DOM already loaded - Initializing ModernUI immediately...');
   window.modernUI = new ModernUI();
+  console.log('✅ ModernUI initialized (immediate):', window.modernUI);
 }
