@@ -35,7 +35,7 @@
     "qa:scan": "scripts\\qa.bat scan",
     "qa:sbom": "scripts\\qa.bat sbom",
     "install-hooks": "scripts\\qa.bat install-hooks",
-    "postinstall": "npm run build"
+    "postinstall": "echo 'Postinstall complete'"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",

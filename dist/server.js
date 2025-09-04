@@ -10,31 +10,36 @@ import { databaseService } from './databaseService.js';
 import { aiAgent } from './aiAgent.js';
 dotenv.config();
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || process.env.port || 3000;
 // Middleware
 app.use(express.json());
 app.use(express.static('public'));
-app.use('/resumes', express.static(path.join(path.dirname(fileURLToPath(import.meta.url)), '../resumes')));
+app.use(
+  '/resumes',
+  express.static(
+    path.join(path.dirname(fileURLToPath(import.meta.url)), '../resumes')
+  )
+);
 app.set('view engine', 'ejs');
 // Add access control middleware
 function checkAccess(req, res, next) {
-    const accessToken = process.env.ACCESS_TOKEN;
-    // If no access token is set, allow public access
-    if (!accessToken) {
-        return next();
-    }
-    // Check for token in query parameter or header
-    const providedToken = req.query.token || req.headers['x-access-token'];
-    if (providedToken === accessToken) {
-        return next();
-    }
-    // If token doesn't match, show access denied
-    if (req.path.startsWith('/api/')) {
-        return res.status(401).json({ error: 'Access denied' });
-    }
-    // For web routes, show a simple access form
-    if (req.path === '/') {
-        return res.send(`
+  const accessToken = process.env.ACCESS_TOKEN;
+  // If no access token is set, allow public access
+  if (!accessToken) {
+    return next();
+  }
+  // Check for token in query parameter or header
+  const providedToken = req.query.token || req.headers['x-access-token'];
+  if (providedToken === accessToken) {
+    return next();
+  }
+  // If token doesn't match, show access denied
+  if (req.path.startsWith('/api/')) {
+    return res.status(401).json({ error: 'Access denied' });
+  }
+  // For web routes, show a simple access form
+  if (req.path === '/') {
+    return res.send(`
       <html>
         <head><title>Access Required</title></head>
         <body>
@@ -46,97 +51,148 @@ function checkAccess(req, res, next) {
         </body>
       </html>
     `);
-    }
-    res.status(401).send('Access denied');
+  }
+  res.status(401).send('Access denied');
 }
 // Apply access control to all routes
 app.use(checkAccess);
 // Health check endpoints
 app.get('/health', (req, res) => {
-    res.status(200).json({
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        environment: process.env.NODE_ENV || 'development'
-    });
+  res.status(200).json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+  });
 });
 app.get('/ready', (req, res) => {
-    // Basic readiness check - can be extended with database connectivity, etc.
-    res.status(200).json({
-        status: 'ready',
-        timestamp: new Date().toISOString(),
-        services: {
-            database: 'available',
-            ai: 'available'
-        }
-    });
+  // Basic readiness check - can be extended with database connectivity, etc.
+  res.status(200).json({
+    status: 'ready',
+    timestamp: new Date().toISOString(),
+    services: {
+      database: 'available',
+      ai: 'available',
+    },
+  });
 });
 // Helper function to convert Job to JobPosting
 function convertJobToJobPosting(job) {
-    return {
-        id: job.id,
-        title: job.title,
-        description: job.description,
-        skills: job.skills.join(', '),
-        requirements: job.requirements.join(', '),
-        createdAt: job.createdAt,
-    };
+  return {
+    id: job.id,
+    title: job.title,
+    description: job.description,
+    skills: job.skills.join(', '),
+    requirements: job.requirements.join(', '),
+    createdAt: job.createdAt,
+  };
 }
 // Multer configuration for file uploads
 const upload = multer({
-    storage: multer.diskStorage({
-        destination: (req, file, cb) => {
-            cb(null, documentParser.getUploadDir());
-        },
-        filename: (req, file, cb) => {
-            const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-            cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
-        },
-    }),
-    fileFilter: (req, file, cb) => {
-        // Allow only specific file types
-        if (file.mimetype === 'text/plain' ||
-            file.mimetype ===
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-            file.mimetype === 'application/msword') {
-            cb(null, true);
-        }
-        else {
-            cb(new Error('Invalid file type. Only .txt, .docx, and .doc files are allowed.'));
-        }
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, documentParser.getUploadDir());
     },
-    limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB limit
+    filename: (req, file, cb) => {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+      cb(null, file.fieldname + '-' + uniqueSuffix + '-' + file.originalname);
     },
+  }),
+  fileFilter: (req, file, cb) => {
+    // Allow only specific file types
+    if (
+      file.mimetype === 'text/plain' ||
+      file.mimetype ===
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+      file.mimetype === 'application/msword'
+    ) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          'Invalid file type. Only .txt, .docx, and .doc files are allowed.'
+        )
+      );
+    }
+  },
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
 });
 // Routes
 app.get('/', async (req, res) => {
-    try {
-        const analytics = await databaseService.getAnalytics();
-        res.render('index', {
-            jobsCount: analytics.totalJobs,
-            candidatesCount: analytics.totalCandidates,
-            campaignsCount: analytics.totalCampaigns,
-        });
-    }
-    catch (error) {
-        console.error('Error rendering dashboard:', error);
-        res.render('index', {
-            jobsCount: 0,
-            candidatesCount: 0,
-            campaignsCount: 0,
-        });
-    }
+  try {
+    const analytics = await databaseService.getAnalytics();
+    res.render('index', {
+      jobsCount: analytics.totalJobs,
+      candidatesCount: analytics.totalCandidates,
+      campaignsCount: analytics.totalCampaigns,
+    });
+  } catch (error) {
+    console.error('Error rendering dashboard:', error);
+    res.render('index', {
+      jobsCount: 0,
+      candidatesCount: 0,
+      campaignsCount: 0,
+    });
+  }
 });
 // API Routes
 app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+    const candidate = await documentParser.parseDocument(
+      req.file.path,
+      req.file.originalname
+    );
+    // Create candidate object using the new database service
+    const newCandidate = await databaseService.createCandidate({
+      name: candidate.name,
+      email: candidate.email || '',
+      phone: candidate.phone || '',
+      title: candidate.title || 'Unknown',
+      location: candidate.location || 'Unknown',
+      experience: candidate.experience || 'Unknown',
+      skills: candidate.skills || [],
+      education: candidate.education || [],
+      currentCompany: candidate.currentCompany || '',
+      linkedin: candidate.linkedin || '',
+      github: candidate.github || '',
+      portfolio: candidate.portfolio || '',
+      summary: candidate.summary || '',
+    });
+    res.json({
+      success: true,
+      candidate: newCandidate,
+      message: `Resume parsed successfully! Added candidate: ${candidate.name}`,
+    });
+  } catch (error) {
+    console.error('Error parsing resume:', error);
+    res.status(500).json({
+      error: 'Failed to parse resume',
+      details: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+app.post(
+  '/api/upload-multiple-resumes',
+  upload.array('resumes', 10),
+  async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
-        }
-        const candidate = await documentParser.parseDocument(req.file.path, req.file.originalname);
-        // Create candidate object using the new database service
-        const newCandidate = await databaseService.createCandidate({
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'No files uploaded' });
+      }
+      const candidates = [];
+      const errors = [];
+      for (const file of req.files) {
+        try {
+          const candidate = await documentParser.parseDocument(
+            file.path,
+            file.originalname
+          );
+          const newCandidate = await databaseService.createCandidate({
             name: candidate.name,
             email: candidate.email || '',
             phone: candidate.phone || '',
@@ -150,159 +206,120 @@ app.post('/api/upload-resume', upload.single('resume'), async (req, res) => {
             github: candidate.github || '',
             portfolio: candidate.portfolio || '',
             summary: candidate.summary || '',
-        });
-        res.json({
-            success: true,
-            candidate: newCandidate,
-            message: `Resume parsed successfully! Added candidate: ${candidate.name}`,
-        });
-    }
-    catch (error) {
-        console.error('Error parsing resume:', error);
-        res.status(500).json({
-            error: 'Failed to parse resume',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
-    }
-});
-app.post('/api/upload-multiple-resumes', upload.array('resumes', 10), async (req, res) => {
-    try {
-        if (!req.files || req.files.length === 0) {
-            return res.status(400).json({ error: 'No files uploaded' });
+          });
+          candidates.push(newCandidate);
+        } catch (error) {
+          errors.push(
+            `${file.originalname}: ${error instanceof Error ? error.message : 'Unknown error'}`
+          );
         }
-        const candidates = [];
-        const errors = [];
-        for (const file of req.files) {
-            try {
-                const candidate = await documentParser.parseDocument(file.path, file.originalname);
-                const newCandidate = await databaseService.createCandidate({
-                    name: candidate.name,
-                    email: candidate.email || '',
-                    phone: candidate.phone || '',
-                    title: candidate.title || 'Unknown',
-                    location: candidate.location || 'Unknown',
-                    experience: candidate.experience || 'Unknown',
-                    skills: candidate.skills || [],
-                    education: candidate.education || [],
-                    currentCompany: candidate.currentCompany || '',
-                    linkedin: candidate.linkedin || '',
-                    github: candidate.github || '',
-                    portfolio: candidate.portfolio || '',
-                    summary: candidate.summary || '',
-                });
-                candidates.push(newCandidate);
-            }
-            catch (error) {
-                errors.push(`${file.originalname}: ${error instanceof Error ? error.message : 'Unknown error'}`);
-            }
-        }
-        res.json({
-            success: true,
-            candidates,
-            errors: errors.length > 0 ? errors : undefined,
-            message: `Successfully parsed ${candidates.length} resumes${errors.length > 0 ? ` (${errors.length} failed)` : ''}`,
-        });
+      }
+      res.json({
+        success: true,
+        candidates,
+        errors: errors.length > 0 ? errors : undefined,
+        message: `Successfully parsed ${candidates.length} resumes${errors.length > 0 ? ` (${errors.length} failed)` : ''}`,
+      });
+    } catch (error) {
+      console.error('Error parsing multiple resumes:', error);
+      res.status(500).json({
+        error: 'Failed to parse resumes',
+        details: error instanceof Error ? error.message : 'Unknown error',
+      });
     }
-    catch (error) {
-        console.error('Error parsing multiple resumes:', error);
-        res.status(500).json({
-            error: 'Failed to parse resumes',
-            details: error instanceof Error ? error.message : 'Unknown error',
-        });
-    }
-});
+  }
+);
 app.get('/api/candidates', async (req, res) => {
-    try {
-        const candidates = await databaseService.getAllCandidates();
-        res.json(candidates);
-    }
-    catch (error) {
-        console.error('Error fetching candidates:', error);
-        res.status(500).json({ error: 'Failed to fetch candidates' });
-    }
+  try {
+    const candidates = await databaseService.getAllCandidates();
+    res.json(candidates);
+  } catch (error) {
+    console.error('Error fetching candidates:', error);
+    res.status(500).json({ error: 'Failed to fetch candidates' });
+  }
 });
 app.get('/api/candidates/archived', async (req, res) => {
-    try {
-        const allCandidates = await databaseService.getAllCandidates();
-        const archivedCandidates = allCandidates.filter((candidate) => candidate.isArchived);
-        res.json(archivedCandidates);
-    }
-    catch (error) {
-        console.error('Error fetching archived candidates:', error);
-        res.status(500).json({ error: 'Failed to fetch archived candidates' });
-    }
+  try {
+    const allCandidates = await databaseService.getAllCandidates();
+    const archivedCandidates = allCandidates.filter(
+      candidate => candidate.isArchived
+    );
+    res.json(archivedCandidates);
+  } catch (error) {
+    console.error('Error fetching archived candidates:', error);
+    res.status(500).json({ error: 'Failed to fetch archived candidates' });
+  }
 });
 app.get('/api/jobs', async (req, res) => {
-    try {
-        const jobs = await databaseService.getAllJobs();
-        res.json({ jobs });
-    }
-    catch (error) {
-        console.error('Error fetching jobs:', error);
-        res.status(500).json({ error: 'Failed to fetch jobs' });
-    }
+  try {
+    const jobs = await databaseService.getAllJobs();
+    res.json({ jobs });
+  } catch (error) {
+    console.error('Error fetching jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch jobs' });
+  }
 });
 app.get('/api/jobs/archived', async (req, res) => {
-    try {
-        const allJobs = await databaseService.getAllJobs();
-        const archivedJobs = allJobs.filter((job) => job.status === 'closed');
-        res.json(archivedJobs);
-    }
-    catch (error) {
-        console.error('Error fetching archived jobs:', error);
-        res.status(500).json({ error: 'Failed to fetch archived jobs' });
-    }
+  try {
+    const allJobs = await databaseService.getAllJobs();
+    const archivedJobs = allJobs.filter(job => job.status === 'closed');
+    res.json(archivedJobs);
+  } catch (error) {
+    console.error('Error fetching archived jobs:', error);
+    res.status(500).json({ error: 'Failed to fetch archived jobs' });
+  }
 });
 app.post('/api/jobs', async (req, res) => {
+  try {
+    const { title, description } = req.body;
+    if (!title || !description) {
+      return res
+        .status(400)
+        .json({ error: 'Title and description are required' });
+    }
+    let parsedData = null;
+    // Try to parse job description with AI, but don't fail if it doesn't work
     try {
-        const { title, description } = req.body;
-        if (!title || !description) {
-            return res
-                .status(400)
-                .json({ error: 'Title and description are required' });
-        }
-        let parsedData = null;
-        // Try to parse job description with AI, but don't fail if it doesn't work
-        try {
-            parsedData = await parseJobDescription(description);
-            console.log('✅ Job description parsed successfully with AI');
-        }
-        catch (aiError) {
-            console.error('⚠️ Failed to parse job description with AI:', aiError instanceof Error ? aiError.message : 'Unknown error');
-            // Fallback: use basic data if AI parsing fails
-            parsedData = {
-                jobTitle: title,
-                responsibilities: [],
-                qualifications: [],
-                skills: [],
-                benefits: [],
-                location: 'N/A',
-                employmentType: 'N/A',
-                experienceLevel: 'N/A',
-                industry: 'N/A',
-                companyName: 'N/A',
-                salaryRange: 'N/A',
-                keywords: [],
-            };
-            console.log('   Using fallback job description data.');
-        }
-        const job = await databaseService.createJob({
-            title,
-            company: 'General',
-            location: 'Remote',
-            type: 'Full-time',
-            salary: 'Competitive',
-            description,
-            requirements: ['TBD'],
-            skills: ['TBD'],
-            status: 'draft',
-        });
-        res.json(job);
+      parsedData = await parseJobDescription(description);
+      console.log('✅ Job description parsed successfully with AI');
+    } catch (aiError) {
+      console.error(
+        '⚠️ Failed to parse job description with AI:',
+        aiError instanceof Error ? aiError.message : 'Unknown error'
+      );
+      // Fallback: use basic data if AI parsing fails
+      parsedData = {
+        jobTitle: title,
+        responsibilities: [],
+        qualifications: [],
+        skills: [],
+        benefits: [],
+        location: 'N/A',
+        employmentType: 'N/A',
+        experienceLevel: 'N/A',
+        industry: 'N/A',
+        companyName: 'N/A',
+        salaryRange: 'N/A',
+        keywords: [],
+      };
+      console.log('   Using fallback job description data.');
     }
-    catch (error) {
-        console.error('Error creating job:', error);
-        res.status(500).json({ error: 'Failed to create job posting' });
-    }
+    const job = await databaseService.createJob({
+      title,
+      company: 'General',
+      location: 'Remote',
+      type: 'Full-time',
+      salary: 'Competitive',
+      description,
+      requirements: ['TBD'],
+      skills: ['TBD'],
+      status: 'draft',
+    });
+    res.json(job);
+  } catch (error) {
+    console.error('Error creating job:', error);
+    res.status(500).json({ error: 'Failed to create job posting' });
+  }
 });
 // Campaign endpoints temporarily disabled - not implemented in new database service
 /*
@@ -427,114 +444,116 @@ app.post('/api/campaigns/:id/send-email', async (req, res) => {
 });
 */
 app.get('/api/analytics', async (req, res) => {
-    try {
-        const analytics = await databaseService.getAnalytics();
-        res.json(analytics);
-    }
-    catch (error) {
-        console.error('Error fetching analytics:', error);
-        res.status(500).json({ error: 'Failed to fetch analytics' });
-    }
+  try {
+    const analytics = await databaseService.getAnalytics();
+    res.json(analytics);
+  } catch (error) {
+    console.error('Error fetching analytics:', error);
+    res.status(500).json({ error: 'Failed to fetch analytics' });
+  }
 });
 // Hiring funnel analytics endpoint
 app.get('/api/analytics/hiring-funnel', async (req, res) => {
-    try {
-        const hiringFunnel = await databaseService.getHiringFunnel();
-        res.json({ success: true, data: hiringFunnel });
-    }
-    catch (error) {
-        console.error('Error fetching hiring funnel:', error);
-        res.status(500).json({ error: 'Failed to fetch hiring funnel data' });
-    }
+  try {
+    const hiringFunnel = await databaseService.getHiringFunnel();
+    res.json({ success: true, data: hiringFunnel });
+  } catch (error) {
+    console.error('Error fetching hiring funnel:', error);
+    res.status(500).json({ error: 'Failed to fetch hiring funnel data' });
+  }
 });
 // Funnel stage details endpoint
 app.get('/api/analytics/funnel-stage/:stage', async (req, res) => {
-    try {
-        const { stage } = req.params;
-        const stageDetails = await databaseService.getStageDetails(stage);
-        const candidates = await databaseService.getCandidatesByStage(stage);
-        if (!stageDetails) {
-            return res.status(404).json({ success: false, error: 'Stage not found' });
-        }
-        res.json({
-            success: true,
-            data: {
-                ...stageDetails,
-                candidates,
-            },
-        });
+  try {
+    const { stage } = req.params;
+    const stageDetails = await databaseService.getStageDetails(stage);
+    const candidates = await databaseService.getCandidatesByStage(stage);
+    if (!stageDetails) {
+      return res.status(404).json({ success: false, error: 'Stage not found' });
     }
-    catch (error) {
-        console.error('Error fetching stage details:', error);
-        res
-            .status(500)
-            .json({ success: false, error: 'Failed to fetch stage details' });
-    }
+    res.json({
+      success: true,
+      data: {
+        ...stageDetails,
+        candidates,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching stage details:', error);
+    res
+      .status(500)
+      .json({ success: false, error: 'Failed to fetch stage details' });
+  }
 });
 app.get('/api/analytics/stage-performance/:stage', async (req, res) => {
-    try {
-        const { stage } = req.params;
-        const performanceData = await databaseService.getStagePerformanceOverTime(stage);
-        if (!performanceData || performanceData.length === 0) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Stage performance data not found' });
-        }
-        res.json({
-            success: true,
-            data: performanceData,
-        });
+  try {
+    const { stage } = req.params;
+    const performanceData =
+      await databaseService.getStagePerformanceOverTime(stage);
+    if (!performanceData || performanceData.length === 0) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Stage performance data not found' });
     }
-    catch (error) {
-        console.error('Error fetching stage performance data:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Failed to fetch stage performance data',
-        });
-    }
+    res.json({
+      success: true,
+      data: performanceData,
+    });
+  } catch (error) {
+    console.error('Error fetching stage performance data:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch stage performance data',
+    });
+  }
 });
 // Time to hire analytics endpoint
 app.get('/api/analytics/time-to-hire', async (req, res) => {
-    try {
-        const analytics = await databaseService.getAnalytics();
-        const timeToHire = analytics.timeToHire;
-        const monthlyHires = await databaseService.getMonthlyHires();
-        // Calculate trend based on recent months vs previous months
-        const recentMonths = monthlyHires.slice(-3); // Last 3 months
-        const previousMonths = monthlyHires.slice(-6, -3); // 3 months before that
-        const recentAvg = recentMonths.reduce((sum, item) => sum + item.count, 0) /
-            recentMonths.length;
-        const previousAvg = previousMonths.reduce((sum, item) => sum + item.count, 0) /
-            previousMonths.length;
-        const trend = recentAvg > previousAvg ? 'improving' : 'declining';
-        // Generate additional metrics
-        const totalHires = monthlyHires.reduce((sum, item) => sum + item.count, 0);
-        const avgHiresPerMonth = totalHires / monthlyHires.length;
-        const bestMonth = monthlyHires.reduce((max, item) => item.count > max.count ? item : max);
-        const worstMonth = monthlyHires.reduce((min, item) => item.count < min.count ? item : min);
-        res.json({
-            success: true,
-            data: {
-                averageTimeToHire: timeToHire,
-                monthlyHires: monthlyHires,
-                trend: trend,
-                totalHires: totalHires,
-                avgHiresPerMonth: Math.round(avgHiresPerMonth * 10) / 10,
-                bestMonth: bestMonth,
-                worstMonth: worstMonth,
-                yearToDate: monthlyHires
-                    .slice(-6)
-                    .reduce((sum, item) => sum + item.count, 0),
-                conversionRate: '7.3%', // Calculated from funnel data
-                costPerHire: analytics.costPerHire,
-                qualityOfHire: analytics.qualityOfHire,
-            },
-        });
-    }
-    catch (error) {
-        console.error('Error fetching time to hire:', error);
-        res.status(500).json({ error: 'Failed to fetch time to hire data' });
-    }
+  try {
+    const analytics = await databaseService.getAnalytics();
+    const timeToHire = analytics.timeToHire;
+    const monthlyHires = await databaseService.getMonthlyHires();
+    // Calculate trend based on recent months vs previous months
+    const recentMonths = monthlyHires.slice(-3); // Last 3 months
+    const previousMonths = monthlyHires.slice(-6, -3); // 3 months before that
+    const recentAvg =
+      recentMonths.reduce((sum, item) => sum + item.count, 0) /
+      recentMonths.length;
+    const previousAvg =
+      previousMonths.reduce((sum, item) => sum + item.count, 0) /
+      previousMonths.length;
+    const trend = recentAvg > previousAvg ? 'improving' : 'declining';
+    // Generate additional metrics
+    const totalHires = monthlyHires.reduce((sum, item) => sum + item.count, 0);
+    const avgHiresPerMonth = totalHires / monthlyHires.length;
+    const bestMonth = monthlyHires.reduce((max, item) =>
+      item.count > max.count ? item : max
+    );
+    const worstMonth = monthlyHires.reduce((min, item) =>
+      item.count < min.count ? item : min
+    );
+    res.json({
+      success: true,
+      data: {
+        averageTimeToHire: timeToHire,
+        monthlyHires: monthlyHires,
+        trend: trend,
+        totalHires: totalHires,
+        avgHiresPerMonth: Math.round(avgHiresPerMonth * 10) / 10,
+        bestMonth: bestMonth,
+        worstMonth: worstMonth,
+        yearToDate: monthlyHires
+          .slice(-6)
+          .reduce((sum, item) => sum + item.count, 0),
+        conversionRate: '7.3%', // Calculated from funnel data
+        costPerHire: analytics.costPerHire,
+        qualityOfHire: analytics.qualityOfHire,
+      },
+    });
+  } catch (error) {
+    console.error('Error fetching time to hire:', error);
+    res.status(500).json({ error: 'Failed to fetch time to hire data' });
+  }
 });
 // Campaign export endpoint temporarily disabled
 /*
@@ -626,198 +645,209 @@ app.post('/api/email-config', async (req, res) => {
 // AI Role Alignment endpoints
 // Role alignment analysis
 app.post('/api/role-alignment', async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.body;
-        if (!candidateId || !jobId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Candidate ID and Job ID are required',
-            });
-        }
-        const candidate = await databaseService.getCandidateById(candidateId);
-        const job = await databaseService.getJobById(jobId);
-        if (!candidate || !job) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Candidate or Job not found' });
-        }
-        const result = await aiAgent.calculateRoleAlignment(candidate, convertJobToJobPosting(job));
-        if (result.ok) {
-            res.json({
-                success: true,
-                alignment: result.data,
-                message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`,
-            });
-        }
-        else {
-            console.error('Role alignment failed:', result.error);
-            res
-                .status(500)
-                .json({ success: false, error: 'Failed to analyze role alignment' });
-        }
+  try {
+    const { candidateId, jobId } = req.body;
+    if (!candidateId || !jobId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
-    catch (error) {
-        console.error('Error in role alignment:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+    const candidate = await databaseService.getCandidateById(candidateId);
+    const job = await databaseService.getJobById(jobId);
+    if (!candidate || !job) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Candidate or Job not found' });
     }
+    const result = await aiAgent.calculateRoleAlignment(
+      candidate,
+      convertJobToJobPosting(job)
+    );
+    if (result.ok) {
+      res.json({
+        success: true,
+        alignment: result.data,
+        message: `Role alignment calculated: ${result.data?.overallScore || 0}% match`,
+      });
+    } else {
+      console.error('Role alignment failed:', result.error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Failed to analyze role alignment' });
+    }
+  } catch (error) {
+    console.error('Error in role alignment:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 // Skills gap analysis
 app.post('/api/skills-gap', async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.body;
-        if (!candidateId || !jobId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Candidate ID and Job ID are required',
-            });
-        }
-        const candidate = await databaseService.getCandidateById(candidateId);
-        const job = await databaseService.getJobById(jobId);
-        if (!candidate || !job) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Candidate or Job not found' });
-        }
-        const result = await aiAgent.analyzeSkillsGap(candidate, convertJobToJobPosting(job));
-        if (result.ok) {
-            res.json({
-                success: true,
-                skillsGap: result.data,
-                message: 'Skills gap analysis completed',
-            });
-        }
-        else {
-            console.error('Skills gap analysis failed:', result.error);
-            res
-                .status(500)
-                .json({ success: false, error: 'Failed to analyze skills gap' });
-        }
+  try {
+    const { candidateId, jobId } = req.body;
+    if (!candidateId || !jobId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
-    catch (error) {
-        console.error('Error in skills gap analysis:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+    const candidate = await databaseService.getCandidateById(candidateId);
+    const job = await databaseService.getJobById(jobId);
+    if (!candidate || !job) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Candidate or Job not found' });
     }
+    const result = await aiAgent.analyzeSkillsGap(
+      candidate,
+      convertJobToJobPosting(job)
+    );
+    if (result.ok) {
+      res.json({
+        success: true,
+        skillsGap: result.data,
+        message: 'Skills gap analysis completed',
+      });
+    } else {
+      console.error('Skills gap analysis failed:', result.error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Failed to analyze skills gap' });
+    }
+  } catch (error) {
+    console.error('Error in skills gap analysis:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 // Interview questions generation
 app.post('/api/interview-questions', async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.body;
-        if (!candidateId || !jobId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Candidate ID and Job ID are required',
-            });
-        }
-        const candidate = await databaseService.getCandidateById(candidateId);
-        const job = await databaseService.getJobById(jobId);
-        if (!candidate || !job) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Candidate or Job not found' });
-        }
-        const result = await aiAgent.generateInterviewQuestions(candidate, convertJobToJobPosting(job));
-        if (result.ok) {
-            res.json({
-                success: true,
-                questions: result.data,
-                message: `${result.data?.length || 0} interview questions generated`,
-            });
-        }
-        else {
-            console.error('Interview questions generation failed:', result.error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to generate interview questions',
-            });
-        }
+  try {
+    const { candidateId, jobId } = req.body;
+    if (!candidateId || !jobId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
-    catch (error) {
-        console.error('Error in interview questions generation:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+    const candidate = await databaseService.getCandidateById(candidateId);
+    const job = await databaseService.getJobById(jobId);
+    if (!candidate || !job) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Candidate or Job not found' });
     }
+    const result = await aiAgent.generateInterviewQuestions(
+      candidate,
+      convertJobToJobPosting(job)
+    );
+    if (result.ok) {
+      res.json({
+        success: true,
+        questions: result.data,
+        message: `${result.data?.length || 0} interview questions generated`,
+      });
+    } else {
+      console.error('Interview questions generation failed:', result.error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate interview questions',
+      });
+    }
+  } catch (error) {
+    console.error('Error in interview questions generation:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 // Categorized interview questions generation
 app.post('/api/interview-questions/categorized', async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.body;
-        if (!candidateId || !jobId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Candidate ID and Job ID are required',
-            });
-        }
-        const candidate = await databaseService.getCandidateById(candidateId);
-        const job = await databaseService.getJobById(jobId);
-        if (!candidate || !job) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Candidate or Job not found' });
-        }
-        const result = await aiAgent.generateCategorizedInterviewQuestions(candidate, convertJobToJobPosting(job));
-        if (result.ok) {
-            res.json({
-                success: true,
-                categorizedQuestions: result.data,
-                message: `${result.data?.all?.length || 0} categorized interview questions generated`,
-                summary: {
-                    technical: result.data?.technical?.length || 0,
-                    experience: result.data?.experience?.length || 0,
-                    problemSolving: result.data?.problemSolving?.length || 0,
-                    leadership: result.data?.leadership?.length || 0,
-                    cultural: result.data?.cultural?.length || 0,
-                    total: result.data?.all?.length || 0,
-                },
-            });
-        }
-        else {
-            console.error('Categorized interview questions generation failed:', result.error);
-            res.status(500).json({
-                success: false,
-                error: 'Failed to generate categorized interview questions',
-            });
-        }
+  try {
+    const { candidateId, jobId } = req.body;
+    if (!candidateId || !jobId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
-    catch (error) {
-        console.error('Error in categorized interview questions generation:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+    const candidate = await databaseService.getCandidateById(candidateId);
+    const job = await databaseService.getJobById(jobId);
+    if (!candidate || !job) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Candidate or Job not found' });
     }
+    const result = await aiAgent.generateCategorizedInterviewQuestions(
+      candidate,
+      convertJobToJobPosting(job)
+    );
+    if (result.ok) {
+      res.json({
+        success: true,
+        categorizedQuestions: result.data,
+        message: `${result.data?.all?.length || 0} categorized interview questions generated`,
+        summary: {
+          technical: result.data?.technical?.length || 0,
+          experience: result.data?.experience?.length || 0,
+          problemSolving: result.data?.problemSolving?.length || 0,
+          leadership: result.data?.leadership?.length || 0,
+          cultural: result.data?.cultural?.length || 0,
+          total: result.data?.all?.length || 0,
+        },
+      });
+    } else {
+      console.error(
+        'Categorized interview questions generation failed:',
+        result.error
+      );
+      res.status(500).json({
+        success: false,
+        error: 'Failed to generate categorized interview questions',
+      });
+    }
+  } catch (error) {
+    console.error(
+      'Error in categorized interview questions generation:',
+      error
+    );
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 // Cultural fit assessment
 app.post('/api/cultural-fit', async (req, res) => {
-    try {
-        const { candidateId, jobId } = req.body;
-        if (!candidateId || !jobId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Candidate ID and Job ID are required',
-            });
-        }
-        const candidate = await databaseService.getCandidateById(candidateId);
-        const job = await databaseService.getJobById(jobId);
-        if (!candidate || !job) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'Candidate or Job not found' });
-        }
-        const result = await aiAgent.assessCulturalFit(candidate, convertJobToJobPosting(job));
-        if (result.ok) {
-            res.json({
-                success: true,
-                culturalFit: result.data,
-                message: `Cultural fit score: ${result.data?.fitScore || 0}%`,
-            });
-        }
-        else {
-            console.error('Cultural fit assessment failed:', result.error);
-            res
-                .status(500)
-                .json({ success: false, error: 'Failed to assess cultural fit' });
-        }
+  try {
+    const { candidateId, jobId } = req.body;
+    if (!candidateId || !jobId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Candidate ID and Job ID are required',
+      });
     }
-    catch (error) {
-        console.error('Error in cultural fit assessment:', error);
-        res.status(500).json({ success: false, error: 'Internal server error' });
+    const candidate = await databaseService.getCandidateById(candidateId);
+    const job = await databaseService.getJobById(jobId);
+    if (!candidate || !job) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'Candidate or Job not found' });
     }
+    const result = await aiAgent.assessCulturalFit(
+      candidate,
+      convertJobToJobPosting(job)
+    );
+    if (result.ok) {
+      res.json({
+        success: true,
+        culturalFit: result.data,
+        message: `Cultural fit score: ${result.data?.fitScore || 0}%`,
+      });
+    } else {
+      console.error('Cultural fit assessment failed:', result.error);
+      res
+        .status(500)
+        .json({ success: false, error: 'Failed to assess cultural fit' });
+    }
+  } catch (error) {
+    console.error('Error in cultural fit assessment:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
 });
 /*
 // Enhanced AI Analysis endpoints temporarily disabled
@@ -1257,195 +1287,208 @@ app.get('/api/ai/orchestrator/health', async (req, res) => {
 });
 */
 app.get('/api/ai/orchestrator/metrics', async (req, res) => {
-    try {
-        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
-        const metrics = orchestrator.getPerformanceMetrics();
-        res.json({
-            success: true,
-            metrics,
-            message: 'Performance metrics retrieved',
-        });
-    }
-    catch (error) {
-        console.error('AI orchestrator metrics error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error retrieving performance metrics',
-        });
-    }
+  try {
+    const orchestrator = new (
+      await import('./aiOrchestrator.js')
+    ).AIOrchestrator();
+    const metrics = orchestrator.getPerformanceMetrics();
+    res.json({
+      success: true,
+      metrics,
+      message: 'Performance metrics retrieved',
+    });
+  } catch (error) {
+    console.error('AI orchestrator metrics error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error retrieving performance metrics',
+    });
+  }
 });
 app.post('/api/ai/orchestrator/config', async (req, res) => {
-    try {
-        const { config } = req.body;
-        if (!config) {
-            return res
-                .status(400)
-                .json({ success: false, error: 'Configuration object is required' });
-        }
-        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
-        const result = await orchestrator.updateConfig(config);
-        res.json({
-            success: true,
-            result,
-            message: 'Orchestrator configuration updated',
-        });
+  try {
+    const { config } = req.body;
+    if (!config) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Configuration object is required' });
     }
-    catch (error) {
-        console.error('AI orchestrator config update error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error updating configuration',
-        });
-    }
+    const orchestrator = new (
+      await import('./aiOrchestrator.js')
+    ).AIOrchestrator();
+    const result = await orchestrator.updateConfig(config);
+    res.json({
+      success: true,
+      result,
+      message: 'Orchestrator configuration updated',
+    });
+  } catch (error) {
+    console.error('AI orchestrator config update error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error updating configuration',
+    });
+  }
 });
 app.post('/api/ai/orchestrator/cache/clear', async (req, res) => {
-    try {
-        const orchestrator = new (await import('./aiOrchestrator.js')).AIOrchestrator();
-        const result = await orchestrator.clearCache();
-        res.json({
-            success: true,
-            result,
-            message: 'Cache cleared successfully',
-        });
-    }
-    catch (error) {
-        console.error('AI orchestrator cache clear error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error clearing cache',
-        });
-    }
+  try {
+    const orchestrator = new (
+      await import('./aiOrchestrator.js')
+    ).AIOrchestrator();
+    const result = await orchestrator.clearCache();
+    res.json({
+      success: true,
+      result,
+      message: 'Cache cleared successfully',
+    });
+  } catch (error) {
+    console.error('AI orchestrator cache clear error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error clearing cache',
+    });
+  }
 });
 // A/B Testing endpoints
 app.post('/api/ai/ab-test/setup', async (req, res) => {
-    try {
-        const { testConfig } = req.body;
-        if (!testConfig) {
-            return res
-                .status(400)
-                .json({ success: false, error: 'Test configuration is required' });
-        }
-        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-        const result = await machineLearning.setupABTest(testConfig);
-        res.json({
-            success: true,
-            result,
-            message: 'A/B test setup completed',
-        });
+  try {
+    const { testConfig } = req.body;
+    if (!testConfig) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Test configuration is required' });
     }
-    catch (error) {
-        console.error('A/B test setup error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error during A/B test setup',
-        });
-    }
+    const machineLearning = new (
+      await import('./machineLearning.js')
+    ).MachineLearningService();
+    const result = await machineLearning.setupABTest(testConfig);
+    res.json({
+      success: true,
+      result,
+      message: 'A/B test setup completed',
+    });
+  } catch (error) {
+    console.error('A/B test setup error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error during A/B test setup',
+    });
+  }
 });
 app.get('/api/ai/ab-test/:testId/variant', async (req, res) => {
-    try {
-        const { testId } = req.params;
-        const { candidateId } = req.query;
-        if (!testId || !candidateId) {
-            return res.status(400).json({
-                success: false,
-                error: 'Test ID and candidate ID are required',
-            });
-        }
-        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-        const variant = machineLearning.getABTestVariant(testId, candidateId);
-        if (!variant) {
-            return res
-                .status(404)
-                .json({ success: false, error: 'A/B test variant not found' });
-        }
-        res.json({
-            success: true,
-            variant,
-            message: 'A/B test variant retrieved',
-        });
+  try {
+    const { testId } = req.params;
+    const { candidateId } = req.query;
+    if (!testId || !candidateId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Test ID and candidate ID are required',
+      });
     }
-    catch (error) {
-        console.error('A/B test variant error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error retrieving A/B test variant',
-        });
+    const machineLearning = new (
+      await import('./machineLearning.js')
+    ).MachineLearningService();
+    const variant = machineLearning.getABTestVariant(testId, candidateId);
+    if (!variant) {
+      return res
+        .status(404)
+        .json({ success: false, error: 'A/B test variant not found' });
     }
+    res.json({
+      success: true,
+      variant,
+      message: 'A/B test variant retrieved',
+    });
+  } catch (error) {
+    console.error('A/B test variant error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error retrieving A/B test variant',
+    });
+  }
 });
 app.post('/api/ai/ab-test/:testId/result', async (req, res) => {
-    try {
-        const { testId } = req.params;
-        const { variantId, candidateId, metrics } = req.body;
-        if (!testId || !variantId || !candidateId || !metrics) {
-            return res.status(400).json({
-                success: false,
-                error: 'Test ID, variant ID, candidate ID, and metrics are required',
-            });
-        }
-        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-        const result = await machineLearning.recordABTestResult(testId, variantId, candidateId, metrics);
-        res.json({
-            success: true,
-            result,
-            message: 'A/B test result recorded',
-        });
+  try {
+    const { testId } = req.params;
+    const { variantId, candidateId, metrics } = req.body;
+    if (!testId || !variantId || !candidateId || !metrics) {
+      return res.status(400).json({
+        success: false,
+        error: 'Test ID, variant ID, candidate ID, and metrics are required',
+      });
     }
-    catch (error) {
-        console.error('A/B test result recording error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error recording A/B test result',
-        });
-    }
+    const machineLearning = new (
+      await import('./machineLearning.js')
+    ).MachineLearningService();
+    const result = await machineLearning.recordABTestResult(
+      testId,
+      variantId,
+      candidateId,
+      metrics
+    );
+    res.json({
+      success: true,
+      result,
+      message: 'A/B test result recorded',
+    });
+  } catch (error) {
+    console.error('A/B test result recording error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error recording A/B test result',
+    });
+  }
 });
 app.get('/api/ai/ab-test/:testId/results', async (req, res) => {
-    try {
-        const { testId } = req.params;
-        if (!testId) {
-            return res
-                .status(400)
-                .json({ success: false, error: 'Test ID is required' });
-        }
-        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-        const result = await machineLearning.getABTestResults(testId);
-        res.json({
-            success: true,
-            result,
-            message: 'A/B test results retrieved',
-        });
+  try {
+    const { testId } = req.params;
+    if (!testId) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Test ID is required' });
     }
-    catch (error) {
-        console.error('A/B test results error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error retrieving A/B test results',
-        });
-    }
+    const machineLearning = new (
+      await import('./machineLearning.js')
+    ).MachineLearningService();
+    const result = await machineLearning.getABTestResults(testId);
+    res.json({
+      success: true,
+      result,
+      message: 'A/B test results retrieved',
+    });
+  } catch (error) {
+    console.error('A/B test results error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error retrieving A/B test results',
+    });
+  }
 });
 // Feedback and Continuous Learning endpoints
 app.post('/api/ai/feedback', async (req, res) => {
-    try {
-        const { feedback } = req.body;
-        if (!feedback) {
-            return res
-                .status(400)
-                .json({ success: false, error: 'Feedback data is required' });
-        }
-        const machineLearning = new (await import('./machineLearning.js')).MachineLearningService();
-        const result = await machineLearning.recordFeedback(feedback);
-        res.json({
-            success: true,
-            result,
-            message: 'Feedback recorded successfully',
-        });
+  try {
+    const { feedback } = req.body;
+    if (!feedback) {
+      return res
+        .status(400)
+        .json({ success: false, error: 'Feedback data is required' });
     }
-    catch (error) {
-        console.error('Feedback recording error:', error);
-        res.status(500).json({
-            success: false,
-            error: 'Internal server error recording feedback',
-        });
-    }
+    const machineLearning = new (
+      await import('./machineLearning.js')
+    ).MachineLearningService();
+    const result = await machineLearning.recordFeedback(feedback);
+    res.json({
+      success: true,
+      result,
+      message: 'Feedback recorded successfully',
+    });
+  } catch (error) {
+    console.error('Feedback recording error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error recording feedback',
+    });
+  }
 });
 // Job and candidate management endpoints temporarily disabled
 /*
@@ -1660,22 +1703,22 @@ app.post('/api/campaigns/:id/unarchive', async (req, res) => {
 */
 // Modern Dashboard Route
 app.get('/modern', (req, res) => {
-    res.render('modern-dashboard');
+  res.render('modern-dashboard');
 });
 // Export app for testing
 export { app };
 // Start server
 if (process.env.NODE_ENV !== 'test') {
-    app
-        .listen(PORT, () => {
-        console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
-        console.log(`📊 Dashboard available at http://localhost:${PORT}`);
-        console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
-        console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
-        console.log(`💾 Database service: Supabase`);
+  app
+    .listen(PORT, () => {
+      console.log(`🚀 AI Recruiter server running on http://localhost:${PORT}`);
+      console.log(`📊 Dashboard available at http://localhost:${PORT}`);
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(`📁 Upload directory: ${documentParser.getUploadDir()}`);
+      console.log(`💾 Database service: Supabase`);
     })
-        .on('error', error => {
-        console.error('❌ Server failed to start:', error);
-        process.exit(1);
+    .on('error', error => {
+      console.error('❌ Server failed to start:', error);
+      process.exit(1);
     });
 }

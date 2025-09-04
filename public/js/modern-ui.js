@@ -30,6 +30,7 @@ class ModernUI {
     this.setupAdvancedAnimations();
     this.setupRealTimeUpdates();
     this.setupAdvancedSearch();
+    this.setupAvatarDropdown();
 
     // Initialize dashboard view after everything is set up
     setTimeout(() => {
@@ -45,6 +46,81 @@ class ModernUI {
       themeToggle.addEventListener('click', () => {
         this.toggleTheme();
       });
+    }
+  }
+
+  // === AVATAR DROPDOWN (Lowest Complexity) ===
+  setupAvatarDropdown() {
+    const userAvatar = document.getElementById('userAvatar');
+    const avatarDropdown = document.getElementById('avatarDropdown');
+
+    if (userAvatar && avatarDropdown) {
+      // Toggle dropdown on avatar click
+      userAvatar.addEventListener('click', e => {
+        e.stopPropagation();
+        this.toggleAvatarDropdown();
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', e => {
+        if (!userAvatar.contains(e.target)) {
+          this.closeAvatarDropdown();
+        }
+      });
+
+      // Handle dropdown item clicks
+      const dropdownItems = avatarDropdown.querySelectorAll('.dropdown-item');
+      dropdownItems.forEach(item => {
+        item.addEventListener('click', e => {
+          e.preventDefault();
+          const action = item.getAttribute('data-action');
+          this.handleDropdownAction(action);
+          this.closeAvatarDropdown();
+        });
+      });
+
+      // Close dropdown on escape key
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          this.closeAvatarDropdown();
+        }
+      });
+    }
+  }
+
+  toggleAvatarDropdown() {
+    const avatarDropdown = document.getElementById('avatarDropdown');
+    if (avatarDropdown) {
+      avatarDropdown.classList.toggle('show');
+    }
+  }
+
+  closeAvatarDropdown() {
+    const avatarDropdown = document.getElementById('avatarDropdown');
+    if (avatarDropdown) {
+      avatarDropdown.classList.remove('show');
+    }
+  }
+
+  handleDropdownAction(action) {
+    switch (action) {
+      case 'profile':
+        this.showNotification('Profile page coming soon!', 'info');
+        break;
+      case 'settings':
+        this.showNotification('Settings page coming soon!', 'info');
+        break;
+      case 'preferences':
+        this.showNotification('Preferences page coming soon!', 'info');
+        break;
+      case 'help':
+        this.showNotification('Help & Support page coming soon!', 'info');
+        break;
+      case 'logout':
+        this.showNotification('Logout functionality coming soon!', 'info');
+        break;
+      default:
+        console.log('Unknown dropdown action:', action);
     }
   }
 
@@ -4327,3 +4403,17 @@ function debugChartContainer() {
 
 // Make function globally available
 window.debugChartContainer = debugChartContainer;
+
+// Initialize ModernUI when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+  window.modernUI = new ModernUI();
+});
+
+// Also initialize if DOM is already loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    window.modernUI = new ModernUI();
+  });
+} else {
+  window.modernUI = new ModernUI();
+}
